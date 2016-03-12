@@ -26,8 +26,10 @@ class TCLFileHarvester extends Harvester[HarvestedFile] {
    */
   override def deliver(r: HarvestedFile) = {
 
+    //println(s"Testign TCL file: "+r.path)
+    
     //if (r.
-    r.path.endsWith(".tcl") match {
+    r.path.toUri().toString().endsWith(".tcl") match {
       case true =>
         println(s"Delivered TCL FILE: " + r.path.toUri())
         this.gather(new TCLFile(r.path))

@@ -6,9 +6,17 @@ import java.io.File
 import edu.kit.ipe.adl.indesign.module.maven.MavenModule
 import edu.kit.ipe.adl.indesign.module.tcl.TCLModule
 import edu.kit.ipe.adl.indesign.module.odfi.rfg.RFGModule
+import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignWWWUIModule
+import java.net.URL
+import java.net.URI
 
 object IndesignCoreTry extends App {
 
+  /*var tu = new URI("/resources")
+  println(s"URI: "+tu.toString())
+  
+  sys.exit()*/
+  
   // Create harvest
   //-------------------
   var fs = Harvest.addHarvester(new FileSystemHarvester(new File("src/test/resources/testFS").toPath()))
@@ -18,6 +26,7 @@ object IndesignCoreTry extends App {
   MavenModule.load
   TCLModule.load 
   RFGModule.load
+  IndesignWWWUIModule.load
   
   Harvest.run
 

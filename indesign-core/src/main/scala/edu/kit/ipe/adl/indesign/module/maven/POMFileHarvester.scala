@@ -18,7 +18,9 @@ class POMFileHarvester extends Harvester[HarvestedFile] {
     r.path.endsWith("pom.xml") match {
       case true => 
         println(s"Delivered POM FILE: "+r.path.toUri())
-      case false => 
+        true
+      case false =>
+        false
     }
     
   }
