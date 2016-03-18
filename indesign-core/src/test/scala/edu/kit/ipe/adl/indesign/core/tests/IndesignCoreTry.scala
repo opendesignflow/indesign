@@ -1,14 +1,15 @@
 package edu.kit.ipe.adl.indesign.core.tests
 
+import java.io.File
+import edu.kit.ipe.adl.indesign.core.brain.Brain
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
-import java.io.File
-import edu.kit.ipe.adl.indesign.module.maven.MavenModule
-import edu.kit.ipe.adl.indesign.module.tcl.TCLModule
-import edu.kit.ipe.adl.indesign.module.odfi.rfg.RFGModule
 import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignWWWUIModule
-import java.net.URL
-import java.net.URI
+import edu.kit.ipe.adl.indesign.module.maven.MavenModule
+import edu.kit.ipe.adl.indesign.module.maven.POMFileHarvester
+import edu.kit.ipe.adl.indesign.module.odfi.rfg.RFGModule
+import edu.kit.ipe.adl.indesign.module.tcl.TCLModule
+import edu.kit.ipe.adl.indesign.module.tcl.TCLFileHarvester
 
 object IndesignCoreTry extends App {
 
@@ -16,18 +17,26 @@ object IndesignCoreTry extends App {
   println(s"URI: "+tu.toString())
   
   sys.exit()*/
-  
-  // Create harvest
-  //-------------------
-  var fs = Harvest.addHarvester(new FileSystemHarvester(new File("src/test/resources/testFS").toPath()))
+
   
   // Load Modules
   //-----------------
-  MavenModule.load
+  Brain += (Harvest,MavenModule,TCLModule,RFGModule,IndesignWWWUIModule)
+
+  Brain.init
+  /*MavenModule.load
   TCLModule.load 
   RFGModule.load
   IndesignWWWUIModule.load
   
-  Harvest.run
+  Harvest.run*/
 
+    
+  // Create harvest
+  //-------------------
+  var fsh = new FileSystemHarvester(new File("src/test/resources/testFS").toPath())
+  Harvest.addHarvester(fsh)
+  fsh.addChildHarvester(new POMFileHarvester)
+  fsh.addChildHarvester(new TCLFileHarvester)
+  
 }

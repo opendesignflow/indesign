@@ -13,6 +13,7 @@ import javafx.stage.WindowEvent
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIewCompiler
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
+import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 
 object IndesignWWWUIModule extends IndesignModule {
 
@@ -59,14 +60,22 @@ object IndesignWWWUIModule extends IndesignModule {
     }
     
     //-- Set Front View 
-    var frontView = LocalWebHTMLVIewCompiler.createView(classOf[IndesignWWWView], true)
+    /*var frontView = LocalWebHTMLVIewCompiler.createView(classOf[IndesignWWWView], true)
     frontView.onWith("view.replace") {
       newView  : LocalWebHTMLVIew => 
         println(s"Replacing View as Front View")
         wwwEngine.replaceFrontView(newView)
     }
-    wwwEngine.setFrontView(frontView)
+    wwwEngine.setFrontView(frontView)*/
+    wwwEngine.addViewHandler("/", classOf[IndesignWWWView])
 
+    // Harvest
+    //---------------------
+    /*
+     * We Want to harvest WWWView
+     */
+    Harvest.addHarvester(WWWViewHarvester)
+    
   }
 
 }

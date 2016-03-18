@@ -1,6 +1,8 @@
 package edu.kit.ipe.adl.indesign.core.harvest
 
-object Harvest {
+import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
+
+object Harvest extends BrainRegion {
   
   // Top Harvesters
   //------------------

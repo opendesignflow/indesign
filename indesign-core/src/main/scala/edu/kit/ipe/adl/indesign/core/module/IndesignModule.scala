@@ -1,7 +1,13 @@
 package edu.kit.ipe.adl.indesign.core.module
 
-trait IndesignModule  {
+import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
+
+trait IndesignModule extends BrainRegion  {
   
   
   def load
+  
+  this.onLoad {
+    load
+  }
 }

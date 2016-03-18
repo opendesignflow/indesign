@@ -7,7 +7,7 @@ import edu.kit.ipe.adl.indesign.module.maven.POMFileHarvester
 object TCLModule extends IndesignModule {
   
   def load = {
-    FileSystemHarvester.addChildHarvester(new TCLFileHarvester)
+    //FileSystemHarvester.addChildHarvester(new TCLFileHarvester)
   }
   
 }

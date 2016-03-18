@@ -28,11 +28,11 @@ class FileSystemHarvester(var basePath : Path) extends Harvester[HarvestedFile] 
   
   def processFile(p:Path) = {
     var r = new HarvestedFile(p)
-    FileSystemHarvester.childHarvesters.foreach(h => h.deliver(r))
+    this.childHarvesters.foreach(h => h.deliver(r))
   }
 }
 
-object FileSystemHarvester extends HarvestSupport[HarvestedFile] {
+object FileSystemHarvester  {
   
   
   implicit def pathToResource(p : Path) = new HarvestedFile(p)
