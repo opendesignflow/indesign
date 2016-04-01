@@ -35,6 +35,12 @@ trait LFCSupport extends ListeningSupport {
     handlers += { () => h }
   }
   
+  def onState(str: String)(h: => Unit) = {
+
+    var handlers = this.statesHandlers.getOrElseUpdate(str, new scala.collection.mutable.ListBuffer[() => Unit])
+    handlers += { () => h }
+  }
+  
   /**
    * Blocks until the provided state has been reached
    */
@@ -78,13 +84,20 @@ trait LFCDefinition {
       case Some(current) => this.states.indexOf(current)
       case None => -1
     }
-    println(s"Current: $currentStateIndex")
+   // println(s"Current: $currentStateIndex")
     // If target is before current, just jump to it 
     (targetStateIndex - currentStateIndex) match {
+      
+      // Stay
+      case 0 => 
+      
+      // Go Back
       case r if (r <= 0) =>
           lifecyclable.applyState(states(targetStateIndex))
           
-        
+      
+          
+     // Go to
       case r =>
         
         // Scroll to target state, and execute all the states which are higher than current state

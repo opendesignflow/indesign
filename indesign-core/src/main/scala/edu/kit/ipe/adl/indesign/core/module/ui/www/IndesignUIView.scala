@@ -5,4 +5,8 @@ import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
 
 trait IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
   
+  var reloadEnable = true
+  
+  def getId = getClass.getCanonicalName
+  
 }

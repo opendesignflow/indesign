@@ -24,7 +24,7 @@ object IndesignWWWUIModule extends IndesignModule {
 
     //-- Create GUI TO help
     //JavaFXRun.on
-    JavaFXRun.onJavaFX {
+    /*JavaFXRun.onJavaFX {
 
       var hostServices = HostServicesFactory.getInstance(JavaFXRun.application)
 
@@ -57,7 +57,7 @@ object IndesignWWWUIModule extends IndesignModule {
 
       println(s"Done UI")
 
-    }
+    }*/
     
     //-- Set Front View 
     /*var frontView = LocalWebHTMLVIewCompiler.createView(classOf[IndesignWWWView], true)
@@ -67,8 +67,10 @@ object IndesignWWWUIModule extends IndesignModule {
         wwwEngine.replaceFrontView(newView)
     }
     wwwEngine.setFrontView(frontView)*/
+    
     wwwEngine.addViewHandler("/", classOf[IndesignWWWView])
-
+    wwwEngine.lInit
+    wwwEngine.lStart
     // Harvest
     //---------------------
     /*

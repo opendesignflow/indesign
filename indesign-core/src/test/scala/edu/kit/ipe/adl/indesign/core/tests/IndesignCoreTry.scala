@@ -10,6 +10,7 @@ import edu.kit.ipe.adl.indesign.module.maven.POMFileHarvester
 import edu.kit.ipe.adl.indesign.module.odfi.rfg.RFGModule
 import edu.kit.ipe.adl.indesign.module.tcl.TCLModule
 import edu.kit.ipe.adl.indesign.module.tcl.TCLFileHarvester
+import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegion
 
 object IndesignCoreTry extends App {
 
@@ -23,6 +24,8 @@ object IndesignCoreTry extends App {
   //-----------------
   Brain += (Harvest,MavenModule,TCLModule,RFGModule,IndesignWWWUIModule)
 
+  Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/instruments/scala-instruments"),"kit.ipe.adl.instruments.nivisa.VISAModule"))
+  
   Brain.init
   /*MavenModule.load
   TCLModule.load 

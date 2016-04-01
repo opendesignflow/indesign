@@ -10,12 +10,12 @@ import edu.kit.ipe.adl.indesign.module.odfi.rfg.www.RFGMainView
 object RFGModule extends IndesignModule {
   
   def load = {
-    TCLFileHarvester.addChildHarvester(new RFGScriptFileHarvester)
+   // TCLFileHarvester.addChildHarvester(new RFGScriptFileHarvester)
   }
   
   
   this.onInit {
-    WWWViewHarvester.deliver(new RFGMainView)
+    WWWViewHarvester.deliverDirect(new RFGMainView)
   }
   
 }

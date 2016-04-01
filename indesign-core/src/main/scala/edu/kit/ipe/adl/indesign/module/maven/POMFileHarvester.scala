@@ -3,9 +3,9 @@ package edu.kit.ipe.adl.indesign.module.maven
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 
-class POMFileHarvester extends Harvester[HarvestedFile] {
+class POMFileHarvester extends Harvester[HarvestedFile,HarvestedFile] {
   
-  def harvest = {
+  def doHarvest = {
     
   }
   

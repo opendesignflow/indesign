@@ -8,7 +8,13 @@ class RFGMainView extends IndesignUIView {
   this.viewContent {
     div {
       h1("In RFG Main View 2") {
-        
+         
+      }
+      
+      button("Test") {
+        onClick {
+          println(s"Hello From RFG Main View")
+        }
       }
     }
   }

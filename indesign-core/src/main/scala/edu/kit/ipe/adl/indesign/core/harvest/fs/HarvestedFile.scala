@@ -8,6 +8,8 @@ import scala.language.implicitConversions
 
 class HarvestedFile(val path: Path) extends HarvestedResource {
   
+  def getId = path.toAbsolutePath().toString()
+  
   // Get And Cache Content
   //--------
   

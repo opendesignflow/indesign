@@ -2,22 +2,16 @@ package edu.kit.ipe.adl.indesign.module.tcl
 
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
-import edu.kit.ipe.adl.indesign.core.harvest.HarvestSupport
 import java.nio.file.Path
 
-class TCLFileHarvester extends Harvester[HarvestedFile] {
+class TCLFileHarvester extends Harvester[HarvestedFile,TCLFile] {
 
   /**
    * Deliver collected TCL file to children harvesters
    */
-  def harvest = {
+  def doHarvest = {
 
-    this.harvestedResources.foreach {
-      f =>
-        TCLFileHarvester.childHarvesters.foreach {
-          h => h.deliver(f)
-        }
-    }
+   
 
   }
 
@@ -41,7 +35,7 @@ class TCLFileHarvester extends Harvester[HarvestedFile] {
   }
 }
 
-object TCLFileHarvester extends HarvestSupport[HarvestedFile] {
+object TCLFileHarvester {
 
   implicit def pathToResource(p: Path) = new HarvestedFile(p)
 }

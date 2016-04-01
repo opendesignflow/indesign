@@ -16,23 +16,23 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
   this.viewContent {
     html {
       head {
-        script(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/localweb/jquery.min.js")) {
+        /*script(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/localweb/jquery.min.js")) {
+
+        }*/
+        stylesheet(new URI(s"/resources/semantic/semantic.min.css")) {
 
         }
-        stylesheet(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/semantic/semantic.min.css")) {
+        stylesheet(new URI(s"/resources/indesign.css")) {
 
         }
-        stylesheet(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/indesign.css")) {
-
-        }
-        script(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/semantic/semantic.min.js")) {
+        script(new URI(s"/resources/semantic/semantic.min.js")) {
 
         }
 
-        stylesheet(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/jquery.treetable.css")) {
+        stylesheet(new URI(s"/resources/jquery.treetable.css")) {
 
         }
-        script(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/jquery.treetable.js")) {
+        script(new URI(s"/resources/jquery.treetable.js")) {
 
         }
 
@@ -79,7 +79,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
               }
               "item" :: div {
                 span {
-                  textContent("Modules")  
+                  textContent("Modules")
                   "menu" :: div {
 
                     WWWViewHarvester.harvestedResources.foreach {
@@ -88,7 +88,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                           textContent(moduleView.getClass.getSimpleName.replace("$", ""))
                           +@("reRender" -> "true")
                           onClick {
-                            placeView(moduleView, "page")
+                            placeView(moduleView.getClass, "page")
                           }
                         }
                     }
@@ -162,7 +162,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                 Brain.regions.foreach {
                   r =>
                     tr {
-                      td(r.getClass.getSimpleName) {
+                      td(r.name) {
 
                       }
                       r.currentState match {
@@ -237,22 +237,21 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
               }
               tbody {
 
-                def harvesterLine(hv: Harvester[_]): Unit = {
+                def harvesterLine(hv: Harvester[_, _]): Unit = {
                   //-- Current
                   tr {
-                    
+
                     // Id
                     +@("data-tt-id" -> hv.hierarchyName())
-                    
+
                     // Parent
-                     +@("data-tt-parent-id" -> hv.hierarchyName(withoutSelf=true))
-                    
-                    
+                    +@("data-tt-parent-id" -> hv.hierarchyName(withoutSelf = true))
+
                     td(hv.getClass.getSimpleName) {
 
                     }
 
-                    td(hv.harvestedResources.size.toString()) {
+                    td(hv.getResources.size.toString()) {
 
                     }
 
@@ -260,18 +259,29 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
                     }
 
-                    "positive" :: td("") {
-                      "icon checkmark" :: i {
+                    //-- Error 
+                    hv.getLastError match {
+                      case Some(e) =>
+                        "negative" :: td("") {
+                          "icon close" :: i {
 
-                      }
-                      span(textContent("None"))
+                          }
+                          span(textContent(e.getLocalizedMessage))
+                        }
+                      case None =>
+                        "positive" :: td("") {
+                          "icon checkmark" :: i {
+
+                          }
+                          span(textContent("None"))
+                        }
                     }
 
                   }
 
                   //-- Children
                   hv.childHarvesters.foreach {
-                    child : Harvester[_] => harvesterLine(child)
+                    child: Harvester[_, _] => harvesterLine(child)
                   }
                 }
                 Harvest.harvesters.foreach {
@@ -282,7 +292,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
               }
             } // EOF harvest table
-              
+
             script("""
 
 $(function() {

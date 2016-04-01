@@ -1,6 +1,8 @@
 package edu.kit.ipe.adl.indesign.core.brain
 
-trait BrainRegion extends BrainLifecycle {
+import edu.kit.ipe.adl.indesign.core.brain.errors.ErrorSupport
+
+trait BrainRegion extends BrainLifecycle  with ErrorSupport {
   
   
   def name = getClass.getSimpleName.replace("$","")

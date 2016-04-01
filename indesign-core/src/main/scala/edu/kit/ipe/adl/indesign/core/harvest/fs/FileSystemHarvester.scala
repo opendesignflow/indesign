@@ -2,15 +2,14 @@ package edu.kit.ipe.adl.indesign.core.harvest.fs
 
 import java.io.File
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
-import edu.kit.ipe.adl.indesign.core.harvest.HarvestSupport
 import java.nio.file.Path
 import java.nio.file.Files
 import scala.language.implicitConversions
 
-class FileSystemHarvester(var basePath : Path) extends Harvester[HarvestedFile] {
+class FileSystemHarvester(var basePath : Path) extends Harvester[HarvestedFile,HarvestedFile] {
   
   
-  def harvest = {
+  def doHarvest = {
     
     println(s"Starting harvest on: $basePath")
     var stream = Files.walk(basePath)

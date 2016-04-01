@@ -3,9 +3,9 @@ package edu.kit.ipe.adl.indesign.module.odfi.rfg
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 
-class RFGScriptFileHarvester extends Harvester[HarvestedFile] {
+class RFGScriptFileHarvester extends Harvester[HarvestedFile,HarvestedFile] {
   
-  def harvest = {
+  def doHarvest = {
     
   }
   

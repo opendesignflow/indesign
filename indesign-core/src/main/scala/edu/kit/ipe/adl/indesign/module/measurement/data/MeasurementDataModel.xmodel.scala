@@ -14,5 +14,22 @@ object MeasurementDataModel extends ModelBuilder {
  
  
   
+  val graph = "Graph" is {
+    isTrait(true)
+    attribute("name")
+    attribute("creationDate") ofType "datetime"
+    
+  }
+  
+  //-- XY
+  val xyGraph = "XYGraph" is {
+    withTrait(graph)
+    
+    "Point" multiple {
+      attribute("x") ofType "double"
+      ofType("double")
+    }
+  }
+  
   
 }
