@@ -11,6 +11,10 @@ import edu.kit.ipe.adl.indesign.module.odfi.rfg.RFGModule
 import edu.kit.ipe.adl.indesign.module.tcl.TCLModule
 import edu.kit.ipe.adl.indesign.module.tcl.TCLFileHarvester
 import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegion
+import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
+import edu.kit.ipe.adl.indesign.module.scala.ScalaModule
+import edu.kit.ipe.adl.indesign.core.module.ui.www.WWWViewHarvester
+import edu.kit.ipe.adl.indesign.module.maven.MavenProjectResource
 
 object IndesignCoreTry extends App {
 
@@ -19,12 +23,22 @@ object IndesignCoreTry extends App {
   
   sys.exit()*/
 
+  //var r = new MavenProjectResource(new File("src/test/resources/testFS/maven-app-single").toPath())
   
-  // Load Modules
+ // r.parseModel
+  
+  
+  
+  
+  //sys.exit()
+  
+  
+  // Load ModulesIndesignWWWUIModule   // IndesignWWWUIModule
   //-----------------
-  Brain += (Harvest,MavenModule,TCLModule,RFGModule,IndesignWWWUIModule)
+  Brain += (
+        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule)
 
-  Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/instruments/scala-instruments"),"kit.ipe.adl.instruments.nivisa.VISAModule"))
+ // Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/instruments/scala-instruments"),"kit.ipe.adl.instruments.nivisa.VISAModule"))
   
   Brain.init
   /*MavenModule.load
@@ -37,9 +51,33 @@ object IndesignCoreTry extends App {
     
   // Create harvest
   //-------------------
-  var fsh = new FileSystemHarvester(new File("src/test/resources/testFS").toPath())
+  var fsh  = new FileSystemHarvester
+  
+  fsh.addPath(new File("src/test/resources/testFS").toPath())
+
   Harvest.addHarvester(fsh)
-  fsh.addChildHarvester(new POMFileHarvester)
-  fsh.addChildHarvester(new TCLFileHarvester)
+  fsh.addChildHarvester(new MavenProjectHarvester)
+  //fsh.addChildHarvester(new POMFileHarvester)
+  //fsh.addChildHarvester(new TCLFileHarvester)
+  
+  Harvest.run
+  
+  println(s"WWWVIew content now: "+WWWViewHarvester.getResources.size)
+  
+  
+  Brain.onAllRegions { 
+    r =>  
+      
+      println(s"Found Region: "+r.name+" -> childrend: "+r.subRegions.size)
+  
+  }
+  
+  
+  
+  
+  
+  
+  Console.readLine()
+  println(s"Stopping")
   
 }

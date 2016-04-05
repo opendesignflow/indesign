@@ -1,4 +1,5 @@
-package edu.kit.ipe.adl.indesign.core.brain.maven
+package edu.kit.ipe.adl.indesign.core.module.artifactresolver
+
 
 import org.eclipse.aether.repository.WorkspaceRepository
 import org.eclipse.aether.repository.WorkspaceReader
@@ -9,7 +10,6 @@ import java.net.URL
 import com.idyria.osi.tea.io.TeaIOUtils
 import org.eclipse.aether.artifact.Artifact
 import com.idyria.osi.aib.core.dependencies.maven.model.Project
-
 import scala.collection.JavaConversions._
 
 /**

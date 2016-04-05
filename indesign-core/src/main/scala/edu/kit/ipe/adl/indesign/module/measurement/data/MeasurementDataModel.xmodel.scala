@@ -15,7 +15,7 @@ object MeasurementDataModel extends ModelBuilder {
  
   
   val graph = "Graph" is {
-    isTrait(true)
+    isTrait
     attribute("name")
     attribute("creationDate") ofType "datetime"
     
@@ -26,8 +26,8 @@ object MeasurementDataModel extends ModelBuilder {
     withTrait(graph)
     
     "Point" multiple {
-      attribute("x") ofType "double"
-      ofType("double")
+      attribute("x") ofType "float"
+      ofType("float")
     }
   }
   

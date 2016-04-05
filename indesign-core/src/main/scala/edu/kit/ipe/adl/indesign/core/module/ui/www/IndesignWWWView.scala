@@ -82,13 +82,16 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                   textContent("Modules")
                   "menu" :: div {
 
-                    WWWViewHarvester.harvestedResources.foreach {
+                    WWWViewHarvester.getResources.foreach {
                       moduleView =>
                         "item" :: a("#") {
-                          textContent(moduleView.getClass.getSimpleName.replace("$", ""))
+                          
+                          textContent(moduleView.name)
                           +@("reRender" -> "true")
+                          
                           onClick {
-                            placeView(moduleView.getClass, "page")
+                            //placeView(moduleView.getClass, "page")
+                            placeView(moduleView,"page")
                           }
                         }
                     }
@@ -225,6 +228,9 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                   }
 
                   th("Resources Count") {
+
+                  }
+                  th("Info") {
 
                   }
                   th("Last Run") {

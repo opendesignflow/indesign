@@ -6,10 +6,30 @@ object Brain extends BrainLifecyleDefinition {
   
   // Regions
   //--------------------
-  var regions = List[BrainRegion]()
+  var regions = List[BrainRegion[_]]()
   
-  def +=(r:BrainRegion*) = this.regions = this.regions ++ r
+  def +=(r:BrainRegion[_]*) = this.regions = this.regions ++ r
   
+  
+  /**
+   * Process Depth first ordered
+   */
+  def onAllRegions(cl: BrainRegion[_] => Unit) = {
+
+    var processList = new scala.collection.mutable.ListBuffer[BrainRegion[_]]()
+    processList ++= this.regions
+
+    while(processList.nonEmpty) {
+      var r : BrainRegion[_] = processList.head
+      processList -= r
+      r.keepErrorsOn(r) {
+          cl(r)
+          processList ++= r.subRegions.toTraversable.asInstanceOf[Traversable[BrainRegion[_]]]
+        }
+    }
+    
+
+  }
   
   // Lifecylce
   //------------------

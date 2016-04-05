@@ -15,7 +15,7 @@ object RFGModule extends IndesignModule {
   
   
   this.onInit {
-    WWWViewHarvester.deliverDirect(new RFGMainView)
+    //WWWViewHarvester.deliverDirect(new RFGMainView)
   }
   
 }

@@ -78,6 +78,9 @@ trait LFCDefinition {
 
   def moveToState(lifecyclable: LFCSupport, targetState: String) = {
 
+    assert(states.contains(targetState),s"Cannot move to non defined state $targetState")
+    
+    //println(s"Moving to state $targetState")
     // Get index of target state and current State 
     var targetStateIndex = this.states.indexOf(targetState)
     var currentStateIndex = lifecyclable.currentState match {

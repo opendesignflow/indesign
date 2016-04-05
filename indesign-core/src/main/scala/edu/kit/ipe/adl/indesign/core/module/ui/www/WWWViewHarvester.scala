@@ -8,6 +8,7 @@ object WWWViewHarvester  extends Harvester[IndesignUIView,IndesignUIView] {
   
   override def deliver(r:IndesignUIView) = {
     gather(r)
+    println(s"Got a view delivered, size now: "+this.getResources.size)
     true
   }
   

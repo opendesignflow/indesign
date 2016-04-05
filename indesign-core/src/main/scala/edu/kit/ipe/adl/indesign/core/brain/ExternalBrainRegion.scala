@@ -8,13 +8,13 @@ import org.apache.maven.project.DefaultProjectBuildingRequest
 import org.codehaus.plexus.DefaultPlexusContainer
 import org.apache.maven.project.ProjectBuildingException
 import com.idyria.osi.aib.core.dependencies.maven.model.Project
-import edu.kit.ipe.adl.indesign.core.brain.maven.MavenResolver
 import com.idyria.osi.tea.compile.ClassDomain
+import edu.kit.ipe.adl.indesign.core.module.artifactresolver.AetherResolver
 
 /**
  * Loads a Brain Region present in another externaly compiled module
  */
-class ExternalBrainRegion(val basePath: File, val regionClass: String) extends BrainRegion {
+class ExternalBrainRegion(val basePath: File, val regionClass: String) extends SingleBrainRegion {
 
   //-- Find target classloader folder
   val classloaderPath = basePath match {
@@ -37,7 +37,7 @@ class ExternalBrainRegion(val basePath: File, val regionClass: String) extends B
   var project = Project(new File(basePath, "pom.xml").toURL())
   var dependenciesFiles = project.dependencies.dependency.filter { d => d.artifactId.toString() != "indesign-core" }.map {
     d =>
-      List(MavenResolver.getArtifactPath(d.groupId, d.artifactId, d.version)) ::: MavenResolver.resolveDependencies(d.groupId, d.artifactId, d.version, "compile").map(dd => MavenResolver.getArtifactPath(dd.getArtifact))
+      List(AetherResolver.getArtifactPath(d.groupId, d.artifactId, d.version)) ::: AetherResolver.resolveDependencies(d.groupId, d.artifactId, d.version, "compile").map(dd => AetherResolver.getArtifactPath(dd.getArtifact))
     /*println(s"Lookign for dependency: "+d.artifactId)
       println(s"Location -> "+MavenResolver.getArtifactPath(d.groupId, d.artifactId, d.version))
       
@@ -51,12 +51,12 @@ class ExternalBrainRegion(val basePath: File, val regionClass: String) extends B
   dependenciesFiles.flatten.foreach {
     dF =>
       println(s"Found Dep File: $dF")
-      urlClassloader.addURL(dF.toURI().toURL())
+      urlClassloader.addURL(dF.get.toURI().toURL())
   }
 
   //-- Load actual Region
   var wrappedRegion = try {
-    urlClassloader.loadClass(regionClass).newInstance().asInstanceOf[BrainRegion]
+    urlClassloader.loadClass(regionClass).newInstance().asInstanceOf[BrainRegion[_]]
   } catch {
     case e: Throwable => throw new RuntimeException(s"Could not create External Region $regionClass from classloader with CL path $classloaderPath ", e)
   }
