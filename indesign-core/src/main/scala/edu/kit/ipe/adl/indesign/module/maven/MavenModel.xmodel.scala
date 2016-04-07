@@ -27,6 +27,34 @@ object MavenModels extends ModelBuilder {
       "relativePath" ofType "string"
     }
     
+    // Repositories
+    //------------------
+    "pluginRepositories" is {
+      
+      "pluginRepository" multiple {
+        "id" ofType "string"
+        "name" ofType "string"
+        "url" ofType "url"
+        
+        "snapshots" is {
+          "enabled" ofType "boolean" default "true"
+        }
+        
+      }
+    }
+    "repositories" is {
+      
+      "repository" multiple {
+        "id" ofType "string"
+        "name" ofType "string"
+        "url" ofType "url"
+        
+        "snapshots" is {
+          "enabled" ofType "boolean" default "true"
+        }
+        
+      }
+    }
 
     // Dependencies
     //-------------

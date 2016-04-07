@@ -28,6 +28,7 @@ import com.idyria.osi.tea.listeners.ListeningSupport
 import sun.reflect.ReflectionFactory.GetReflectionFactoryAction
 import org.eclipse.aether.resolution.ArtifactRequest
 import org.eclipse.aether.resolution.ArtifactResolutionException
+import com.idyria.osi.tea.logging.TLog
 
 class AetherConfiguration extends ListeningSupport {
 
@@ -142,6 +143,11 @@ class AetherResolver extends TLogSource {
   }
   reinit
 
+  //this.session.setW
+
+  //session.setWorkspaceReader(new EclipseWorkspaceReader(new File("/home/rleys/eclipse-workspaces/mars/")))
+  //TLog.setLevel(classOf[EclipseWorkspaceReader], TLog.Level.FULL)
+
   // Get Artifact
   //------------------------
   def getArtifactPath(groupId: String, artifactId: String, version: String): Option[File] = {
@@ -154,6 +160,13 @@ class AetherResolver extends TLogSource {
     var a = new DefaultArtifact(s"$groupId:$artifactId:$classifier:$version")
     println(s"Resolving: " + a.getClassifier)
     getArtifactPath(a)
+  }
+
+  /**
+   * Runs a resolution on the artifact to make sure it is populated
+   */
+  def resolveArtifact(groupId: String, artifactId: String, version: String, classifier: String = "jar"): Option[Artifact] = {
+    resolveArtifact(new DefaultArtifact(s"$groupId:$artifactId:$classifier:$version"))
   }
 
   /**
@@ -251,8 +264,8 @@ class AetherResolver extends TLogSource {
     var artifactResults =
       system.resolveDependencies(session, dependencyRequest).getArtifactResults();
 
- //   println(s"Deps size: "+artifactResults.size())
- 
+    //   println(s"Deps size: "+artifactResults.size())
+
     artifactResults.toList
 
   }
@@ -260,8 +273,92 @@ class AetherResolver extends TLogSource {
   // Classpath building helpers
   //----------------------------
 
-  
+  def resolveArtifactAndDependencies(groupId: String, artifactId: String, version: String, classifier: String = "jar", scope: String = "compile"): List[Artifact] = {
 
+    resolveArtifactAndDependencies(new DefaultArtifact(s"$groupId:$artifactId:$classifier:$version"), scope)
+  }
+
+  /**
+   * Artifact and Dependencies are resolved
+   */
+  def resolveArtifactAndDependencies(artifact: Artifact, scope: String): List[Artifact] = {
+
+    
+    
+    var realArt = artifact.getFile match {
+      case null => this.resolveArtifact(artifact)
+       
+      case _ => Some(artifact)
+    }
+    realArt match {
+      case Some(art) =>
+
+        var res = this.resolveDependencies(artifact, scope)
+        res.find { p => p.isMissing() } match {
+          case Some(missing) =>
+
+            throw new RuntimeException(s"Cannot Resolve Artifact and Dependencies of $artifact , artifact ${missing.getArtifact} is missing")
+          case None =>
+            
+            // Return the list of artifacts, but resolve actual file paths if there is a workspace reader
+            res.map { 
+              a => 
+                if(session.getWorkspaceReader!=null) {
+                 
+                  a.getArtifact.setFile(resolveArtifactsFile(a.getArtifact).get)
+                   //println(s"Resolving file for ${a.getArtifact} because of ws reader "+a.getArtifact.getExtension+" -> "+resolveArtifactsFile(a.getArtifact))
+                }
+                a.getArtifact 
+             
+            }
+        }
+
+      case None =>
+        throw new RuntimeException(s"Cannot Resolve Artifact and Dependencies of $artifact , artifact not found")
+    }
+
+  }
+  
+  /**
+   * Artifact and Dependencies are resolved
+   */
+  def resolveArtifactAndDependenciesClasspath(artifact: Artifact, scope: String): List[URL] = {
+
+    this.resolveArtifactAndDependencies(artifact, scope).map {
+      a => 
+        session.getWorkspaceReader match {
+          case null =>
+            a.getFile.toURI().toURL()
+          case p => 
+            resolveArtifactsFile(a).get.toURI().toURL()
+        }
+    }
+    
+    
+  }
+  
+  def resolveArtifactAndDependenciesClasspath(groupId: String, artifactId: String, version: String, classifier: String = "jar", scope: String = "compile"): List[URL] = {
+    this.resolveArtifactAndDependenciesClasspath(new DefaultArtifact(s"$groupId:$artifactId:$classifier:$version"), scope)
+  }
+  
+  /**
+   * If the artifact is a jar and the file is a pom.xml, return the local compiling output as dependebcy file
+   */
+  def resolveArtifactsFile(art:Artifact) : Option[File] = {
+    
+    art.getFile match {
+      case null => None
+      case f if(f.getAbsolutePath.endsWith("pom.xml") && art.getExtension=="jar")=>
+        Some(new File(f.getAbsoluteFile.getParentFile,"target/classes")) 
+      case f => Some(f)
+        
+    }
+    
+    
+  }
+  
+  
+  
 }
 
 object AetherResolver extends AetherResolver {

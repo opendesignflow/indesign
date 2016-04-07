@@ -5,10 +5,26 @@ import java.nio.file.Path
 import java.nio.file.Files
 import scala.collection.JavaConversions._
 import scala.language.implicitConversions
+import java.io.File
 
 class HarvestedFile(val path: Path) extends HarvestedResource {
 
   def getId = path.toAbsolutePath().toString()
+
+  override def toString = getClass.getSimpleName.replace("$", "") + ": " + getId
+
+  // Utils
+  //---------------
+
+  def isDirectory = path.toFile().isDirectory()
+
+  def hasSubFile(filePath: String*): Option[File] = {
+    var f = new File(path.toFile, filePath.mkString(File.separator))
+    f.exists() match {
+      case true => Some(f)
+      case false => None
+    }
+  }
 
   // Get And Cache Content
   //--------

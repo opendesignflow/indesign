@@ -1,6 +1,6 @@
 package edu.kit.ipe.adl.indesign.core.brain
 
-object Brain extends BrainLifecyleDefinition {
+object Brain extends BrainLifecyleDefinition with BrainLifecycle {
   
   
   
@@ -8,7 +8,14 @@ object Brain extends BrainLifecyleDefinition {
   //--------------------
   var regions = List[BrainRegion[_]]()
   
-  def +=(r:BrainRegion[_]*) = this.regions = this.regions ++ r
+  def +=(rs:BrainRegion[_]*) =  {
+    this.regions = this.regions ++ rs
+    Brain.currentState match {
+      case Some(state) => rs.foreach { r => Brain.moveToState(r,state)}
+      case None => 
+    }
+    
+  }
   
   
   /**
@@ -35,12 +42,14 @@ object Brain extends BrainLifecyleDefinition {
   //------------------
   
   def load = {
+    Brain.moveToState(this, "load")
     this.regions.foreach {
       r => Brain.moveToState(r, "load")
     }
   }
   
   def init = {
+    Brain.moveToState(this, "init")
     this.regions.foreach {
       r => Brain.moveToState(r, "init")
     }

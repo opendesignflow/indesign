@@ -1,6 +1,6 @@
 package edu.kit.ipe.adl.indesign.core.brain
 
-import edu.kit.ipe.adl.indesign.core.brain.errors.ErrorSupport
+import com.idyria.osi.tea.errors.ErrorSupport
 
 trait BrainRegion[CT <: BrainRegion[_]] extends BrainLifecycle  with ErrorSupport {
   

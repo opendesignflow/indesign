@@ -23,18 +23,15 @@ object ScalaModule extends IndesignModule {
   
 }
 
-class ScalaSourceFileHarvester extends  Harvester[HarvestedFile,ScalaSourceFile] {
+class ScalaSourceFileHarvester extends  Harvester{
   
   
   
+ 
   
-  
-  def doHarvest = {
-    
-  }
-  
-  
-  override def deliver(r:HarvestedFile) : Boolean = {
+  this.onDeliverFor[HarvestedFile] {
+
+    case r =>
 
     r.path.toString.endsWith(".scala") match {
       case true  => 

@@ -4,18 +4,14 @@ import org.scalatest.FunSuite
 import org.scalatest.GivenWhenThen
 import org.scalatest.BeforeAndAfter
 
-class HarvesterA extends Harvester[HarvestedResource,HarvestedResource] {
+class HarvesterA extends Harvester {
   
-  def doHarvest = {
-    
-  }
+  
 }
 
-class HarvesterB extends Harvester[HarvestedResource,HarvestedResource] {
+class HarvesterB extends Harvester {
   
-  def doHarvest = {
-    
-  }
+  
 }
 
 class HarvestTest extends FunSuite with GivenWhenThen with BeforeAndAfter {

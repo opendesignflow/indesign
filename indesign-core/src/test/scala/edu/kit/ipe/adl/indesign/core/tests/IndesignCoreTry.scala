@@ -15,6 +15,10 @@ import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
 import edu.kit.ipe.adl.indesign.module.scala.ScalaModule
 import edu.kit.ipe.adl.indesign.core.module.ui.www.WWWViewHarvester
 import edu.kit.ipe.adl.indesign.module.maven.MavenProjectResource
+import edu.kit.ipe.adl.indesign.module.scala.ScalaAppHarvester
+import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
+import edu.kit.ipe.adl.indesign.module.scala.ScalaAppSourceFile
+import edu.kit.ipe.adl.indesign.core.module.eclipse.EclipseModule
 
 object IndesignCoreTry extends App {
 
@@ -30,15 +34,16 @@ object IndesignCoreTry extends App {
   
   
   
+  
   //sys.exit()
   
   
   // Load ModulesIndesignWWWUIModule   // IndesignWWWUIModule
   //-----------------
   Brain += (
-        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule)
+        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,IndesignWWWUIModule,EclipseModule)
 
- // Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/instruments/scala-instruments"),"kit.ipe.adl.instruments.nivisa.VISAModule"))
+  
   
   Brain.init
   /*MavenModule.load
@@ -53,15 +58,22 @@ object IndesignCoreTry extends App {
   //-------------------
   var fsh  = new FileSystemHarvester
   
-  fsh.addPath(new File("src/test/resources/testFS").toPath())
+  fsh.addPath(new File("src/test/testFS").toPath())
+  
+  fsh.addPath(new File("/home/rleys/git/adl/Neutrinomass_ADC").toPath())
+  
+  fsh.addPath(new File("/home/rleys/eclipse-workspaces/mars").toPath())
 
   Harvest.addHarvester(fsh)
-  fsh.addChildHarvester(new MavenProjectHarvester)
+  fsh.addChildHarvester(new MavenProjectHarvester) 
   //fsh.addChildHarvester(new POMFileHarvester)
   //fsh.addChildHarvester(new TCLFileHarvester)
   
   Harvest.run
   
+  
+ // Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/dev-tools/scala/adept-interface"),"kit.ipe.adl.bsp.adept.AdeptModule"))
+ // Harvest.run
   println(s"WWWVIew content now: "+WWWViewHarvester.getResources.size)
   
   
@@ -73,7 +85,27 @@ object IndesignCoreTry extends App {
   }
   
   
+  Harvest.printHarvesters
   
+  /*
+  println(s"Finding Scala App Mains and running them")
+  
+  Harvest.onHarvesters[ScalaAppHarvester] {
+    case appHarvester if(appHarvester.getResources.size>0) => 
+      
+      println(s"Found Scala App sources: "+appHarvester.getResources)
+      appHarvester.onResources[ScalaAppSourceFile] {
+        case r => 
+          println(s"Found A Scala App to load: "+r+", parent: "+r.parentResource)
+          
+          r.ensureCompiled
+          r.run
+          
+      }
+      
+    
+    
+  }*/
   
   
   

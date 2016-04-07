@@ -70,11 +70,16 @@ class EclipseWorkspaceReader(val workspaceLocation: File, val workspaceRepositor
         } match {
             case Some((file, art)) =>
                 logFine(s"Got it: $file")
+                
                 //new File(file.getParentFile,"target/classes")
+                
+                
                 artifact.setFile(new File(file.getParentFile, "target/classes"))
-
+                
+                
                 file
-            //new File(file.getParentFile,"target/classes")
+                //artifact.getFile
+                //new File(file.getParentFile,"target/classes")
             case None => null
         }
 

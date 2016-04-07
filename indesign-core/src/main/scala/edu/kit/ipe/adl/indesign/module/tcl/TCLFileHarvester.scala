@@ -4,21 +4,16 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import java.nio.file.Path
 
-class TCLFileHarvester extends Harvester[HarvestedFile,TCLFile] {
+class TCLFileHarvester extends Harvester {
 
-  /**
-   * Deliver collected TCL file to children harvesters
-   */
-  def doHarvest = {
-
-   
-
-  }
+ 
 
   /**
    * Reacts on pom.xml file
    */
-  override def deliver(r: HarvestedFile) = {
+  this.onDeliverFor[HarvestedFile] {
+
+    case r =>
 
     //println(s"Testign TCL file: "+r.path)
     

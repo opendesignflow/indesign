@@ -3,7 +3,8 @@ package edu.kit.ipe.adl.indesign.core.harvest
 import com.idyria.osi.tea.listeners.ListeningSupport
 import edu.kit.ipe.adl.indesign.core.brain.LFCDefinition
 import edu.kit.ipe.adl.indesign.core.brain.LFCSupport
-import edu.kit.ipe.adl.indesign.core.brain.errors.ErrorSupport
+import com.idyria.osi.tea.errors.ErrorSupport
+import scala.reflect.ClassTag
 
 trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSupport {
   
@@ -28,14 +29,82 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     true
   }
   
-  // Lifecycle management
+  /**
+   * If local, a resource won't be propagated to children
+   */
+  var local = false
+  
+  // Parenting
   //-------------------
-  def onAdded(cl: Harvester[_,_] => Unit) = {
-    this.onWith("added")(cl)
+  
+  var parentResource : Option[HarvestedResource] = None
+  
+  /**
+   * If derived from a resource, it becomes this resources parent
+   */
+  def deriveFrom(r:HarvestedResource) = {
+    this.parentResource match {
+      case Some(r) => 
+      case None => 
+        this.parentResource = Some(r)
+    }
+    this
+  } 
+  
+  def findUpchainResource[CT <: HarvestedResource](implicit tag:ClassTag[CT]) : Option[CT] = {
+    
+    var currentParent = this.parentResource
+    var stop = false
+    while(!stop && currentParent.isDefined) {
+      
+      tag.runtimeClass.isInstance(currentParent.get) match {
+        case true => 
+          stop = true
+        case false => 
+          currentParent = currentParent.get.parentResource
+      }
+    
+    }
+    
+    
+    currentParent match {
+      case Some(res) => Some(res.asInstanceOf[CT]) 
+      case None => None
+    }
+    
+    
   }
   
-  def onCleaned(cl:Harvester[_,_] => Unit) = {
-    this.onWith("cleaned")(cl)
+  // Lifecycle management
+  //-------------------
+  def onAdded(cl: PartialFunction[Harvester,Unit]) = {
+    this.onWith("added") {
+      h : Harvester => 
+      cl.isDefinedAt(h) match {
+        case true => cl(h)
+        case false => 
+      }
+    }
+  }
+  def onGathered(cl: PartialFunction[Harvester,Unit]) = {
+    this.onWith("gathered") {
+      h : Harvester => 
+      cl.isDefinedAt(h) match {
+        case true => cl(h)
+        case false => 
+      }
+    }
+    
+  }
+  
+  def onCleaned(cl:PartialFunction[Harvester,Unit]) = {
+    this.onWith("cleaned") {
+      h : Harvester => 
+      cl.isDefinedAt(h) match {
+        case true => cl(h)
+        case false => 
+      }
+    }
   }
   
   def onProcess(cl: => Unit) = {

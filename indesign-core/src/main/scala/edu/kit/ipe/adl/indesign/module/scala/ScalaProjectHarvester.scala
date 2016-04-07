@@ -4,26 +4,20 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
 
-class ScalaProjectHarvester extends Harvester[HarvestedFile, ScalaSourceFile] {
+class ScalaProjectHarvester extends Harvester {
 
   this.addChildHarvester(new ScalaAppHarvester)
   
-  def doHarvest = {
+ 
 
-    parentHarvester match {
-      case Some( mh:MavenProjectHarvester) =>
-        
-      case _ => 
-    }
-    
-  }
+  this.onDeliverFor[HarvestedFile] {
 
-  override def deliver(r: HarvestedFile): Boolean = {
+    case r =>
 
     r.path.toString.endsWith(".scala") match {
       case true =>
 
-        gather(new ScalaSourceFile(r.path))
+        gather(new ScalaSourceFile(r.path).deriveFrom(r))
         true
       case _ =>
         false

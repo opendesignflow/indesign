@@ -3,33 +3,34 @@ package edu.kit.ipe.adl.indesign.core.harvest
 import java.nio.file.Path
 import edu.kit.ipe.adl.indesign.core.brain.LFCDefinition
 import edu.kit.ipe.adl.indesign.core.brain.LFCSupport
-import edu.kit.ipe.adl.indesign.core.brain.errors.ErrorSupport
+import com.idyria.osi.tea.errors.ErrorSupport
 import org.scalatest.matchers.HavePropertyMatcher
+import scala.reflect.ClassTag
 
 /**
  * A harvester will look for resources, and call upon its child harvesters to match them
  *
  */
-trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSupport with ErrorSupport {
+trait Harvester extends LFCSupport with ErrorSupport {
 
   var lastRun: Long = 0
 
   // Child Stuff
   //----------------------------
-  var childHarvesters = List[Harvester[RT, _]]()
-  var parentHarvester: Option[Harvester[_, PT]] = None
+  var childHarvesters = List[Harvester]()
+  var parentHarvester: Option[Harvester] = None
 
-  def addChildHarvester(h: Harvester[RT, _]): Unit = {
-    this.childHarvesters = this.childHarvesters :+ h.asInstanceOf[Harvester[RT, _]]
+  def addChildHarvester(h: Harvester): Unit = {
+    this.childHarvesters = this.childHarvesters :+ h.asInstanceOf[Harvester]
     h.parentHarvester = Some(this)
   }
 
-  def addChildHarvester(h: Class[Harvester[_ <: HarvestedResource, _ <: HarvestedResource]]): Unit = {
-    this.addChildHarvester(h.newInstance().asInstanceOf[Harvester[RT, _]])
+  def addChildHarvester(h: Class[Harvester]): Unit = {
+    this.addChildHarvester(h.newInstance().asInstanceOf[Harvester])
 
   }
-  def addChildHarvesterForce(h: Harvester[_ <: HarvestedResource, _ <: HarvestedResource]): Unit = {
-    this.addChildHarvester(h.asInstanceOf[Harvester[RT, _]])
+  def addChildHarvesterForce(h: Harvester): Unit = {
+    this.addChildHarvester(h.asInstanceOf[Harvester])
 
   }
 
@@ -37,10 +38,10 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
 
     // Get Parent Line
     var parents = withoutSelf match {
-      case true => List[Harvester[_, _]]()
-      case false => List[Harvester[_, _]](this)
+      case true => List[Harvester]()
+      case false => List[Harvester](this)
     }
-    var currentParent: Option[Harvester[_, _]] = this.parentHarvester
+    var currentParent: Option[Harvester] = this.parentHarvester
     while (currentParent != None) {
       parents = parents :+ currentParent.get
       currentParent = currentParent.get.parentHarvester
@@ -51,10 +52,28 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
 
   }
 
+  def hierarchy(withoutSelf: Boolean = false) = {
+
+    // Get Parent Line
+    var parents = withoutSelf match {
+      case true => List[Harvester]()
+      case false => List[Harvester](this)
+    }
+    var currentParent: Option[Harvester] = this.parentHarvester
+    while (currentParent != None) {
+      parents = parents :+ currentParent.get
+      currentParent = currentParent.get.parentHarvester
+    }
+
+    // Return String
+    parents.reverse
+
+  }
+
   // harvest 
   //------------------
-  var availableResources = scala.collection.mutable.LinkedHashSet[RT]()
-  var harvestedResources = scala.collection.mutable.LinkedHashSet[RT]()
+  var availableResources = scala.collection.mutable.LinkedHashSet[HarvestedResource]()
+  var harvestedResources = scala.collection.mutable.LinkedHashSet[HarvestedResource]()
 
   /**
    * After a Harvest run, clean available Resources which were not present in the gather outcome
@@ -64,14 +83,23 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
   /**
    * Store a resource in local gathered resources for later processing
    */
-  def gather(r: RT) = {
+  def gather[CT <: HarvestedResource](r: CT) = {
     this.harvestedResources += r
+    r
   }
 
   /**
    * Return available resources list
    */
   def getResources = this.availableResources.toList
+
+  def onResources[CT <: HarvestedResource](pf: Function[CT, Unit])(implicit cl: ClassTag[CT]) = {
+
+    this.getResources.foreach {
+      case r if (cl.runtimeClass.isInstance(r)) => pf(r.asInstanceOf[CT])
+      case _ =>
+    }
+  }
 
   /**
    * Harvest Gather ressources, wich are added to gathered resources
@@ -85,7 +113,7 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
       ch =>
         this.availableResources.foreach {
           r =>
-            ch.deliver(r)
+            //ch.deliver(r)
         }
       //ch.finishHarvest(ch.autoCleanResources)
     }
@@ -97,6 +125,7 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
       this.lastRun = System.currentTimeMillis()
       Thread.currentThread().setContextClassLoader(this.getClass.getClassLoader)
       doHarvest
+      finishGather
     } catch {
       case e: Throwable =>
         e.printStackTrace()
@@ -109,7 +138,11 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
     //-------------
     this.childHarvesters.foreach {
       c =>
-        c.finishGather(autoCleanResources)
+        this.availableResources.filter(r => !r.local).foreach {
+          r =>
+            c.deliver(r)
+        }
+       // c.finishGather
     }
     //finishHarvest(autoCleanResources)
   }
@@ -117,12 +150,14 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
   /**
    * To be overriden by implementations
    */
-  def doHarvest
+  def doHarvest = {
+    
+  }
 
   /**
    * Finish harvest by reloading harvested and gathered resources
    */
-  def finishGather(clean: Boolean = true): Unit = {
+  def finishGather : Unit = {
 
     //println(s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName)
 
@@ -131,17 +166,15 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
     //  -> Remove from gathered the one already available
     //  -> Add Remaining gathered
     this.availableResources.toList.foreach {
-      case r if (!clean && !r.rooted) =>
+      case r if (!r.rooted) =>
 
         this.harvestedResources.find { hr => hr.getId == r.getId } match {
 
           // Remove non gathered  and non 
-          case None if (clean) =>
+          case None =>
             this.availableResources -= r
             r.@->("clean", this)
 
-          // Keep resource if autoclean is not set
-          case None if (!clean) =>
 
           // Keep, then remove from gathered
           case Some(matchingHarvested) =>
@@ -158,6 +191,12 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
         r.@->("gathered", this)
         r.@->("added", this)
     }
+    
+    // Reject
+    this.harvestedResources.foreach {
+      r => 
+        r.@->("rejected",this)
+    }
     this.harvestedResources.clear()
 
     // Deliver resources to child harvesters, and run a finish harvect on them too
@@ -173,18 +212,43 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
 
   }
 
+  var deliverClosure: PartialFunction[HarvestedResource, Boolean] = { case _ => false }
+
+  //def deliver_=(pf:PartialFunction[HarvestedResource,Boolean]) : Unit = this.deliverClosure = pf
+  //def deliver :  PartialFunction[HarvestedResource,Boolean] = this.deliverClosure
+
   /**
    * If a parent harvester runs, it delivers resources to its child harvesters
    * Deliver is called by parent
    */
-  def deliver(r: PT): Boolean = {
-    false
+  def deliver(r: HarvestedResource): Boolean = {
+    deliverClosure.isDefinedAt(r) match {
+      case true => deliverClosure(r)
+      case false => false
+    }
   }
 
-  def deliverDirect(r: PT): Boolean = {
+  def onDeliver(pf: PartialFunction[HarvestedResource, Boolean]): Unit = {
+    this.deliverClosure = pf
+  }
+
+  def onDeliverFor[CT <: HarvestedResource](pf: PartialFunction[CT, Boolean])(implicit cl: ClassTag[CT]): Unit = {
+    this.deliverClosure = {
+      case r if (cl.runtimeClass.isInstance(r)) => 
+        
+        pf.isDefinedAt(r.asInstanceOf[CT]) match {
+          case true => pf(r.asInstanceOf[CT])
+          case false => false
+        }
+        
+    }
+  }
+
+  def deliverDirect(r: HarvestedResource): Boolean = {
     this.deliver(r) match {
       case true =>
-        this.finishGather(false)
+        r.root
+        this.finishGather
         true
       case false => false
     }
@@ -197,7 +261,7 @@ trait Harvester[PT <: HarvestedResource, RT <: HarvestedResource] extends LFCSup
     this.getResources.foreach {
       r =>
         this.keepErrorsOn(r) {
-    
+
           HarvestedResource.moveToState(r, "processed")
         }
     }

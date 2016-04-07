@@ -41,7 +41,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
         "ui grid container" :: div {
 
-          "left floated two wide column" :: div {
+          "left floated three wide column" :: div {
             // Menu
             //-----------------------
             <div class="ui pointing vertical menu">
@@ -72,7 +72,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
               }
               "active item" :: a("#") {
                 textContent("Control")
-                +@("reRender" -> "true")
+                +@("reRender" -> "true") 
                 onClick {
                   detachView("page")
                 }
@@ -82,16 +82,17 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                   textContent("Modules")
                   "menu" :: div {
 
-                    WWWViewHarvester.getResources.foreach {
+                    WWWViewHarvester.onResources[IndesignUIView] {
                       moduleView =>
                         "item" :: a("#") {
                           
-                          textContent(moduleView.name)
+                          var ready = (moduleView.contentClosure==null || moduleView.proxy.isDefined)
+                          textContent(moduleView.name+s"(${ready})")
                           +@("reRender" -> "true")
                           
                           onClick {
                             //placeView(moduleView.getClass, "page")
-                            placeView(moduleView,"page")
+                            placeView(moduleView,"page",viewready=ready)
                           }
                         }
                     }
@@ -103,7 +104,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
             }
           }
 
-          viewPlaceHolder("page", "thirteen wide column") {
+          viewPlaceHolder("page", "twelve wide column") {
 
             h1("InDesign UI ") {
 
@@ -243,7 +244,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
               }
               tbody {
 
-                def harvesterLine(hv: Harvester[_, _]): Unit = {
+                def harvesterLine(hv: Harvester): Unit = {
                   //-- Current
                   tr {
 
@@ -261,6 +262,10 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
                     }
 
+                    td("") {
+                      
+                    }
+                    
                     td(hv.lastRun.toString) {
 
                     }
@@ -287,7 +292,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
                   //-- Children
                   hv.childHarvesters.foreach {
-                    child: Harvester[_, _] => harvesterLine(child)
+                    child: Harvester => harvesterLine(child)
                   }
                 }
                 Harvest.harvesters.foreach {

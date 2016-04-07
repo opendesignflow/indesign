@@ -10,55 +10,37 @@ import org.apache.maven.project.ProjectBuildingException
 import com.idyria.osi.aib.core.dependencies.maven.model.Project
 import com.idyria.osi.tea.compile.ClassDomain
 import edu.kit.ipe.adl.indesign.core.module.artifactresolver.AetherResolver
+import edu.kit.ipe.adl.indesign.module.maven.MavenProjectResource
+import edu.kit.ipe.adl.indesign.core.module.IndesignModule
 
 /**
  * Loads a Brain Region present in another externaly compiled module
  */
-class ExternalBrainRegion(val basePath: File, val regionClass: String) extends SingleBrainRegion {
+class ExternalBrainRegion(val basePath: File, val regionClass: String) extends MavenProjectResource(basePath.toPath()) with SingleBrainRegion  {
 
-  //-- Find target classloader folder
-  val classloaderPath = basePath match {
-
-    // Maven
-    //-----------
-
-    //-- Target classes standard
-    case p if (p.getAbsolutePath.endsWith("target/classes")) => p
-
-    //-- Folder with pom, use std target/classes
-    case p if (new File(p, "pom.xml").exists()) =>
-      new File(p, List("target", "classes").mkString(File.separator))
-  }
-
-  //-- Set Classloaders
-  var urlClassloader = new ClassDomain(Array(classloaderPath.toURI().toURL()), getClass.getClassLoader)
-
-  //-- Load dependencies
-  var project = Project(new File(basePath, "pom.xml").toURL())
-  var dependenciesFiles = project.dependencies.dependency.filter { d => d.artifactId.toString() != "indesign-core" }.map {
-    d =>
-      List(AetherResolver.getArtifactPath(d.groupId, d.artifactId, d.version)) ::: AetherResolver.resolveDependencies(d.groupId, d.artifactId, d.version, "compile").map(dd => AetherResolver.getArtifactPath(dd.getArtifact))
-    /*println(s"Lookign for dependency: "+d.artifactId)
-      println(s"Location -> "+MavenResolver.getArtifactPath(d.groupId, d.artifactId, d.version))
-      
-      var deps = MavenResolver.resolveDependencies(d.groupId, d.artifactId, d.version,"compile")
-      deps.foreach {
-        dd => 
-          println(s"Found --> $dd -> ${dd.getArtifact.getFile}")
-      }*/
-
-  }
-  dependenciesFiles.flatten.foreach {
-    dF =>
-      println(s"Found Dep File: $dF")
-      urlClassloader.addURL(dF.get.toURI().toURL())
-  }
-
+  
   //-- Load actual Region
+  this.resetClassDomain
   var wrappedRegion = try {
-    urlClassloader.loadClass(regionClass).newInstance().asInstanceOf[BrainRegion[_]]
+  
+  
+    
+    this.withClassLoader[BrainRegion[_]](this.classDomain) {
+      var cl = this.classDomain.loadClass(regionClass)
+      var inst = cl.newInstance()
+      println(s"Class: "+cl.getClassLoader)
+      println(s"Region of class: "+classOf[IndesignModule].isInstance(inst))
+      inst.asInstanceOf[BrainRegion[_]]
+    }
+    
   } catch {
-    case e: Throwable => throw new RuntimeException(s"Could not create External Region $regionClass from classloader with CL path $classloaderPath ", e)
+    case e: Throwable => 
+      
+      classDomain.getURLs.foreach {
+        u => 
+          println(s"D: "+u)
+      }
+      throw new RuntimeException(s"Could not create External Region $regionClass from classloader with CL path $classDomain ", e)
   }
 
   override def name = wrappedRegion.name
