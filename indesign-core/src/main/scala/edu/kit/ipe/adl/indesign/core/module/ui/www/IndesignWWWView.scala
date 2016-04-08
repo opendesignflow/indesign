@@ -35,6 +35,9 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
         script(new URI(s"/resources/jquery.treetable.js")) {
 
         }
+        script(new URI(s"/resources/indesign.js")) {
+
+        }
 
       }
       body {
@@ -86,7 +89,8 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                       moduleView =>
                         "item" :: a("#") {
                           
-                          var ready = (moduleView.contentClosure==null || moduleView.proxy.isDefined)
+                          //var ready = (moduleView.contentClosure==null || moduleView.proxy.isDefined)
+                          var ready =  moduleView.isProxy
                           textContent(moduleView.name+s"(${ready})")
                           +@("reRender" -> "true")
                           

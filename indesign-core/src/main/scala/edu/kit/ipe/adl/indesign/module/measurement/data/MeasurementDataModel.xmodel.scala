@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.module.measurement.session
+package edu.kit.ipe.adl.indesign.module.measurement.data
 
 
 import com.idyria.osi.ooxoo.model.ModelBuilder
@@ -26,8 +26,10 @@ object MeasurementDataModel extends ModelBuilder {
     withTrait(graph)
     
     "Point" multiple {
-      attribute("x") ofType "float"
-      ofType("float")
+      "X" ofType "float"
+      "Y" multiple {
+        ofType("float")
+      }
     }
   }
   

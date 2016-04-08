@@ -41,7 +41,7 @@ object IndesignCoreTry extends App {
   // Load ModulesIndesignWWWUIModule   // IndesignWWWUIModule
   //-----------------
   Brain += (
-        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,IndesignWWWUIModule,EclipseModule)
+        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,EclipseModule,IndesignWWWUIModule)
 
   
   
@@ -69,7 +69,7 @@ object IndesignCoreTry extends App {
   //fsh.addChildHarvester(new POMFileHarvester)
   //fsh.addChildHarvester(new TCLFileHarvester)
   
-  Harvest.run
+ 
   
   
  // Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/dev-tools/scala/adept-interface"),"kit.ipe.adl.bsp.adept.AdeptModule"))
@@ -84,8 +84,13 @@ object IndesignCoreTry extends App {
   
   }
   
+
   
+  Harvest.run
   Harvest.printHarvesters
+  
+  /*Harvest.run
+  Harvest.printHarvesters*/
   
   /*
   println(s"Finding Scala App Mains and running them")

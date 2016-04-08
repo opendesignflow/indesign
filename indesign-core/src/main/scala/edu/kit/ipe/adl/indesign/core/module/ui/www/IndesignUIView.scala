@@ -10,6 +10,8 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
 
   // ! Important, if the View is derived from a Scala Source File, then root it
   //------------------
+  var isProxy = false
+  var proxiedView: Option[LocalWebHTMLVIew] = None
   /*this.onProcess {
     this.parentResource match {
       case Some(p: ScalaSourceFile) =>
@@ -19,12 +21,27 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
     }
   }*/
 
+  override def getClassLoader = proxiedView match {
+    case None => super.getClassLoader
+    case Some(v) => v.getClassLoader
+  }
+  
+  // Actions
+  //---------------
+  
+  override def getActions = proxiedView match {
+    case Some(v) => v.getActions
+    case None => super.getActions
+  }
+  
   // INfos
   //------------
   def name = {
 
     this.parentResource match {
-      case Some(p: ScalaSourceFile) => p.path.toFile().getName
+      case Some(p: ScalaSourceFile) =>
+        isProxy = true
+        p.path.toFile().getName
       case _ =>
 
         getClass.getSimpleName.replace("$", "")
@@ -33,7 +50,9 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
   }
 
   def getId = this.parentResource match {
-    case Some(p: ScalaSourceFile) => p.path.toFile().getName
+    case Some(p: ScalaSourceFile) =>
+      isProxy = true
+      p.path.toFile().getName
     case _ =>
 
       getClass.getCanonicalName
@@ -45,12 +64,10 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
   //----------------------
   override def render = {
 
-    this.contentClosure match {
-
-      // If Content closuren ot defined and there is a parent resource, try to get the content using this resource
-      case null if (this.parentResource != None) =>
-
+    this.isProxy match {
+      case true if (proxiedView == None) =>
         this.parentResource match {
+
           case Some(p: ScalaSourceFile) =>
 
             // Ensure Compilation is done
@@ -63,7 +80,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
 
             // Set proxy on new view 
             view.proxy = Some(this)
-            this.contentClosure = view.contentClosure
+            this.proxiedView = Some(view)
             view.viewPath = this.viewPath
 
             // On reload, replace
@@ -82,7 +99,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
 
                 // Set proxy on new view 
                 view.proxy = Some(this)
-                this.contentClosure = view.contentClosure
+                this.proxiedView = Some(view)
                 view.viewPath = this.viewPath
               }
 
@@ -90,11 +107,14 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
               this.getTopParentView.@->("refresh")
             }
 
+            proxiedView.get.rerender
+
           case _ =>
             super.render
         }
 
-        super.render
+      case true if (proxiedView.isDefined) =>
+        proxiedView.get.rerender
       case _ =>
         super.render
     }

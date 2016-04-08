@@ -204,7 +204,7 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
       // Tab
       var tabs = h.hierarchy(true).map { p => "----"}.mkString +">"
       
-      println(s"$tabs ${h.getClass.getSimpleName}")
+      println(s"$tabs ${h.getClass.getSimpleName} "+h.getResources.size)
       
     }
   }

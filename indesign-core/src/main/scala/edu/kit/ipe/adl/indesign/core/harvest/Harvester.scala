@@ -124,8 +124,9 @@ trait Harvester extends LFCSupport with ErrorSupport {
     try {
       this.lastRun = System.currentTimeMillis()
       Thread.currentThread().setContextClassLoader(this.getClass.getClassLoader)
-      doHarvest
       finishGather
+      doHarvest
+      
     } catch {
       case e: Throwable =>
         e.printStackTrace()
