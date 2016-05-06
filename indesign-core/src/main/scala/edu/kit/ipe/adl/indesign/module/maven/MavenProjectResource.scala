@@ -171,12 +171,14 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with SingleBrainReg
 
   // Builder Task
   //-----------------------
-  class BuilderTask extends DefaultHeartTask {
+  /*class BuilderTask extends DefaultHeartTask {
 
+    
+    
     def doTask = {
 
     }
 
-  }
+  }*/
 
 }

@@ -6,7 +6,7 @@ import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
 import org.hamcrest.core.IsInstanceOf
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIewCompiler
 
-class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
+class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with IndesignUIHtmlBuilder {
 
   // ! Important, if the View is derived from a Scala Source File, then root it
   //------------------
@@ -48,7 +48,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
     }
 
   }
-
+ 
   def getId = this.parentResource match {
     case Some(p: ScalaSourceFile) =>
       isProxy = true
@@ -97,6 +97,9 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource {
                 var cl = p.loadClass
                 var view = LocalWebHTMLVIewCompiler.newInstance[LocalWebHTMLVIew](None, cl.asInstanceOf[Class[LocalWebHTMLVIew]])
 
+                // Close old view
+                this.proxiedView.get.closeView
+                
                 // Set proxy on new view 
                 view.proxy = Some(this)
                 this.proxiedView = Some(view)

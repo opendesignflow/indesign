@@ -4,11 +4,12 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.FutureTask
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.Callable
+import edu.kit.ipe.adl.indesign.core.harvest.HarvestedResource
 
 /**
  * Spec for a Heart Task
  */
-trait HeartTask[PT] extends  Callable[PT] with Runnable {
+trait HeartTask[PT] extends  Callable[PT] with Runnable with HarvestedResource with HeartTimingSupport{
   
   // Schedule Parameters
   //-----------------
@@ -44,10 +45,21 @@ trait HeartTask[PT] extends  Callable[PT] with Runnable {
   //-----------------
   var activity = 0
   
+  // Timings
+  //----------------
+  
   // Run
   //--------------
-  def run = doTask
-  def call = doTask
+  def run = call
+  def call = {
+    
+    time("run") {
+      catchErrorsOn(this) {
+         doTask
+      }
+     
+    }  
+  }
   
   def doTask : PT 
   

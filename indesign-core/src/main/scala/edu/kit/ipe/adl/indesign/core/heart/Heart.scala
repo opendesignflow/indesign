@@ -20,12 +20,20 @@ object Heart extends ThreadFactory {
 
     th
   }
+  
 
   /**
    * Background Executor
    */
   val timedExecutor = Executors.newScheduledThreadPool(8, this)
 
+  // Task Management
+  //------------------------
+  
+  var tasks =  scala.collection.mutable.Map[String,HeartTask[_]]()
+  
+  
+  
   /**
    * Execute a Task
    */
@@ -47,4 +55,12 @@ object Heart extends ThreadFactory {
 
   }
 
+  // Inspection
+  //-----------------
+  
+  def isTaskRunning(id:String) = {
+    
+  }
+  
+  
 }

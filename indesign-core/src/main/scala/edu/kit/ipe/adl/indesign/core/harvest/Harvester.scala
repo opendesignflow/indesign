@@ -4,7 +4,6 @@ import java.nio.file.Path
 import edu.kit.ipe.adl.indesign.core.brain.LFCDefinition
 import edu.kit.ipe.adl.indesign.core.brain.LFCSupport
 import com.idyria.osi.tea.errors.ErrorSupport
-import org.scalatest.matchers.HavePropertyMatcher
 import scala.reflect.ClassTag
 
 /**
@@ -124,8 +123,14 @@ trait Harvester extends LFCSupport with ErrorSupport {
     try {
       this.lastRun = System.currentTimeMillis()
       Thread.currentThread().setContextClassLoader(this.getClass.getClassLoader)
-      finishGather
-      doHarvest
+      //finishGather
+      try {
+        doHarvest
+        finishGather
+      } catch {
+        case e : NothingGatheredException => 
+        case e : Throwable => throw e
+      }
       
     } catch {
       case e: Throwable =>
@@ -143,7 +148,7 @@ trait Harvester extends LFCSupport with ErrorSupport {
           r =>
             c.deliver(r)
         }
-       // c.finishGather
+        c.finishGather
     }
     //finishHarvest(autoCleanResources)
   }
@@ -151,8 +156,8 @@ trait Harvester extends LFCSupport with ErrorSupport {
   /**
    * To be overriden by implementations
    */
-  def doHarvest = {
-    
+  def doHarvest : Unit = {
+    throw new NothingGatheredException
   }
 
   /**
@@ -160,7 +165,7 @@ trait Harvester extends LFCSupport with ErrorSupport {
    */
   def finishGather : Unit = {
 
-    //println(s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName)
+    println(s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName+" with : "+this.harvestedResources.toList)
 
     // Go through available resources
     //  -> Remove the ones which are not in the gathered, if autoclean is set to true

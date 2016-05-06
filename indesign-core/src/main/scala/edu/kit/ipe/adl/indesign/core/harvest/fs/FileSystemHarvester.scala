@@ -92,7 +92,7 @@ class FileSystemHarvester extends Harvester {
         }
 
         stream.forEach {
-          inputPath => doF(inputPath)
+          inputPath  => doF(inputPath)
 
         }
     }
