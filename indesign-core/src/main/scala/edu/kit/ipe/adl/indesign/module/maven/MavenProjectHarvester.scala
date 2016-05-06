@@ -4,8 +4,11 @@ import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import java.io.File
 import edu.kit.ipe.adl.indesign.core.module.ui.www.WWWViewHarvester
+import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneIndexProvider
+import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 
-class MavenProjectHarvester extends FileSystemHarvester {
+
+class MavenProjectHarvester extends FileSystemHarvester with LuceneIndexProvider {
 
   this.addChildHarvester(new POMFileHarvester)
 
@@ -36,6 +39,8 @@ class MavenProjectHarvester extends FileSystemHarvester {
       }
   }
 
+    Harvest.updateAutoHarvesterOn(this)
+  
 }
 
 object MavenProjectHarvester {

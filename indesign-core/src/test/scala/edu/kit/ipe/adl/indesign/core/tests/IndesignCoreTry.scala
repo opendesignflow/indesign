@@ -19,6 +19,7 @@ import edu.kit.ipe.adl.indesign.module.scala.ScalaAppHarvester
 import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
 import edu.kit.ipe.adl.indesign.module.scala.ScalaAppSourceFile
 import edu.kit.ipe.adl.indesign.core.module.eclipse.EclipseModule
+import edu.kit.ipe.adl.indesign.core.module.git.GitModule
 
 object IndesignCoreTry extends App {
 
@@ -41,7 +42,7 @@ object IndesignCoreTry extends App {
   // Load ModulesIndesignWWWUIModule   // IndesignWWWUIModule
   //-----------------
   Brain += (
-        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,EclipseModule,IndesignWWWUIModule)
+        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,EclipseModule,IndesignWWWUIModule,GitModule)
 
   
   
@@ -63,6 +64,8 @@ object IndesignCoreTry extends App {
   fsh.addPath(new File("/home/rleys/git/adl/Neutrinomass_ADC").toPath())
   
   fsh.addPath(new File("/home/rleys/eclipse-workspaces/mars").toPath())
+  
+  fsh.addPath(new File("""E:\Common\Projects\git""").toPath())
 
   Harvest.addHarvester(fsh)
   fsh.addChildHarvester(new MavenProjectHarvester) 

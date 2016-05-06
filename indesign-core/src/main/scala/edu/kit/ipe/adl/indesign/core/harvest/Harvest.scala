@@ -34,7 +34,7 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
     }
 
   }
-  
+
   /**
    * Process Depth first ordered
    */
@@ -49,7 +49,7 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
 
       keepErrorsOn(h) {
         cl(h)
-        processList.pushAll( h.childHarvesters)
+        processList.pushAll(h.childHarvesters)
       }
     }
 
@@ -100,7 +100,7 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
         keepErrorsOn(h) {
           h.resetErrors
           //println(s"********** harvest on ${h.getClass.getCanonicalName} **************");
-          h.processResources
+          // h.processResources
         }
     }
 
@@ -163,37 +163,37 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
   }
 
   def updateAutoHarvesterOn(harvester: Harvester) = {
+
+    logFine[Harvester]("Auto Update on : " + harvester.getClass)
     var h = harvester.asInstanceOf[Harvester]
     var children = h.childHarvesters.asInstanceOf[List[Harvester]]
 
+    // Finder:
+    // - Get all objects/classes matching harvester's class or parent class
+    // - Make the list distinct to avoid duplicate instantiations
+    // - Add missing classtype/objects
+
     // Make sure the harvester has at least one type of auto classes
     //----------------
-    autoHarvesterClasses.get(harvester.getClass) match {
-      case Some(autoHarvesterClasses) =>
-        autoHarvesterClasses.filter {
-          requiredClass: Class[_] =>
-            children.find {
-              ch =>
-                ch.getClass == requiredClass
-            } == None
-        }.foreach {
-          req =>
-            harvester.addChildHarvester(req)
-        }
-      case None =>
+    var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
+    logFine[Harvester]("Required Classes : " + requiredClasses)
+    requiredClasses.foreach {
+
+      // Can't find required class in children harvesters, add
+      case requiredClass if (children.find { ch => requiredClass.isAssignableFrom(ch.getClass) }.isEmpty) =>
+        harvester.addChildHarvester(requiredClass)
+      case _ =>
     }
 
     // MAke sure the harvester has all the required objects
     //---------------
-    autoHarvesterObjects.get(harvester.getClass) match {
-      case Some(autoHarvesterObjects) =>
-        autoHarvesterObjects.filterNot(obj => children.contains(obj)).foreach {
-          requiredHarvester =>
-
-            h.addChildHarvesterForce(requiredHarvester)
-        }
-      case None =>
+    var requiredObjects = autoHarvesterObjects.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
+    requiredObjects.foreach {
+      case requiredHarvester if (!children.contains(requiredHarvester)) =>
+        h.addChildHarvesterForce(requiredHarvester)
+      case _ =>
     }
+
   }
 
   // Utilities
@@ -202,10 +202,10 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
     this.onAllHarvestersDepthFirst { h =>
 
       // Tab
-      var tabs = h.hierarchy(true).map { p => "----"}.mkString +">"
-      
-      println(s"$tabs ${h.getClass.getSimpleName} "+h.getResources.size)
-      
+      var tabs = h.hierarchy(true).map { p => "----" }.mkString + ">"
+
+      println(s"$tabs ${h.getClass.getSimpleName} " + h.getResources.size)
+
     }
   }
 

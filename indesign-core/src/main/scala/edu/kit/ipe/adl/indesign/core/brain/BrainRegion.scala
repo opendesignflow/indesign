@@ -1,8 +1,9 @@
 package edu.kit.ipe.adl.indesign.core.brain
 
 import com.idyria.osi.tea.errors.ErrorSupport
+import com.idyria.osi.tea.logging.TLogSource
 
-trait BrainRegion[CT <: BrainRegion[_]] extends BrainLifecycle  with ErrorSupport {
+trait BrainRegion[CT <: BrainRegion[_]] extends BrainLifecycle  with ErrorSupport with TLogSource {
   
   // Parent / Child
   //--------------

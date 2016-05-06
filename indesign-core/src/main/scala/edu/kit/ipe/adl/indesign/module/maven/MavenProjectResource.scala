@@ -15,15 +15,16 @@ import com.idyria.osi.tea.files.FileWatcher
 import edu.kit.ipe.adl.indesign.core.module.artifactresolver.AetherResolver
 import org.eclipse.aether.artifact.Artifact
 import java.net.URL
+import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneIndexResource
 
-class MavenProjectResource(p: Path) extends HarvestedFile(p) with SingleBrainRegion with ClassDomainSupport {
+class MavenProjectResource(p: Path) extends HarvestedFile(p) with SingleBrainRegion with ClassDomainSupport with LuceneIndexResource {
 
   //-- Get Pom File 
   var pomFile = new File(p.toFile(), "pom.xml")
 
   //-- File Watcher for this project
   var watcher = new FileWatcher
-  watcher.start
+
 
   //-- Maven Model
   var projectModel = project(pomFile.toURI().toURL())
@@ -38,6 +39,9 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with SingleBrainReg
 
   override def name = projectModel.artifactId
 
+  //-- Indexing
+  def getLuceneDirectory = new File(p.toFile,".indesign-lucene-index")
+  
   //-- WWW VIew
   var view = new MavenWWWView(this)
 
@@ -101,6 +105,8 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with SingleBrainReg
       // println(s"Maven Project resource added to harvster")
       MavenModule.addSubRegion(this)
 
+
+      
     //-- 
 
     case _ =>
@@ -109,6 +115,8 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with SingleBrainReg
   this.onProcess {
     //println(s"Creating Compiler for MavenProject")
 
+    watcher.start
+    
     compiler match {
       case None =>
         resetClassDomain

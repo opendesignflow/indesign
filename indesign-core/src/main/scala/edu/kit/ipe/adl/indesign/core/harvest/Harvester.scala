@@ -20,16 +20,17 @@ trait Harvester extends LFCSupport with ErrorSupport {
   var childHarvesters = List[Harvester]()
   var parentHarvester: Option[Harvester] = None
 
-  def addChildHarvester(h: Harvester): Unit = {
+  def addChildHarvester(h: Harvester): Harvester = {
     this.childHarvesters = this.childHarvesters :+ h.asInstanceOf[Harvester]
     h.parentHarvester = Some(this)
+    h
   }
 
-  def addChildHarvester(h: Class[Harvester]): Unit = {
+  def addChildHarvester(h: Class[Harvester]): Harvester = {
     this.addChildHarvester(h.newInstance().asInstanceOf[Harvester])
 
   }
-  def addChildHarvesterForce(h: Harvester): Unit = {
+  def addChildHarvesterForce(h: Harvester): Harvester = {
     this.addChildHarvester(h.asInstanceOf[Harvester])
 
   }

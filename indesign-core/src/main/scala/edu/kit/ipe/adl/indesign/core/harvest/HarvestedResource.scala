@@ -5,8 +5,9 @@ import edu.kit.ipe.adl.indesign.core.brain.LFCDefinition
 import edu.kit.ipe.adl.indesign.core.brain.LFCSupport
 import com.idyria.osi.tea.errors.ErrorSupport
 import scala.reflect.ClassTag
+import com.idyria.osi.tea.logging.TLogSource
 
-trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSupport {
+trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSupport with TLogSource {
   
   
   /**
@@ -112,6 +113,8 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
       cl
     }
   }
+  
+
   
 }
 
