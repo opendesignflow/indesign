@@ -19,7 +19,13 @@ import edu.kit.ipe.adl.indesign.module.scala.ScalaAppHarvester
 import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
 import edu.kit.ipe.adl.indesign.module.scala.ScalaAppSourceFile
 import edu.kit.ipe.adl.indesign.core.module.eclipse.EclipseModule
+
 import edu.kit.ipe.adl.indesign.core.module.git.GitModule
+
+import com.idyria.osi.tea.logging.TLog
+import com.idyria.osi.wsb.webapp.http.connector.websocket.WebsocketInterface
+import com.idyria.osi.wsb.webapp.http.connector.websocket.WebsocketProtocolhandler
+
 
 object IndesignCoreTry extends App {
 
@@ -29,23 +35,19 @@ object IndesignCoreTry extends App {
   sys.exit()*/
 
   //var r = new MavenProjectResource(new File("src/test/resources/testFS/maven-app-single").toPath())
-  
- // r.parseModel
-  
-  
-  
-  
-  
+  // r.parseModel
   //sys.exit()
   
+  TLog.setLevel(classOf[WebsocketProtocolhandler], TLog.Level.FULL)
   
+
   // Load ModulesIndesignWWWUIModule   // IndesignWWWUIModule
   //-----------------
   Brain += (
+
         Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,EclipseModule,IndesignWWWUIModule,GitModule)
 
-  
-  
+
   Brain.init
   /*MavenModule.load
   TCLModule.load 
@@ -54,47 +56,40 @@ object IndesignCoreTry extends App {
   
   Harvest.run*/
 
-    
   // Create harvest
   //-------------------
-  var fsh  = new FileSystemHarvester
-  
+  var fsh = new FileSystemHarvester
+
   fsh.addPath(new File("src/test/testFS").toPath())
-  
+
   fsh.addPath(new File("/home/rleys/git/adl/Neutrinomass_ADC").toPath())
-  
+
   fsh.addPath(new File("/home/rleys/eclipse-workspaces/mars").toPath())
   
   fsh.addPath(new File("""E:\Common\Projects\git""").toPath())
 
   Harvest.addHarvester(fsh)
-  fsh.addChildHarvester(new MavenProjectHarvester) 
+  fsh.addChildHarvester(new MavenProjectHarvester)
   //fsh.addChildHarvester(new POMFileHarvester)
   //fsh.addChildHarvester(new TCLFileHarvester)
-  
- 
-  
-  
- // Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/dev-tools/scala/adept-interface"),"kit.ipe.adl.bsp.adept.AdeptModule"))
- // Harvest.run
-  println(s"WWWVIew content now: "+WWWViewHarvester.getResources.size)
-  
-  
-  Brain.onAllRegions { 
-    r =>  
-      
-      println(s"Found Region: "+r.name+" -> childrend: "+r.subRegions.size)
-  
-  }
-  
 
-  
+  // Brain += (new ExternalBrainRegion(new File("/home/rleys/git/adl/dev-tools/scala/adept-interface"),"kit.ipe.adl.bsp.adept.AdeptModule"))
+  // Harvest.run
+  println(s"WWWVIew content now: " + WWWViewHarvester.getResources.size)
+
+  Brain.onAllRegions {
+    r =>
+
+      println(s"Found Region: " + r.name + " -> childrend: " + r.subRegions.size)
+
+  }
+
   Harvest.run
   Harvest.printHarvesters
-  
+
   /*Harvest.run
   Harvest.printHarvesters*/
-  
+
   /*
   println(s"Finding Scala App Mains and running them")
   
@@ -114,10 +109,8 @@ object IndesignCoreTry extends App {
     
     
   }*/
-  
-  
-  
+
   Console.readLine()
   println(s"Stopping")
-  
+
 }

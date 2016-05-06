@@ -38,6 +38,12 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
         script(new URI(s"/resources/indesign.js")) {
 
         }
+        
+        // Modules
+        //----------------
+        script(new URI(s"/resources/modules/heart/heart.js")) {
+
+        }
 
       }
       body {
@@ -114,7 +120,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
             }
 
-            input {
+            /*input {
               +@("type" -> "button")
               +@("value" -> s"Click me 2 -> $valueSee")
               textContent("Click me")
@@ -138,7 +144,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                 valueSee = " last click on: " + System.currentTimeMillis()
               }
             }
-
+*/
             // Brain
             //-------------------
             $(<h2 class="ui header">

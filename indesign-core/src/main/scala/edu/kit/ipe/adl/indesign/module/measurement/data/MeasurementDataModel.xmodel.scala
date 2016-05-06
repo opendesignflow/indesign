@@ -6,6 +6,7 @@ import com.idyria.osi.ooxoo.model.producer
 import com.idyria.osi.ooxoo.model.producers
 import com.idyria.osi.ooxoo.model.out.markdown.MDProducer
 import com.idyria.osi.ooxoo.model.out.scala.ScalaProducer
+import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
 
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),
@@ -13,11 +14,15 @@ import com.idyria.osi.ooxoo.model.out.scala.ScalaProducer
 object MeasurementDataModel extends ModelBuilder {
  
  
+  // Data definition
+  //----------------------------
   
   val graph = "Graph" is {
     isTrait
+    withTrait(classOf[STAXSyncTrait])
     attribute("name")
     attribute("creationDate") ofType "datetime"
+    attribute("display") ofType "string" default "line"
     
   }
   
@@ -32,6 +37,20 @@ object MeasurementDataModel extends ModelBuilder {
       }
     }
   }
+  
+  
+  // Protocols
+  //------------------------
+  
+  "UpdateGraphRequest" is {
+    
+    //-- Target Id
+    attribute("targetId")
+    
+    //-- Graph
+    importElement(graph)
+  }
+  
   
   
 }
