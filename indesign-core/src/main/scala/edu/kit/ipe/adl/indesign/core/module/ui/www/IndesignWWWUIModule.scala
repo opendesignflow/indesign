@@ -2,12 +2,10 @@ package edu.kit.ipe.adl.indesign.core.module.ui.www
 
 import edu.kit.ipe.adl.indesign.core.module.IndesignModule
 import com.idyria.osi.wsb.webapp.localweb.LocalWebEngine
-import com.idyria.osi.vui.implementation.javafx.JavaFXRun
 import javafx.stage.Stage
 import javafx.scene.Scene
 import javafx.scene.paint.Color
 import javafx.scene.control.Hyperlink
-import com.idyria.osi.vui.implementation.javafx.JavaFXNodeDelegate
 import javafx.event.EventHandler
 import javafx.stage.WindowEvent
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory
