@@ -5,12 +5,13 @@ import edu.kit.ipe.adl.indesign.core.brain.LFCDefinition
 import edu.kit.ipe.adl.indesign.core.brain.LFCSupport
 import com.idyria.osi.tea.errors.ErrorSupport
 import scala.reflect.ClassTag
+import com.idyria.osi.tea.logging.TLogSource
 
 /**
  * A harvester will look for resources, and call upon its child harvesters to match them
  *
  */
-trait Harvester extends LFCSupport with ErrorSupport {
+trait Harvester extends LFCSupport with ErrorSupport with TLogSource{
 
   var lastRun: Long = 0
 
@@ -100,6 +101,14 @@ trait Harvester extends LFCSupport with ErrorSupport {
       case _ =>
     }
   }
+  
+  def getResource[CT <: HarvestedResource](implicit cl: ClassTag[CT]) : Option[CT] = {
+   
+    this.getResources.find { r=> cl.runtimeClass.isInstance(r) } match {
+      case Some(r) => Some(r.asInstanceOf[CT])
+      case None => None
+    }
+  }
 
   /**
    * Harvest Gather ressources, wich are added to gathered resources
@@ -166,7 +175,7 @@ trait Harvester extends LFCSupport with ErrorSupport {
    */
   def finishGather : Unit = {
 
-    println(s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName+" with : "+this.harvestedResources.toList)
+    logFine[Harvester](s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName+" with : "+this.harvestedResources.toList)
 
     // Go through available resources
     //  -> Remove the ones which are not in the gathered, if autoclean is set to true

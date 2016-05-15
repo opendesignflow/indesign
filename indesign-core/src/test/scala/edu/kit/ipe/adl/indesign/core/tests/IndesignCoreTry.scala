@@ -7,9 +7,6 @@ import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignWWWUIModule
 import edu.kit.ipe.adl.indesign.module.maven.MavenModule
 import edu.kit.ipe.adl.indesign.module.maven.POMFileHarvester
-import edu.kit.ipe.adl.indesign.module.odfi.rfg.RFGModule
-import edu.kit.ipe.adl.indesign.module.tcl.TCLModule
-import edu.kit.ipe.adl.indesign.module.tcl.TCLFileHarvester
 import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegion
 import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
 import edu.kit.ipe.adl.indesign.module.scala.ScalaModule
@@ -45,7 +42,7 @@ object IndesignCoreTry extends App {
   //-----------------
   Brain += (
 
-        Harvest,MavenModule,TCLModule,RFGModule,ScalaModule,EclipseModule,IndesignWWWUIModule,GitModule)
+        Harvest,MavenModule,ScalaModule,EclipseModule,IndesignWWWUIModule,GitModule)
 
 
   Brain.init

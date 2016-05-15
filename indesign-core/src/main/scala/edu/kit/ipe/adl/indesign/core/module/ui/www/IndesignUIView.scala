@@ -98,7 +98,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
                 var view = LocalWebHTMLVIewCompiler.newInstance[LocalWebHTMLVIew](None, cl.asInstanceOf[Class[LocalWebHTMLVIew]])
 
                 // Close old view
-                this.proxiedView.get.closeView
+                //this.proxiedView.get.closeView 
                 
                 // Set proxy on new view 
                 view.proxy = Some(this)
