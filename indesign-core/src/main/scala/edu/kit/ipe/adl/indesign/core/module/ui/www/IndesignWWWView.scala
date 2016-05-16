@@ -114,7 +114,8 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
                           //var ready = (moduleView.contentClosure==null || moduleView.proxy.isDefined)
                           var ready = moduleView.isProxy
-                          textContent(moduleView.name + s"(${ready})")
+                          //textContent(moduleView.name + s"(${ready})")
+                          textContent(moduleView.name)
                           +@("reRender" -> "true")
 
                           onClick {
