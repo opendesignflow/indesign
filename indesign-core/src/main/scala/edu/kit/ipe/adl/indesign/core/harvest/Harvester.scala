@@ -116,6 +116,8 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource{
    */
   def harvest = {
 
+    logFine[Harvester](s"----------- Starting Harvest on "+this.getClass.getCanonicalName)
+    
     // Deliver current resources to childnre
     //--------------------
     this.childHarvesters.foreach {
@@ -175,37 +177,39 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource{
    */
   def finishGather : Unit = {
 
-    logFine[Harvester](s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName+" with : "+this.harvestedResources.toList)
+    logFine[Harvester](s"----------- Starting finish Harvest on "+this.getClass.getCanonicalName+" with : "+this.harvestedResources.toList+" and "+this.availableResources.size+" available")
 
     // Go through available resources
     //  -> Remove the ones which are not in the gathered, if autoclean is set to true
     //  -> Remove from gathered the one already available
     //  -> Add Remaining gathered
     this.availableResources.toList.foreach {
-      case r if (!r.rooted) =>
+      case r  =>
 
         this.harvestedResources.find { hr => hr.getId == r.getId } match {
 
-          // Remove non gathered  and non 
-          case None =>
+          // Remove non gathered  and non rooted
+          case None if (!r.rooted) =>
             this.availableResources -= r
             r.@->("clean", this)
 
 
           // Keep, then remove from gathered
           case Some(matchingHarvested) =>
+            logFine[Harvester](s"Resource ${matchingHarvested.getId} already present, remove from harvested")
             this.harvestedResources -= matchingHarvested
-
+            
+          case _ => 
         }
       case _ =>
     }
 
-    // Add resources to available
+    // Add resources to available unless one resource with same ID exists
     this.harvestedResources.foreach {
       r =>
         this.availableResources += r
-        r.@->("gathered", this)
         r.@->("added", this)
+        r.@->("gathered", this)
     }
     
     // Reject
@@ -215,6 +219,9 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource{
     }
     this.harvestedResources.clear()
 
+    logFine[Harvester](s"----------- Finish Harvest on "+this.getClass.getCanonicalName+" with : "+this.harvestedResources.toList+" and "+this.availableResources.size+" available")
+
+    
     // Deliver resources to child harvesters, and run a finish harvect on them too
     //--------------
     /*this.childHarvesters.foreach {

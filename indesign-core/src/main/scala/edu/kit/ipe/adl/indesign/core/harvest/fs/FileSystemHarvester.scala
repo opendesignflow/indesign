@@ -21,7 +21,7 @@ class FileSystemHarvester extends Harvester {
 
   //def createResourceFromPath(p:Path) : RT
 
-  this.onDeliver  {
+  this.onDeliver {
     case r: HarvestedFile =>
       (r.path.toFile().exists(), r.path.toFile().isDirectory()) match {
         case (true, true) =>
@@ -51,12 +51,12 @@ class FileSystemHarvester extends Harvester {
       case resource =>
 
         // Walk Through the files, stop if a child harvester gathered a directory, and set current resource as parent to all created resources
-        
+
         var basePath = resource.path
 
-        //println(s"Starting harvest on: $basePath")
+        //println(s"-- Starting harvest on: $resource")
 
-        var stream = Files.walk(basePath)
+        
 
         // Delevier files to child harvester
         //stream.forEach(FileSystemHarvester.childHarvesters.foreach(h => h.deliver(_)))
@@ -67,7 +67,8 @@ class FileSystemHarvester extends Harvester {
         // set as a def otherwise the scala compiler doesn'T work with Java8 Closure style
         def doF(inputPath: Path) = {
           var r = new HarvestedFile(inputPath)
-          r.parentResource = Some(resource)
+          r.deriveFrom(resource)
+          //r.parentResource = Some(resource)
 
           // Retain only child harvesters for which the current path has no parent in stop list
           var validChildren = this.childHarvesters.filter {
@@ -90,11 +91,17 @@ class FileSystemHarvester extends Harvester {
 
           }
         }
+        basePath.toFile().listFiles().foreach {
+          f =>
+            var stream = Files.walk(f.toPath())
+            stream.forEach {
+              inputPath =>
+               // println(s"---- Processing: $inputPath")
+                doF(inputPath)
 
-        stream.forEach {
-          inputPath  => doF(inputPath)
-
+            }
         }
+
     }
 
   }

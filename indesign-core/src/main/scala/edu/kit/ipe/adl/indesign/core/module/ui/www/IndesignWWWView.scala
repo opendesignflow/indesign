@@ -48,7 +48,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
       }
       body {
 
-        "ui grid container" :: div {
+        "ui grid container maintop" :: div {
 
           "left floated three wide column" :: div {
             // Menu
