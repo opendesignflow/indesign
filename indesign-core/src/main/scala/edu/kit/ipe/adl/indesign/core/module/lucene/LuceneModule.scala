@@ -2,7 +2,6 @@ package edu.kit.ipe.adl.indesign.core.module.lucene
 
 import edu.kit.ipe.adl.indesign.core.module.IndesignModule
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
-import edu.kit.ipe.adl.indesign.module.scala.ScalaProjectHarvester
 
 object LuceneModule extends IndesignModule {
   

@@ -1,0 +1,7 @@
+$(function() {
+	
+
+	    $('.vui-datatables').DataTable();
+
+	
+});

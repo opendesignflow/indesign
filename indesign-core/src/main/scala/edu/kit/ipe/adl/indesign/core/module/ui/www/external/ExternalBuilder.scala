@@ -10,7 +10,9 @@ import org.w3c.dom.html.HTMLElement
 
 trait ExternalBuilder extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
-  def externalAdd(targetNode:HTMLNode[HTMLElement, Any]) : Unit
+  def externalAdd(targetNode:HTMLNode[HTMLElement, Any]) : Unit = {
+    
+  }
   
   override def render: HTMLNode[HTMLElement, HTMLNode[HTMLElement, _]] = {
 

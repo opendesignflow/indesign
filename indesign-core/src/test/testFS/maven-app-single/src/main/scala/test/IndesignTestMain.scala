@@ -3,5 +3,5 @@ package test
 
 object IndesignSingleTestMain extends App {
   
-  println("Test Main 2")
+  println("Test Main")
 }

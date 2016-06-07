@@ -11,7 +11,8 @@ class FileSystemHarvester extends Harvester {
 
   //var searchPaths = List[Path]()
 
-  def addPath(p: Path) = {
+  def addPath(f:File)  : Boolean = addPath(f.toPath())
+  def addPath(p: Path) : Boolean = {
     var f = new HarvestedFile(p)
     f.root
     f.local = true
@@ -25,8 +26,17 @@ class FileSystemHarvester extends Harvester {
     case r: HarvestedFile =>
       (r.path.toFile().exists(), r.path.toFile().isDirectory()) match {
         case (true, true) =>
-          gather(r)
-          true
+          this.availableResources.find {
+            case hf: HarvestedFile if (hf.getId==r.getId) => true
+            case _ => false
+          } match {
+            case Some(_) => 
+              false
+            case _ =>
+              gather(r)
+              true
+          }
+
         case _ => false
 
       }
@@ -35,7 +45,26 @@ class FileSystemHarvester extends Harvester {
 
   override def doHarvest = {
 
-    //println(s"Harvesting")
+    // Use Config to find base paths
+    this.config match {
+      case Some(conf) =>
+        conf.values.keys.foreach {
+          case key if (key.keyType === "file") =>
+            key.values.foreach {
+              v =>
+                // println("Found File: "+v)
+                this.addPath(new File(v).getCanonicalFile.toPath)
+
+            }
+
+          case key =>
+          // println("Key in config: "+key.keyType)
+        }
+      case None =>
+    }
+
+    // println(s"Harvesting on : ${this} -> ${this.childHarvesters.size}")
+
     /**
      * For each child harvester, a list of paths to stop at during walk
      */
@@ -50,13 +79,16 @@ class FileSystemHarvester extends Harvester {
     this.onResources[HarvestedFile] {
       case resource =>
 
+        // Readd Resource to Gathered to make sure it won't dissapear
+        // If rooted, don't readd
+        if (!resource.rooted) {
+          gather(resource)
+        }
         // Walk Through the files, stop if a child harvester gathered a directory, and set current resource as parent to all created resources
 
         var basePath = resource.path
 
         //println(s"-- Starting harvest on: $resource")
-
-        
 
         // Delevier files to child harvester
         //stream.forEach(FileSystemHarvester.childHarvesters.foreach(h => h.deliver(_)))
@@ -96,7 +128,7 @@ class FileSystemHarvester extends Harvester {
             var stream = Files.walk(f.toPath())
             stream.forEach {
               inputPath =>
-               // println(s"---- Processing: $inputPath")
+                // println(s"---- Processing: $inputPath")
                 doF(inputPath)
 
             }

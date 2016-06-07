@@ -1,20 +1,19 @@
 package edu.kit.ipe.adl.indesign.module.lucene
+/*
+import java.io.File
+
+import com.idyria.osi.tea.logging.TLog
 
 import edu.kit.ipe.adl.indesign.core.brain.Brain
-import edu.kit.ipe.adl.indesign.module.scala.ScalaModule
-import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignWWWUIModule
-import edu.kit.ipe.adl.indesign.core.module.eclipse.EclipseModule
-
-import edu.kit.ipe.adl.indesign.module.maven.MavenModule
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
-import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneModule
-import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
-import java.io.File
-import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
-import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneIndexableHarvester
-import com.idyria.osi.tea.logging.TLog
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
-import edu.kit.ipe.adl.indesign.core.module.git.GitModule
+import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
+import edu.kit.ipe.adl.indesign.core.module.eclipse.EclipseModule
+import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneIndexableHarvester
+import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneModule
+import edu.kit.ipe.adl.indesign.module.maven.MavenModule
+import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
+import edu.kit.ipe.adl.indesign.module.scala.ScalaModule
 
 object LuceneHarvestTry extends App {
 
@@ -22,7 +21,7 @@ object LuceneHarvestTry extends App {
   
   
   Brain += (
-    Harvest, MavenModule, ScalaModule, EclipseModule, LuceneModule,GitModule)
+    Harvest, MavenModule, ScalaModule, EclipseModule, LuceneModule)
 
   Brain.init
 
@@ -44,4 +43,4 @@ object LuceneHarvestTry extends App {
   }
   
 
-}
+}*/

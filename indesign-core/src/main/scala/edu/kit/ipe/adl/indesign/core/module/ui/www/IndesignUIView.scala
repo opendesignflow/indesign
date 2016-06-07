@@ -2,12 +2,22 @@ package edu.kit.ipe.adl.indesign.core.module.ui.www
 
 import edu.kit.ipe.adl.indesign.core.harvest.HarvestedResource
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
-import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
 import org.hamcrest.core.IsInstanceOf
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIewCompiler
+import edu.kit.ipe.adl.indesign.core.module.buildsystem.JavaSourceFile
+import edu.kit.ipe.adl.indesign.core.module.buildsystem.SourceFile
 
 class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with IndesignUIHtmlBuilder {
 
+  
+  // Standalone
+  //--------------
+  
+  /**
+   * If set, the main UI module will map this view to a specific path and open a link to a new tab
+   */
+  var targetViewPath : Option[String] = None
+  
   // ! Important, if the View is derived from a Scala Source File, then root it
   //------------------
   var isProxy = false
@@ -39,7 +49,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
   def name = {
 
     this.parentResource match {
-      case Some(p: ScalaSourceFile) =>
+      case Some(p: SourceFile) =>
         isProxy = true
         p.path.toFile().getName
       case _ =>
@@ -50,7 +60,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
   }
  
   def getId = this.parentResource match {
-    case Some(p: ScalaSourceFile) =>
+    case Some(p: SourceFile) =>
       isProxy = true
       p.path.toFile().getName
     case _ =>
@@ -68,7 +78,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
       case true if (proxiedView == None) =>
         this.parentResource match {
 
-          case Some(p: ScalaSourceFile) =>
+          case Some(p: JavaSourceFile) =>
 
             // Ensure Compilation is done
             p.ensureCompiled

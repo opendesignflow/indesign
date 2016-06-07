@@ -2,8 +2,8 @@ package edu.kit.ipe.adl.indesign.core.module.ui.www
 
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
-import edu.kit.ipe.adl.indesign.module.scala.ScalaProjectHarvester
-import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
+import edu.kit.ipe.adl.indesign.core.module.buildsystem.JavaSourceFile
+import com.idyria.osi.wsb.webapp.localweb.LocalWebEngine
 
 object WWWViewHarvester extends Harvester {
 
@@ -12,9 +12,19 @@ object WWWViewHarvester extends Harvester {
   this.onDeliver {
     case r: IndesignUIView =>
       gather(r)
-      println(s"Got a view delivered, size now: " + this.getResources.size)
+      //println(s"Got a view delivered, size now: " + this.getResources.size)
+      r.onGathered {
+        case h if(h==this) => 
+          
+          // If View has a specific target path, then register it in Local Web Tree
+          r.targetViewPath match {
+            case Some(path)  =>
+              LocalWebEngine.addViewHandler(path, r.getClass)
+            case _ => 
+          }
+      }
       true
-    case r: ScalaSourceFile =>
+    case r: JavaSourceFile =>
 
       r.getLines.find { line => line.contains(s"extends ${classOf[IndesignUIView].getSimpleName.replace("$","")}") }.isDefined match {
         case true =>
@@ -33,5 +43,5 @@ object WWWViewHarvester extends Harvester {
   
   // Auto Reg
   //---------------------
-  Harvest.registerAutoHarvesterObject(classOf[ScalaProjectHarvester], this)
+  //Harvest.registerAutoHarvesterObject(classOf[ScalaProjectHarvester], this)
 }

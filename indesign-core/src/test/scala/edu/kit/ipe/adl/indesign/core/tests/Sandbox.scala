@@ -1,9 +1,8 @@
 package edu.kit.ipe.adl.indesign.core.tests
 
 import scala.sys.process._
-import edu.kit.ipe.adl.indesign.core.module.artifactresolver.AetherResolver
 import com.idyria.osi.tea.logging.TLog
-import edu.kit.ipe.adl.indesign.core.module.artifactresolver.EclipseWorkspaceReader
+
 import java.io.File
 
 object Sandbox extends App {
@@ -17,7 +16,7 @@ object Sandbox extends App {
   println(foundlock)*/
   
   
-  
+  /*
   
   AetherResolver.session.setWorkspaceReader(new EclipseWorkspaceReader(new File("/home/rleys/eclipse-workspaces/mars/")))
   TLog.setLevel(classOf[EclipseWorkspaceReader], TLog.Level.FULL)
@@ -30,7 +29,7 @@ object Sandbox extends App {
           println(s"D: $d -> "+d.getFile)
       }
     case None => 
-  }
+  }*/
   
   /*var res = Seq("lsof","-l","+D","/home/rleys/eclipse-workspaces/mars/.metadata/").!!
   */

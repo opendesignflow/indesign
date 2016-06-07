@@ -10,7 +10,8 @@ import java.io.File
 class HarvestedFile(val path: Path) extends HarvestedResource {
 
   def getId = path.toAbsolutePath().toString()
-
+  def getName = path.getFileName.toString()
+  
   override def toString = getClass.getSimpleName.replace("$", "") + ": " + getId
 
   // Utils

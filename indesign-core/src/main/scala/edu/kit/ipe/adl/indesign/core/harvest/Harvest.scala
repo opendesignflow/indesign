@@ -1,17 +1,35 @@
 package edu.kit.ipe.adl.indesign.core.harvest
 
-import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
-import com.idyria.osi.tea.errors.ErrorSupport
 import scala.reflect.ClassTag
 
-object Harvest extends BrainRegion[BrainRegion[_]] {
+import com.idyria.osi.tea.compile.ClassDomain
+import com.idyria.osi.tea.errors.ErrorSupport
 
+import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
+
+object Harvest extends BrainRegion {
+
+  // Make this region always present
+  this.root
+
+  // Register Harvest Task
+  //------------
+  
+  
   // Top Harvesters
   //------------------
 
   var harvesters = List[Harvester]()
-  def addHarvester(h: Harvester) = {
-    this.harvesters = this.harvesters :+ h
+  def addHarvester(h: Harvester)  = {
+    this.harvesters.contains(h) match {
+      case true => 
+      case false => this.harvesters = this.harvesters :+ h
+    }
+    
+    h
+  }
+  def removeHarvester(h: Harvester): Harvester = {
+    this.harvesters = this.harvesters.filter(_ != h)
     h
   }
 
@@ -30,6 +48,10 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
       keepErrorsOn(h) {
         cl(h)
         processList ++= h.childHarvesters
+        /*h.errors.foreach {
+          e => 
+          e.printStackTrace()
+        }*/
       }
     }
 
@@ -55,6 +77,26 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
 
   }
 
+  /*def onAllHarvestersDepthFirst(cl: Harvester => Boolean): Unit = {
+
+    var processList = new scala.collection.mutable.Stack[Harvester]()
+    processList ++= this.harvesters
+
+    while (processList.nonEmpty) {
+
+      var h = processList.pop()
+
+      keepErrorsOn(h) {
+        cl(h) match {
+          case true => 
+          case false => 
+        }
+        processList.pushAll(h.childHarvesters)
+      }
+    }
+
+  }*/
+
   def onHarvesters[CT <: Harvester](cl: PartialFunction[CT, Unit])(implicit tag: ClassTag[CT]): Unit = {
 
     var processList = new scala.collection.mutable.ListBuffer[Harvester]()
@@ -78,6 +120,29 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
 
     }
 
+  }
+  
+  def collectOnHarvesters[CT <: Harvester,B](cl: PartialFunction[CT, B])(implicit tag: ClassTag[CT])  = {
+    
+    var collected = List[B]()
+    onHarvesters[CT] {
+      case h if(cl.isDefinedAt(h)) => 
+        collected = collected :+ cl(h)
+    }
+    collected
+  }
+  
+  def collectResourcesOnHarvesters[CT <: Harvester,RT<:HarvestedResource : ClassTag,B](cl: PartialFunction[RT, B])(implicit htag: ClassTag[CT])  = {
+    
+    var r = collectOnHarvesters[CT,List[B]] {
+      case h => 
+        var r = h.getResourcesOfType[RT].collect {
+          case hr if (cl.isDefinedAt(hr)) => cl(hr)
+        }
+        r
+       
+    }
+    r.flatten.toList
   }
 
   def run = {
@@ -154,7 +219,63 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
 
   }
 
+  def cleanAutoHarvesters = {
+
+    // Clean Auto Classes
+    this.autoHarvesterClasses.foreach {
+
+      // Clean Source map if source is tainted
+      case (source, required) if (source.getClass.getClassLoader.isInstanceOf[ClassDomain] && source.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted) =>
+        this.autoHarvesterClasses = this.autoHarvesterClasses.filterKeys { k => k != source }
+
+      case (source, required) =>
+        var filtered = required.filter {
+          case req if (req.getClassLoader.isInstanceOf[ClassDomain]) =>
+            !req.getClassLoader.asInstanceOf[ClassDomain].tainted
+          case _ => true
+        }
+        this.autoHarvesterClasses = this.autoHarvesterClasses.updated(source, filtered)
+
+    }
+
+    // Clean Auto Objects
+    this.autoHarvesterObjects.foreach {
+      case (source, required) =>
+        var filtered = required.filter {
+          case req if (req.getClass.getClassLoader.isInstanceOf[ClassDomain]) =>
+            !req.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted
+          case _ => true
+        }
+        this.autoHarvesterObjects = this.autoHarvesterObjects.updated(source, filtered)
+
+    }
+
+    // Clean Harvesters
+    this.onAllHarvestersDepthFirst {
+      case harvester if (harvester.getClass.getClassLoader.isInstanceOf[ClassDomain] && harvester.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted) =>
+
+        // REmove from parent or top 
+        harvester.parentHarvester match {
+          case Some(parent) =>
+            parent.removeChildHarvester(harvester)
+          case None =>
+            Harvest.removeHarvester(harvester)
+
+        }
+
+      // Keep
+      case _ =>
+
+    }
+
+  }
+
   def updateAutoHarvester = {
+
+    // Clean
+    cleanAutoHarvesters
+
+    // Update on all
     onAllHarvesters {
       harvester =>
         updateAutoHarvesterOn(harvester)
@@ -175,13 +296,22 @@ object Harvest extends BrainRegion[BrainRegion[_]] {
 
     // Make sure the harvester has at least one type of auto classes
     //----------------
-    var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
+    //var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
+    var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass == harvester.getClass }.values.flatten.toList.distinct
     logFine[Harvester]("Required Classes : " + requiredClasses)
+
     requiredClasses.foreach {
 
-      // Can't find required class in children harvesters, add
-      case requiredClass if (children.find { ch => requiredClass.isAssignableFrom(ch.getClass) }.isEmpty) =>
-        harvester.addChildHarvester(requiredClass)
+      // Can't find required class in children harvesters, and required is not same as harvester, add
+      //case requiredClass if (requiredClass != harvester.getClass && ((harvester.parentHarvester.isDefined && harvester.parentHarvester.get.getClass!=requiredClass) || harvester.parentHarvester.isEmpty) && children.find { ch => requiredClass.isAssignableFrom(ch.getClass) }.isEmpty) =>
+      case requiredClass if (requiredClass != harvester.getClass && children.find { ch => requiredClass.isAssignableFrom(ch.getClass) }.isEmpty) =>
+
+        try {
+          harvester.addChildHarvester(requiredClass)
+        } catch {
+          case e: Throwable =>
+            println(s"An error occured during auto update on: ${requiredClass} -> ${harvester.getClass} " + e.getLocalizedMessage)
+        }
       case _ =>
     }
 

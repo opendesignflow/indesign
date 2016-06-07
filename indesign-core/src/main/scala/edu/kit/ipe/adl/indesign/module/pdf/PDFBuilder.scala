@@ -18,8 +18,8 @@ trait PDFBuilder extends ExternalBuilder {
       this.id("pdfjs-" + id)
       +@("data-url" -> url)
       +@("page" -> pdfPage.toString)
-      +@("width" -> "600")
-      +@("height" -> "300")
+      /*+@("width" -> "600")
+      +@("height" -> "300")*/
 
     }
     this.registerAction("pdfjs.updatePage")(c) {
@@ -27,11 +27,13 @@ trait PDFBuilder extends ExternalBuilder {
         println(s"Updating Page "+request.get.getURLParameter("page"))
         pdfPage = request.get.getURLParameter("page").get.toInt
     }
+    c
    
   }
 
-  def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
-
+  override def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
+    
+    super.externalAdd(targetNode)
     switchToNode(targetNode, {
       // Extra scripts
       // Extra scripts

@@ -6,8 +6,9 @@ import java.net.URI
 
 trait HighlightJSBuilder extends ExternalBuilder {
   
-  def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
-
+  override def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
+    
+     super.externalAdd(targetNode)
     switchToNode(targetNode, {
       // Extra scripts
       stylesheet(new URI(createSpecialPath("resources", "highlightjs/styles/default.css"))) {
@@ -16,11 +17,14 @@ trait HighlightJSBuilder extends ExternalBuilder {
       script(new URI(createSpecialPath("resources", "highlightjs/highlight.pack.js"))) {
         
       }
+      script(new URI(createSpecialPath("resources", "indesign-highlightjs.js"))) {
+        
+      }
 
      
       
     })
-    //super.externalAdd(targetNode)
+   
 
   }
   
