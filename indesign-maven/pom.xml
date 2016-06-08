@@ -109,7 +109,12 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+		<dependency>
+			<groupId>edu.kit.ipe.adl.indesign</groupId>
+			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>indesign-wwwui</artifactId>
+		</dependency>
+
 
 	</dependencies>
 </project>

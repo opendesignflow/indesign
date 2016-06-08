@@ -62,7 +62,9 @@ trait ExternalBrainRegion extends BrainRegion {
   }
   this.onCleaned {
     case h =>
+      logFine[Brain](s"Cleaning External Region")
       this.cleanDerivedResources
+      this.moveToShutdown
   }
 
   //var wrappedRegions = List[BrainRegion]

@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.module.pdf
+package edu.kit.ipe.adl.indesign.core.module.ui.www.pdf
 
 import edu.kit.ipe.adl.indesign.core.module.ui.www.external.ExternalBuilder
 import com.idyria.osi.vui.html.HTMLNode

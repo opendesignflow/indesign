@@ -34,7 +34,7 @@ class MavenProjectHarvester extends FileSystemHarvester with LuceneIndexProvider
       gather(mp.deriveFrom(r))
       mp.onGathered {
         case h if (h == this) =>
-          WWWViewHarvester.deliverDirect(mp.view)
+         // WWWViewHarvester.deliverDirect(mp.view)
       }
       true
     case r if (new File(r.path.toFile(), "pom.xml").exists()) =>
@@ -46,7 +46,7 @@ class MavenProjectHarvester extends FileSystemHarvester with LuceneIndexProvider
       gather(mp.deriveFrom(r))
       mp.onGathered {
         case h if (h == this) =>
-          WWWViewHarvester.deliverDirect(mp.view)
+         /// WWWViewHarvester.deliverDirect(mp.view)
       }
 
       true

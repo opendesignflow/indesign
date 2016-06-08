@@ -9,11 +9,11 @@ import org.eclipse.aether.impl.ArtifactResolver
 import edu.kit.ipe.adl.indesign.core.artifactresolver.AetherResolver
 import edu.kit.ipe.adl.indesign.core.brain.artifact.ArtifactExternalRegion
 
-trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource {
+trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource with Harvester {
 
 }
 
-object Brain extends Brain with Harvester {
+object Brain extends Brain {
 
   sys.addShutdownHook {
     Brain.moveToShutdown
@@ -131,6 +131,8 @@ object Brain extends Brain with Harvester {
       case None =>
     }
 
+    logFine[Brain]("Brain Regions: "+Brain.getResourcesOfType[BrainRegion])
+    
   }
 
   // Region Creation

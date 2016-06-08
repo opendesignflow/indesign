@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.core.config.ui
+package edu.kit.ipe.adl.indesign.core.module.ui.www.config
 
 import edu.kit.ipe.adl.indesign.core.module.ui.www.external.ExternalBuilder
 import edu.kit.ipe.adl.indesign.core.config.Config

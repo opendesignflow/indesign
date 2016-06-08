@@ -10,6 +10,8 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.ModuleSourceFile
+import edu.kit.ipe.adl.indesign.core.artifactresolver.AetherResolver
+import edu.kit.ipe.adl.indesign.module.maven.resolver._
 
 class MavenExternalBrainRegionBuilder extends ExternalBrainRegionBuilder {
 
@@ -51,7 +53,7 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
     case null => basePath.path.toFile().getAbsolutePath
     case v => v.toString
   }
-  
+
   override def getRegionPath = basePath.path.toFile.getAbsolutePath
   //-- Override tainted to make sure tainted is only if original classloader is tainted and also local one
 
@@ -61,8 +63,9 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
   override def isTainted = {
     this.classDomain.tainted || (this.classDomain.tainted && this.getClass.getClassLoader.isInstanceOf[ClassDomain] && this.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted)
   }
-  
-  
+
+  //-- Detect dependent projects
+  AetherResolver.session.setWorkspaceReader(new MavenProjectIndesignWorkspaceReader)
 
   //-- Load actual Region
   /*println(s"CL: " + Thread.currentThread().getContextClassLoader)
@@ -72,7 +75,11 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
   // Region load
   def loadRegionClass(cl: String) = {
 
-    forceUpdateDependencies
+    try {
+      forceUpdateDependencies
+    } catch {
+      case e: Throwable =>
+    }
     logFine[Brain]("Create Region Class: " + this.classDomain)
     logFine[Brain]("Create Region Class: " + this.classDomain.getURLs.toList)
     /*var region = Brain.createRegion(this.classDomain, cl)
@@ -85,43 +92,64 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
     logFine[Brain]("Reseting CLD: " + this + " - " + this.classDomain)
     this.resetClassDomain
     logFine[Brain]("Now CLD: " + this.classDomain)
-    
+
     //-- Add to FSHarvester if needed
     println(s"***** Delivering base path $basePath to FS Harvester")
     Harvest.onHarvesters[FileSystemHarvester] {
-      case fsh => 
+      case fsh =>
         println(s"***** ----> Doing")
         fsh.deliverDirect(basePath)
     }
-    
+
   }
   this.onShutdown {
     logFine[Brain]("Maven REgion on Shutdown: " + this + " - " + this.classDomain)
     this.classDomain.tainted = true
     //this.classDomain = null
-    
+
     //-- Remove From Harvester
     Harvest.onHarvesters[FileSystemHarvester] {
-      case fsh => 
+      case fsh =>
         fsh.cleanResource(basePath)
-      
+
     }
   }
+
+  this.onAdded {
+    case h =>
+      
+      logFine[Brain]("Gathered Region: " + this + " - " + this.classDomain)
+      try {
+        forceUpdateDependencies
+      } catch {
+        case e: Throwable =>
+      }
+  }
+  
+ /* this.onGathered {
+    case h =>
+      
+      logFine[Brain]("Gathered Region: " + this + " - " + this.classDomain)
+      try {
+        forceUpdateDependencies
+      } catch {
+        case e: Throwable =>
+      }
+  }*/
 
   this.onCleaned {
     case h =>
       logFine[Brain]("Maven REgion Cleaned: " + this + " - " + this.classDomain)
       this.classDomain.tainted = true
+      this.moveToShutdown
   }
- 
+
   // Region Discovery
   //-----------
   override def discoverRegions: List[String] = {
 
-    
     this.getDerivedResources[ModuleSourceFile].map { msf => msf.getDiscoveredModules }.flatten.toList.distinct
-    
-    
+
     /*var regionFiles = new File(this.basePath.path.toFile(), "target/classes/META-INF/indesign/regions.available")
     regionFiles match {
       case rf if (rf.exists() == true) =>

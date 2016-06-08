@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.core.heart.ui
+package edu.kit.ipe.adl.indesign.core.module.ui.www.heart
 
 import java.net.URI
 

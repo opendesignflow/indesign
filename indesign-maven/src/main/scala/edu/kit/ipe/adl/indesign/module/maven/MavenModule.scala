@@ -64,7 +64,7 @@ object MavenModule extends IndesignModule {
     println("Loading Maven : "+this.getClass.getClassLoader)
     Harvest.registerAutoHarvesterClass(classOf[FileSystemHarvester], classOf[MavenProjectHarvester])
     WWWViewHarvester.deliverDirect(new MavenOverview)
-    AetherResolver.session.setWorkspaceReader(new MavenProjectIndesignWorkspaceReader)
+    
   }
   
   

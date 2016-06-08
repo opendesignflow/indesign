@@ -11,7 +11,7 @@ trait WebdrawViewBuilder extends ExternalBuilder {
     super.externalAdd(targetNode)
     switchToNode(targetNode, {
 
-      var n = script(new URI(createSpecialPath("resources", "module/webdraw/indesign-webdraw.js"))) {
+      var n = script(new URI(createSpecialPath("resources", "modules/webdraw/indesign-webdraw.js"))) {
 
       }
       

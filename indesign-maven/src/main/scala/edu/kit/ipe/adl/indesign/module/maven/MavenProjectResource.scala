@@ -46,7 +46,7 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
   def getLuceneDirectory = new File(p.toFile, ".indesign-lucene-index")
 
   //-- WWW VIew
-  var view = new MavenWWWView(this)
+  //var view = new MavenWWWView(this)
 
   // Dependencies
   //---------------------
@@ -56,47 +56,63 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
   def getDependencies = dependencies.getOrElse {
 
     // Update Aether Resolver with Resolution URLS
-    projectModel.repositories.repositories.foreach {
-      r =>
-        AetherResolver.config.addDefaultRemoteRepository(r.id, r.url.data.toURL)
+    keepErrorsOn(this) {
+      projectModel.repositories.repositories.foreach {
+        r =>
+          AetherResolver.config.addDefaultRemoteRepository(r.id, r.url.data.toURL)
+      }
+      projectModel.pluginRepositories.pluginRepositories.foreach {
+        r =>
+          AetherResolver.config.addDefaultRemoteRepository(r.id, r.url.data.toURL)
+      }
+
+      // Map List of dependencies
+      var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
+        d =>
+          try {
+            AetherResolver.resolveArtifactAndDependencies(d.groupId, d.artifactId, d.version)
+          } catch {
+            case re: Throwable =>
+              List[Artifact]()
+          }
+      }.flatten.toList
+
+      dependencies = Some(res)
+      //dependenciesURLS = None
+
+      res
     }
-    projectModel.pluginRepositories.pluginRepositories.foreach {
-      r =>
-        AetherResolver.config.addDefaultRemoteRepository(r.id, r.url.data.toURL)
-    }
-
-    // Map List of dependencies
-    var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
-      d =>
-        AetherResolver.resolveArtifactAndDependencies(d.groupId, d.artifactId, d.version)
-    }.flatten.toList
-
-    dependencies = Some(res)
-    dependenciesURLS = None
-
-    res
+    dependencies.get
 
   }
 
   def getDependenciesURL = dependenciesURLS.getOrElse {
 
     // Map List of dependencies
-   /* var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
+    /* var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
       d =>
         AetherResolver.resolveArtifactAndDependenciesClasspath(d.groupId, d.artifactId, d.version)
     }.flatten.toArray*/
-    
-    var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
-      d =>
-        AetherResolver.resolveArtifactAndDependenciesClasspath(d.groupId, d.artifactId, d.version)
-    }.flatten
-    
-   /* var res = AetherResolver.
+
+    keepErrorsOn(this) {
+      var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
+        d =>
+          try {
+            AetherResolver.resolveArtifactAndDependenciesClasspath(d.groupId, d.artifactId, d.version)
+          } catch {
+            case re: Throwable =>
+              List[URL]()
+          }
+      }.flatten
+
+      /* var res = AetherResolver.
             resolveArtifactAndDependenciesClasspath(projectModel.groupId, projectModel.artifactId, projectModel.version)*/
 
-    dependenciesURLS = Some(res.toArray)
+      dependenciesURLS = Some(res.toArray)
 
-    res.toArray
+      res.toArray
+    }
+    dependenciesURLS.get
   }
 
   // Compiler Stuff
@@ -112,8 +128,9 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
   this.onAdded {
     case h if (h.isInstanceOf[MavenProjectHarvester]) =>
 
-      view.originalHarvester = this.originalHarvester
-      WWWViewHarvester.deliverDirect(view)
+    //view.originalHarvester = this.originalHarvester
+    //WWWViewHarvester.deliverDirect(view)
+
     // println(s"Maven Project resource added to harvster")
     //MavenModule.addSubRegion(this)
 
@@ -159,20 +176,22 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
       // Add dependencies
       //var urlDeps = this.getDependencies.map(_.getFile.toURI().toURL()).toArray
       var du = getDependenciesURL
-      this.compiler.get.addClasspathURL(du) 
+      this.compiler.get.addClasspathURL(du)
       du.foreach(this.classDomain.addURL(_))
 
     }
 
   }
-  
+
   def forceUpdateDependencies = {
-     dependencies = None
-     dependenciesURLS = None
-     getDependencies
-     var du = getDependenciesURL
-     this.compiler.get.addClasspathURL(du) 
-      du.foreach(this.classDomain.addURL(_))
+    dependencies = None
+    dependenciesURLS = None
+    getDependencies
+    var du = getDependenciesURL
+    
+    //-- Update
+    this.compiler.get.addClasspathURL(du)
+    du.foreach(this.classDomain.addURL(_))
   }
 
   // Compiler Request

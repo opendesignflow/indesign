@@ -239,6 +239,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     //  -> Remove the ones which are not in the gathered, if autoclean is set to true
     //  -> Remove from gathered the one already available
     //  -> Add Remaining gathered
+    var toclean = List[HarvestedResource]()
     this.availableResources.toList.foreach {
       case r =>
 
@@ -250,7 +251,8 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
           case 0 if (!r.rooted) =>
             logFine[Harvester](s"Resource ${r.getId} not rooted and not in harvested, removing")
             this.availableResources -= r
-            r.@->("clean", this)
+            toclean = toclean:+r
+            
           // Remove from harvested, because already existing
           case size if (size>0) => 
             logFine[Harvester](s"Resource ${r.getId} already present, remove from harvested")
@@ -276,6 +278,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     }
 
     // Add resources to available unless one resource with same ID exists
+    //-------------
     this.harvestedResources.foreach {
       r =>
         this.availableResources += r
@@ -284,16 +287,38 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
           case _ => 
         }
         r.@->("added", this)
-        r.@->("gathered", this)
     }
+    
+    
+    
+    // Clean
+    //-----------------
+    toclean.foreach {
+      r => 
+        r.@->("clean", this)
+    }
+    
+    
+    
 
     // Reject
-    this.harvestedResources.foreach {
+    //---------------
+    /*this.harvestedResources.foreach {
       r =>
         r.@->("rejected", this)
-    }
-    this.harvestedResources.clear()
+    }*/
+    
 
+    // Call Gathered
+    //--------------------
+    this.harvestedResources.foreach {
+      r =>
+        
+        r.@->("gathered", this)
+    }
+    
+    this.harvestedResources.clear()
+    
     logFine[Harvester](s"----------- Finish Harvest on " + this.getClass.getCanonicalName + " with : " + this.harvestedResources.toList + " and " + this.availableResources.size + " available")
 
     // Deliver resources to child harvesters, and run a finish harvect on them too

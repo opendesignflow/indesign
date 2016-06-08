@@ -12,7 +12,7 @@ import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegion
 import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignUIView
 import com.google.inject.spi.ModuleSource
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.ModuleSourceFile
-import edu.kit.ipe.adl.indesign.core.config.ui.ConfigUIBuilder
+import edu.kit.ipe.adl.indesign.core.module.ui.www.config.ConfigUIBuilder
 
 class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuilder {
 

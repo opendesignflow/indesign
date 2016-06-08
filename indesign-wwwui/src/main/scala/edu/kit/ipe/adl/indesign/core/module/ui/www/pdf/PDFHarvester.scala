@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.h2dl.pdf
+package edu.kit.ipe.adl.indesign.core.module.ui.www.pdf
 
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
