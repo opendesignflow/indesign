@@ -70,4 +70,5 @@ class ArtifactResolverTest extends FunSuite with BeforeAndAfterAllConfigMap {
   
   
   
+  
 }

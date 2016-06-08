@@ -219,9 +219,9 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                     "text" :: p {
                       textContent(region.asInstanceOf[ExternalBrainRegion].getRegionPath)
                     }
-                    "text" :: p {
+                    /*"text" :: p {
                       textContent(s"Builder tainted: " + region.asInstanceOf[ExternalBrainRegion].regionBuilder.get.isTainted)
-                    }
+                    }*/
 
                   }
                 case false =>
@@ -282,9 +282,9 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                     "ui flowing popup top left transition hidden" :: div {
 
                       //-- Make list to add 
-                      //var available = r.asInstanceOf[ExternalBrainRegion].discoverRegions
-                      var available = region.getDerivedResources[ModuleSourceFile].map { msf => msf.getDiscoveredModules }.flatten.toList.distinct
-                      println(s"Discovered: $available")
+                      var available = region.asInstanceOf[ExternalBrainRegion].discoverRegions
+                      //var available = region.getDerivedResources[ModuleSourceFile].map { msf => msf.getDiscoveredModules }.flatten.toList.distinct
+                     // println(s"Discovered: $available")
 
                       //var regionsClasses = r.derivedResources.map { rs => rs.getClass.getName.trim }.toList
                       var regionsClasses = region.asInstanceOf[ExternalBrainRegion].configKey.get.values.drop(1).map { v => v.toString }

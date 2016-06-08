@@ -5,6 +5,9 @@ import java.io.File
 import com.idyria.osi.tea.logging.TLogSource
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.heart.Heart
+import org.eclipse.aether.impl.ArtifactResolver
+import edu.kit.ipe.adl.indesign.core.artifactresolver.AetherResolver
+import edu.kit.ipe.adl.indesign.core.brain.artifact.ArtifactExternalRegion
 
 trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource {
 
@@ -15,10 +18,9 @@ object Brain extends Brain with Harvester {
   sys.addShutdownHook {
     Brain.moveToShutdown
   }
-  
+
   Brain.deliverDirect(Heart)
- 
-  
+
   // Regions
   ///--------------------
   // var regions = List[BrainRegion]()
@@ -74,14 +76,14 @@ object Brain extends Brain with Harvester {
                 gather(Brain.createRegion(getClass.getClassLoader, v))
             }
 
-          case key if (key.keyType === "external-region") =>
+          case key if (key.keyType === "external-region-folder") =>
 
             var path = key.values(0).toString
 
             logFine[Brain](s"Adding External Region: $path ")
             try {
               keepErrorsOn(this) {
-                
+
                 var external = ExternalBrainRegion.build(new File(path).toURI().toURL)
                 external.configKey = Some(key)
                 gather(external)
@@ -89,7 +91,27 @@ object Brain extends Brain with Harvester {
 
             } catch {
               case e: Throwable =>
-              e.printStackTrace()
+                e.printStackTrace()
+            }
+          case key if (key.keyType === "external-region-artifact") =>
+
+            //-- Get Spec
+            var path = key.values(0).toString
+            val spec = """([\w-_\.]+):([\w-_\.]+):([\w-_\.]+)(?::([\w-_\.]+))?""".r
+            val spec(gid, aid, v, cl) = path
+
+            logFine[Brain](s"Adding External Region Artficact: $path ")
+            try {
+              keepErrorsOn(this) {
+
+                var external = new ArtifactExternalRegion(gid, aid, v)
+                external.configKey = Some(key)
+                gather(external)
+              }
+
+            } catch {
+              case e: Throwable =>
+                e.printStackTrace()
             }
 
           //-- Load classes in the region
@@ -113,6 +135,28 @@ object Brain extends Brain with Harvester {
 
   // Region Creation
   //----------
+  def getObject(cl: ClassLoader, name: String) = {
+    
+    //-- Get Class
+    var objectClass = cl.loadClass(name)
+
+    //-- Object/Class
+    name match {
+      // Object
+      case name if (name.endsWith("$")) =>
+        objectClass.getFields.find { f => f.getName == "MODULE$" } match {
+          case Some(objectField) =>
+            objectField.setAccessible(true)
+            Some(objectField.get(null))
+          case None =>
+            None
+        }
+
+      // Class
+      case name =>
+        None
+    }
+  }
 
   def createRegion(cl: ClassLoader, name: String) = {
 
@@ -141,7 +185,7 @@ object Brain extends Brain with Harvester {
   // Lifecylce
   //------------------
   this.onSetup {
-    this.onResources[BrainRegion]( r => r.keepErrorsOn(r)(Brain.moveToState(r, "setup")))
+    this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.moveToState(r, "setup")))
   }
   this.onLoad {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.moveToState(r, "load")))

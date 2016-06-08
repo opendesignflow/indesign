@@ -11,12 +11,14 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
+import edu.kit.ipe.adl.indesign.core.brain.LFCDefinition
 
 object IndesignPlatorm extends App {
 
   println("Welcome to the Indesign Platform")
   
   TLog.setLevel(classOf[Brain], TLog.Level.FULL)
+  //TLog.setLevel(classOf[LFCDefinition], TLog.Level.FULL)
 
   // TLog.setLevel(classOf[Harvester], TLog.Level.FULL)
   
@@ -48,10 +50,11 @@ object IndesignPlatorm extends App {
     case -1 => new File("workspace-main").getCanonicalFile
     case i =>
       var targetFile = new File("workspace-"+args(i + 1)).getCanonicalFile
-      targetFile match {
+      targetFile
+      /*targetFile match {
         case f if (!f.exists || !f.isDirectory()) => sys.error("Content Folder Folder must exists and be directory")
         case f => f
-      }
+      }*/
 
   }
   wsName.mkdirs

@@ -35,7 +35,7 @@ object IndesignWWWUIModule extends IndesignModule {
       case Some(f) =>
         f.addWindowListener(new WindowAdapter {
           override def windowClosing(e:WindowEvent) = {
-            //println(s"Closed Window");
+            println(s"Closed Window going to shutdown state");
             IndesignWWWUIModule.moveToShutdown
           }
         })

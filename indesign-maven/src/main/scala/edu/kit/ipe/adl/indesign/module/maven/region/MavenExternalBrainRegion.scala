@@ -9,6 +9,7 @@ import com.idyria.osi.tea.compile.ClassDomain
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
+import edu.kit.ipe.adl.indesign.core.module.buildsystem.ModuleSourceFile
 
 class MavenExternalBrainRegionBuilder extends ExternalBrainRegionBuilder {
 
@@ -117,14 +118,18 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
   //-----------
   override def discoverRegions: List[String] = {
 
-    var regionFiles = new File(this.basePath.path.toFile(), "target/classes/META-INF/indesign/regions.available")
+    
+    this.getDerivedResources[ModuleSourceFile].map { msf => msf.getDiscoveredModules }.flatten.toList.distinct
+    
+    
+    /*var regionFiles = new File(this.basePath.path.toFile(), "target/classes/META-INF/indesign/regions.available")
     regionFiles match {
       case rf if (rf.exists() == true) =>
 
         scala.io.Source.fromFile(regionFiles, "UTF-8").getLines().toList
 
       case _ => List[String]()
-    }
+    }*/
 
   }
 
