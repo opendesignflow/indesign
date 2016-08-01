@@ -43,8 +43,9 @@ trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with
   }
   
   //-- On Gather; make sure we are at same state as brain/parent
-  this.onGathered {
-    case h => 
+ /* this.onGathered {
+    case h if (h==Brain)  => 
+      logFine[Brain](s"Region $this gathered, moving to latest state") 
       this.parentResource match {
         case Some(pr : BrainRegion) if(pr.currentState!=None) =>
           Brain.moveToState(this, pr.currentState.get)
@@ -53,7 +54,7 @@ trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with
            Brain.moveToState(this, Brain.currentState.get)
         case _ => 
       }
-  }
+  }*/
   
   // Lifecycle
   //-----------------
@@ -74,6 +75,9 @@ trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with
   }
   this.onShutdown{
     this.onDerivedResources[BrainRegion]{case r =>  r.keepErrorsOn(r)(Brain.moveToState(r, "shutdown"))}
+  }
+  this.onResetState {
+    this.onDerivedResources[BrainRegion]{case r =>  r.keepErrorsOn(r)(Brain.resetLFCState(r))}
   }
   
 }

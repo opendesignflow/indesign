@@ -9,11 +9,39 @@ import java.io.FileInputStream
 @xelement(name = "project")
 class project extends projectTrait {
 
+  def getArtifactId: String = {
+    this.artifactId match {
+      case null =>
+       null
+      case aid =>
+        aid.toString
+    }
+  }
+  def getGroupId: String = {
+    this.groupId match {
+      case null if (__parent != null && parent.groupId != null) =>
+        parent.groupId.toString
+      case null =>null
+      case gid =>
+        gid.toString
+    }
+  }
+  
+  def getVersion: String = {
+    this.version match {
+      case null if (__parent != null && parent.version != null) =>
+        parent.version.toString
+      case null =>null
+      case v =>
+        v.toString
+    }
+  }
+
   // Utilities
   //-------------
   def is(art: Artifact): Boolean = {
 
-    (this.groupId, this.artifactId, this.version) match {
+    (this.getGroupId, this.getArtifactId, this.getVersion) match {
       case (null, _, _) => false
       case (_, null, _) => false
       case (_, _, null) => false

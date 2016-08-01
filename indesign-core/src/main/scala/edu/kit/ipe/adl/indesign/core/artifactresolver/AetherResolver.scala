@@ -209,6 +209,7 @@ class AetherResolver extends TLogSource {
     } catch {
       case e: ArtifactResolutionException =>
         //e.printStackTrace()
+        println(s"Resolving $artifact failed: " + e.getLocalizedMessage)
         None
 
     }
@@ -266,7 +267,7 @@ class AetherResolver extends TLogSource {
    */
   def resolveDependencies(artifact: Artifact, scope: String): List[ArtifactResult] = {
 
-    logFine(s"Resolving dependencies for $artifact")
+    //println(s"Resolving dependencies for $artifact")
 
     //-- Prepare Scope filter
     var classpathFilter = DependencyFilterUtils.classpathFilter(scope);
@@ -286,8 +287,8 @@ class AetherResolver extends TLogSource {
         system.resolveDependencies(session, dependencyRequest).getArtifactResults();
       artifactResults.toList
     } catch {
-      case e: NullPointerException =>
-        logWarn("Nullpointer exception while resolving dependencies")
+      case e: Throwable =>
+        println("Error exception while resolving dependencies: " + e)
         List()
     }
 
@@ -308,6 +309,7 @@ class AetherResolver extends TLogSource {
    */
   def resolveArtifactAndDependencies(artifact: Artifact, scope: String): List[Artifact] = {
 
+    // println(s"Resolve Art: "+artifact)
     var realArt = artifact.getFile match {
       case null => this.resolveArtifact(artifact)
 
@@ -315,16 +317,16 @@ class AetherResolver extends TLogSource {
     }
     realArt match {
       case Some(art) =>
-
-        var res = this.resolveDependencies(artifact, scope)
+        //println(s"Resolved Art: "+art)
+        var res = this.resolveDependencies(art, scope)
         res.find { p => p.isMissing() } match {
           case Some(missing) =>
-
+            //println(s"Missing: "+missing)
             throw new RuntimeException(s"Cannot Resolve Artifact and Dependencies of $artifact , artifact ${missing.getArtifact} is missing")
           case None =>
 
             // Return the list of artifacts, but resolve actual file paths if there is a workspace reader
-            res.map {
+            var deps = res.map {
               a =>
                 if (session.getWorkspaceReader != null) {
 
@@ -334,6 +336,7 @@ class AetherResolver extends TLogSource {
                 a.getArtifact
 
             }
+            List(art) ++ deps
         }
 
       case None =>
@@ -347,14 +350,10 @@ class AetherResolver extends TLogSource {
    */
   def resolveArtifactAndDependenciesClasspath(artifact: Artifact, scope: String): List[URL] = {
 
-    this.resolveArtifactAndDependencies(artifact, scope).map {
+    this.resolveArtifactAndDependencies(artifact, scope).distinct.map {
       a =>
-        session.getWorkspaceReader match {
-          case null =>
-            a.getFile.toURI().toURL()
-          case p =>
-            resolveArtifactsFile(a).get.toURI().toURL()
-        }
+        resolveArtifactsFile(a).get.toURI().toURL()
+       
     }
 
   }
@@ -368,12 +367,17 @@ class AetherResolver extends TLogSource {
    */
   def resolveArtifactsFile(art: Artifact): Option[File] = {
 
-    art.getFile match {
-      case null => None
-      case f if (f.getAbsolutePath.endsWith("pom.xml") && art.getExtension == "jar") =>
-        Some(new File(f.getAbsoluteFile.getParentFile, "target/classes"))
-      case f => Some(f)
+    session.getWorkspaceReader match {
+      case null =>
+        Some(art.getFile)
+      case p =>
+        art.getFile match {
+          case null => None
+          case f if (f.getAbsolutePath.endsWith("pom.xml") && art.getExtension == "jar") =>
+            Some(new File(f.getAbsoluteFile.getParentFile, "target/classes"))
+          case f => Some(f)
 
+        }
     }
 
   }

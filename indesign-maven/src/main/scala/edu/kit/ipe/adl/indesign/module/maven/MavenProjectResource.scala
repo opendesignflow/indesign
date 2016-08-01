@@ -18,8 +18,9 @@ import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneIndexResource
 import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
 import com.idyria.osi.tea.files.FileWatcherAdvanced
 import edu.kit.ipe.adl.indesign.core.brain.Brain
+import com.idyria.osi.tea.compile.ClassDomainContainer
 
-class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSupport with LuceneIndexResource {
+class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSupport with LuceneIndexResource with ClassDomainContainer {
 
   //-- Get Pom File 
   var pomFile = new File(p.toFile(), "pom.xml")
@@ -39,7 +40,7 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
   MavenProjectResource.watcher.onFileChange(this, pomFile) {
     file =>
       this.projectModel = project(pomFile.toURI().toURL())
-      this.dependencies = None
+    //this.dependencies = None
   }
 
   //-- Indexing
@@ -50,10 +51,13 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
 
   // Dependencies
   //---------------------
-  var dependencies: Option[List[Artifact]] = None
-  var dependenciesURLS: Option[Array[URL]] = None
+  var dependencies = List[Artifact]()
+  var dependenciesURLS = List[URL]()
 
-  def getDependencies = dependencies.getOrElse {
+  /**
+   * Update Dependencies, meaning resresolve everything and add to list
+   */
+  def updateDependencies: Unit = {
 
     // Update Aether Resolver with Resolution URLS
     keepErrorsOn(this) {
@@ -67,60 +71,38 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
       }
 
       // Map List of dependencies
-      var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
+      var newDeps = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
         d =>
           try {
+            //println(s"Dep needed ${d.artifactId}:${d.groupId}:${d.version}")
             AetherResolver.resolveArtifactAndDependencies(d.groupId, d.artifactId, d.version)
           } catch {
             case re: Throwable =>
+              println(re.getLocalizedMessage)
               List[Artifact]()
           }
-      }.flatten.toList
+      }.flatten.toList.distinct
 
-      dependencies = Some(res)
+      // println(s"Dep Res ${res.toList}")
+      dependencies = (dependencies ::: newDeps).distinct
+      dependenciesURLS = dependencies.map { d => AetherResolver.resolveArtifactsFile(d) }.filter(_.isDefined).map { _.get.toURI().toURL() }
       //dependenciesURLS = None
 
-      res
     }
-    dependencies.get
 
   }
 
-  def getDependenciesURL = dependenciesURLS.getOrElse {
+  def getDependencies = dependencies
 
-    // Map List of dependencies
-    /* var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
-      d =>
-        AetherResolver.resolveArtifactAndDependenciesClasspath(d.groupId, d.artifactId, d.version)
-    }.flatten.toArray*/
-
-    keepErrorsOn(this) {
-      var res = projectModel.dependencies.dependencies.filter(d => d.scope == null || d.scope.toString() == "compile").map {
-        d =>
-          try {
-            AetherResolver.resolveArtifactAndDependenciesClasspath(d.groupId, d.artifactId, d.version)
-          } catch {
-            case re: Throwable =>
-              List[URL]()
-          }
-      }.flatten
-
-      /* var res = AetherResolver.
-            resolveArtifactAndDependenciesClasspath(projectModel.groupId, projectModel.artifactId, projectModel.version)*/
-
-      dependenciesURLS = Some(res.toArray)
-
-      res.toArray
-    }
-    dependenciesURLS.get
-  }
+  def getDependenciesURL = dependenciesURLS
 
   // Compiler Stuff
   //-----------------
 
   //-- Classdomain
   // var classDomain = new ClassDomain(Thread.currentThread().getContextClassLoader)
-  var classDomain = new ClassDomain(classOf[Brain].getClassLoader)
+  //var classDomain = new ClassDomain(classOf[Brain].getClassLoader)
+  this.createNewClassDomain(classOf[Brain].getClassLoader)
 
   //-- Compiler
   var compiler: Option[IDCompiler] = None
@@ -128,6 +110,9 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
   this.onAdded {
     case h if (h.isInstanceOf[MavenProjectHarvester]) =>
 
+      
+      updateDependencies
+      
     //view.originalHarvester = this.originalHarvester
     //WWWViewHarvester.deliverDirect(view)
 
@@ -138,7 +123,7 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
 
     case _ =>
   }
-
+  
   this.onProcess {
     //println(s"Creating Compiler for MavenProject")
 
@@ -155,43 +140,68 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
     }
 
   }
+  
+  
+
+  /**
+   * When CD is rebuild
+   */
+  this.onRebuildClassDomain {
+    
+    //-- Add Build output
+    this.classdomain.get.addURL(new File(this.path.toFile(), "target/classes").toURI().toURL())
+    
+    //-- Update Dependencies
+    updateDependencies
+    var du = getDependenciesURL
+    du.foreach(this.classdomain.get.addURL(_))
+  }
 
   def resetClassDomain: Unit = {
 
+    recreateClassDomain
+
     // Clear
-    var pCl = classDomain.getParent
-    classDomain.tainted = true
-    classDomain = null
+    //var pCl = classDomain.getParent
+    //classDomain.tainted = true
+    //classDomain = null
     this.compiler = null
     System.gc
 
-    // Recreate
-    this.classDomain = new ClassDomain(pCl)
-    this.withClassLoader(this.classDomain) {
+    // Recreate compiler
+    //this.classDomain = new ClassDomain(pCl)
+    this.withClassLoader(this.classdomain.get) {
       this.compiler = Some(new IDCompiler)
 
-      this.classDomain.addURL(new File(this.path.toFile(), "target/classes").toURI().toURL())
+     // this.classDomain.addURL(new File(this.path.toFile(), "target/classes").toURI().toURL())
       this.compiler.get.addSourceOutputFolders((new File(this.path.toFile(), "src/main/scala"), new File(this.path.toFile(), "target/classes")))
 
       // Add dependencies
       //var urlDeps = this.getDependencies.map(_.getFile.toURI().toURL()).toArray
       var du = getDependenciesURL
-      this.compiler.get.addClasspathURL(du)
-      du.foreach(this.classDomain.addURL(_))
+      this.compiler.get.addClasspathURL(du.toArray)
 
     }
 
   }
 
   def forceUpdateDependencies = {
-    dependencies = None
+
+    /*dependencies = None
     dependenciesURLS = None
-    getDependencies
-    var du = getDependenciesURL
+    getDependencies*/
+    updateDependencies
+    this.@->("rebuild")
     
+    /*var du = getDependenciesURL
+
     //-- Update
-    this.compiler.get.addClasspathURL(du)
-    du.foreach(this.classDomain.addURL(_))
+    this.compiler match {
+      case Some(comp) => comp.addClasspathURL(du.toArray)
+      case None =>
+    }
+
+    du.foreach(this.classdomain.get.addURL(_))*/
   }
 
   // Compiler Request
@@ -206,7 +216,7 @@ class MavenProjectResource(p: Path) extends HarvestedFile(p) with ClassDomainSup
     this.compiler match {
       case Some(compiler) =>
 
-        withClassLoader(classDomain) {
+        withClassLoader(classdomain.get) {
           compiler.compileFile(h.path.toFile()) match {
             case Some(errors) =>
               throw errors

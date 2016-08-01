@@ -2,8 +2,8 @@ package edu.kit.ipe.adl.indesign.module.scala
 
 import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.brain.Brain
-import edu.kit.ipe.adl.indesign.core.brain.MavenExternalBrainRegion
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.ModuleSourceFile
+import edu.kit.ipe.adl.indesign.module.maven.region.MavenExternalBrainRegion
 
 class ScalaIndesignModuleHarvester extends Harvester {
 
@@ -39,7 +39,7 @@ class ScalaIndesignModule(s: ScalaSourceFile) extends ScalaSourceFile(s.path) wi
   this.onGathered {
     case h =>
 
-      println("***Gathered InDesign Module 2, discovered: "+getDiscoveredModules);
+      //println("***Gathered InDesign Module 2, discovered: "+getDiscoveredModules);
 
       // Look for region with same ID as project.
       // If existing, record Module as available
@@ -53,7 +53,9 @@ class ScalaIndesignModule(s: ScalaSourceFile) extends ScalaSourceFile(s.path) wi
               r.getId == project.getId 
           } match {
             case Some(region) =>
-              println("Found Region to deliver module to ");
+              
+              //println("Found Region to deliver module to ");
+             
               region.addDerivedResource(this)
             case None => 
           }

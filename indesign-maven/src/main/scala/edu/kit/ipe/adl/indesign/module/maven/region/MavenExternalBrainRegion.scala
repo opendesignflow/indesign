@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.core.brain
+package edu.kit.ipe.adl.indesign.module.maven.region
 
 import java.io.File
 
@@ -12,6 +12,13 @@ import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.ModuleSourceFile
 import edu.kit.ipe.adl.indesign.core.artifactresolver.AetherResolver
 import edu.kit.ipe.adl.indesign.module.maven.resolver._
+import com.idyria.osi.tea.logging.TLog
+import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegionBuilder
+import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegion
+import edu.kit.ipe.adl.indesign.core.brain.Brain
+import edu.kit.ipe.adl.indesign.core.brain.artifact.ArtifactRegion
+import org.eclipse.aether.artifact.DefaultArtifact
+import org.eclipse.aether.artifact.Artifact
 
 class MavenExternalBrainRegionBuilder extends ExternalBrainRegionBuilder {
 
@@ -43,7 +50,17 @@ class MavenExternalBrainRegionBuilder extends ExternalBrainRegionBuilder {
 /**
  * Loads a Brain Region present in another externaly compiled module
  */
-class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProjectResource(basePath.path) with ExternalBrainRegion {
+class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProjectResource(basePath.path) with ExternalBrainRegion with ArtifactRegion {
+
+  //  TLog.setLevel(classOf[MavenExternalBrainRegion], TLog.Level.FULL)
+
+  //-- Register Maven Region Builder
+  //-- When Region is created, look if builder classdomain is tainted
+  this.on("region.created") {
+      println("(***) MERegion create: "+regionBuilder.get.getClass.getClassLoader)
+  }
+
+  //ExternalBrainRegion.addBuilder(new MavenExternalBrainRegionBuilder,true)
 
   override def name = projectModel.artifactId match {
     case null => getId
@@ -55,56 +72,85 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
   }
 
   override def getRegionPath = basePath.path.toFile.getAbsolutePath
+
+  def getRegionArtifact: Artifact = new DefaultArtifact(projectModel.getGroupId, projectModel.getArtifactId, "jar", projectModel.getVersion)
+  def getRegionDependencies: List[Artifact] = this.getDependencies
+
   //-- Override tainted to make sure tainted is only if original classloader is tainted and also local one
 
   /**
    * Tainted if class domain is tainted or this classdomain tainted and classloader is also tainted
    */
   override def isTainted = {
-    this.classDomain.tainted || (this.classDomain.tainted && this.getClass.getClassLoader.isInstanceOf[ClassDomain] && this.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted)
+    this.classdomain.get.tainted || (this.classdomain.get.tainted && this.getClass.getClassLoader.isInstanceOf[ClassDomain] && this.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted)
   }
 
   //-- Detect dependent projects
-  AetherResolver.session.setWorkspaceReader(new MavenProjectIndesignWorkspaceReader)
-
+  //TLog.setLevel(classOf[MavenProjectIndesignWorkspaceReader], TLog.Level.FULL)
+  MavenProjectIndesignWorkspaceReader.resetAllProjects
+  AetherResolver.session.setWorkspaceReader(MavenProjectIndesignWorkspaceReader)
+ TLog.setLevel(classOf[MavenExternalBrainRegion], TLog.Level.FULL)
   //-- Load actual Region
   /*println(s"CL: " + Thread.currentThread().getContextClassLoader)
   this.resetClassDomain
   println(s"CL: " + Thread.currentThread().getContextClassLoader)*/
 
-  // Region load
+  /**
+   * Maven region setup;
+   * Try to find other regions we dependend on, and set them as parent class loader
+   */
+  this.onSetup {
+
+     println("(***) MERegion Setup: "+regionBuilder.get.getClass.getClassLoader)
+    
+     regionBuilder.get.getClass.getClassLoader
+     this.changeParentClassDomain( regionBuilder.get.getClass.getClassLoader.asInstanceOf[ClassDomain])
+     
+    //-- Update Dependencies
+    this.forceUpdateDependencies
+
+    //-- Look for another MavenRegion which we would have in depedendencies
+    this.resolveRegionClassDomainHierarchy
+
+    logFine[MavenExternalBrainRegion](s"($this) Maven Region Setup: Reseting CLD: " + this + " - " + this.classdomain)
+    //this.resetClassDomain
+    logFine[MavenExternalBrainRegion](s"($this) Now CLD: " + this.classdomain)
+    logFine[MavenExternalBrainRegion](s"($this) Parent Container CLD : " + this.getParentClassDomain)
+    logFine[MavenExternalBrainRegion](s"($this) Local CLD parent     : " + this.getClassDomainParent)
+
+    //-- Add to FSHarvester if needed
+    // println(s"***** Delivering base path $basePath to FS Harvester")
+    Harvest.onHarvesters[FileSystemHarvester] {
+      case fsh =>
+        //println(s"***** ----> Doing")
+        fsh.deliverDirect(basePath)
+    }
+
+  }
+
+  /**
+   * Called during load
+   */
   def loadRegionClass(cl: String) = {
 
+    logFine[MavenExternalBrainRegion]("Maven load region Class: " + this.classdomain.get.getURLs.length)
     try {
       forceUpdateDependencies
     } catch {
       case e: Throwable =>
     }
-    logFine[Brain]("Create Region Class: " + this.classDomain)
-    logFine[Brain]("Create Region Class: " + this.classDomain.getURLs.toList)
+    logFine[MavenExternalBrainRegion]("--- After deps update: " + this.classdomain.get.getURLs.length)
+    logFine[MavenExternalBrainRegion]("Create Region Class: " + this.classdomain.get)
+    logFine[MavenExternalBrainRegion]("Create Region Class: " + this.classdomain.get.getURLs.toList)
     /*var region = Brain.createRegion(this.classDomain, cl)
     this.addSubRegion(region)*/
-    Brain.createRegion(this.classDomain, cl)
+    Brain.createRegion(this.classdomain.get, cl)
 
   }
 
-  this.onSetup {
-    logFine[Brain]("Reseting CLD: " + this + " - " + this.classDomain)
-    this.resetClassDomain
-    logFine[Brain]("Now CLD: " + this.classDomain)
-
-    //-- Add to FSHarvester if needed
-    println(s"***** Delivering base path $basePath to FS Harvester")
-    Harvest.onHarvesters[FileSystemHarvester] {
-      case fsh =>
-        println(s"***** ----> Doing")
-        fsh.deliverDirect(basePath)
-    }
-
-  }
   this.onShutdown {
-    logFine[Brain]("Maven REgion on Shutdown: " + this + " - " + this.classDomain)
-    this.classDomain.tainted = true
+    logFine[Brain]("Maven REgion on Shutdown: " + this + " - " + this.classdomain.get)
+    this.taintClassDomain
     //this.classDomain = null
 
     //-- Remove From Harvester
@@ -117,16 +163,17 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
 
   this.onAdded {
     case h =>
-      
-      logFine[Brain]("Gathered Region: " + this + " - " + this.classDomain)
+
+      logFine[MavenExternalBrainRegion]("Added Region for deps update: " + this + " - " + this.classdomain.get)
+      MavenProjectIndesignWorkspaceReader.resetAllProjects
       try {
         forceUpdateDependencies
       } catch {
         case e: Throwable =>
       }
   }
-  
- /* this.onGathered {
+
+  /* this.onGathered {
     case h =>
       
       logFine[Brain]("Gathered Region: " + this + " - " + this.classDomain)
@@ -139,11 +186,16 @@ class MavenExternalBrainRegion(val basePath: HarvestedFile) extends MavenProject
 
   this.onCleaned {
     case h =>
-      logFine[Brain]("Maven REgion Cleaned: " + this + " - " + this.classDomain)
-      this.classDomain.tainted = true
+      logFine[Brain]("Maven REgion Cleaned: " + this + " - " + this.classdomain.get)
+      this.taintClassDomain
       this.moveToShutdown
   }
-
+  
+  override def rebuildDependencies = {
+    this.updateDependencies
+  }
+  
+  
   // Region Discovery
   //-----------
   override def discoverRegions: List[String] = {

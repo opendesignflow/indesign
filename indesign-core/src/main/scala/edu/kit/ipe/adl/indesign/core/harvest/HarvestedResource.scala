@@ -217,6 +217,16 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
         }
     }
   }
+  
+  def onKept(cl: PartialFunction[Harvester, Unit]) = {
+    this.onWith("kept") {
+      h: Harvester =>
+        cl.isDefinedAt(h) match {
+          case true => keepErrorsOn(this){cl(h)}
+          case false =>
+        }
+    }
+  }
 
   def onProcess(cl: => Unit) = {
     this.registerStateHandler("processed") {

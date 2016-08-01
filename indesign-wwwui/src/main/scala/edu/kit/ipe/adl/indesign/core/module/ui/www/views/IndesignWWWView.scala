@@ -11,6 +11,7 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import com.idyria.osi.vui.html.basic.DefaultBasicHTMLBuilder._
 import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignUIView
 import edu.kit.ipe.adl.indesign.core.module.ui.www.WWWViewHarvester
+import edu.kit.ipe.adl.indesign.core.module.ui.www.WWWViewHarvester
 
 class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
@@ -22,29 +23,37 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
         /*script(new URI(s"//localhost:${LocalWebEngine.httpConnector.port}/resources/localweb/jquery.min.js")) {
 
         }*/
-        stylesheet(new URI(s"/resources/semantic/semantic.min.css")) {
+        
+        
+        script(new URI(createSpecialPath("resources", "modules/wwwui/jquery/jquery.min.js"))) {
 
         }
-        stylesheet(new URI(s"/resources/indesign.css")) {
+        
+        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/semantic/semantic.min.css"))) {
 
         }
-        script(new URI(s"/resources/semantic/semantic.min.js")) {
+        script(new URI(createSpecialPath("resources", "modules/wwwui/semantic/semantic.min.js"))) {
+
+        }
+        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/jquery/jquery.treetable.css"))) {
+
+        }
+        script(new URI(createSpecialPath("resources", "modules/wwwui/jquery/jquery.treetable.js"))) {
 
         }
 
-        stylesheet(new URI(s"/resources/jquery.treetable.css")) {
+       
+        
+        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/indesign.css"))) {
 
         }
-        script(new URI(s"/resources/jquery.treetable.js")) {
-
-        }
-        script(new URI(s"/resources/indesign.js")) {
+        script(new URI(createSpecialPath("resources", "modules/wwwui/indesign.js"))) {
 
         }
 
         // Modules
         //----------------
-        script(new URI(s"/resources/modules/heart/heart.js")) {
+        script(new URI(createSpecialPath("resources", "modules/heart/heart.js"))) {
 
         }
 
@@ -109,7 +118,11 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
               // Group UI Views and make menus from each
               //-------------
-              var views = WWWViewHarvester.getResourcesOfType[IndesignUIView]
+              var wwwvieh = Harvest.getHarvesters[WWWViewHarvester].get.last
+              println("WWWh: "+wwwvieh)
+              var views = wwwvieh.getResourcesOfType[IndesignUIView]
+               println("Views: "+views)
+               println("Views lazy: "+wwwvieh.getResourcesOfLazyType[IndesignUIView])
               var groupedViews = views.groupBy { view => view.originalHarvester.get.getClass.getCanonicalName.split("\\.").last }
               groupedViews.foreach {
                 case (key, moduleViews) if (moduleViews.size > 0) =>
@@ -117,7 +130,7 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
                     "header" :: key
 
                     "menu" :: div {
-                      moduleViews.sortBy { _.name }.foreach {
+                      moduleViews.sortBy { _.getUIViewName }.foreach {
                         moduleView =>
                           "item" :: a("#") {
 
@@ -127,13 +140,13 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
                                 +@("href" -> s"/$path".noDoubleSlash)
                                 +@("target" -> "_blank")
-                                textContent(moduleView.name)
+                                textContent(moduleView.getUIViewName)
 
                               case None =>
                                 //var ready = (moduleView.contentClosure==null || moduleView.proxy.isDefined)
                                 var ready = moduleView.isProxy
                                 //textContent(moduleView.name + s"(${ready})")
-                                textContent(moduleView.name)
+                                textContent(moduleView.getUIViewName)
                                 +@("reRender" -> "true")
 
                                 onClick {

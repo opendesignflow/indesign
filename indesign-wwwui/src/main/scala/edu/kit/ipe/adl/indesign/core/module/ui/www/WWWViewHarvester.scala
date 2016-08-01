@@ -5,10 +5,16 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.JavaSourceFile
 import com.idyria.osi.wsb.webapp.localweb.LocalWebEngine
 
-object WWWViewHarvester extends Harvester {
+class WWWViewHarvester extends Harvester {
 
   //this.autoCleanResources = false
 
+  override def doHarvest = {
+    
+   // println("Doing harvest on ")
+    
+  }
+  
   this.onDeliver {
     case r: IndesignUIView =>
       gather(r)
@@ -36,7 +42,10 @@ object WWWViewHarvester extends Harvester {
         case _ =>
           false
       }
-
+    case r => 
+      println(s"Deliber direct of: $r");
+      r.asInstanceOf[IndesignUIView]
+      false
       
   }
 

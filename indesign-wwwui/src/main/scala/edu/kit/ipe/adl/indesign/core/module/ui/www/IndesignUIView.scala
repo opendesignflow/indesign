@@ -9,15 +9,19 @@ import edu.kit.ipe.adl.indesign.core.module.buildsystem.SourceFile
 
 class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with IndesignUIHtmlBuilder {
 
-  
   // Standalone
   //--------------
-  
+
   /**
    * If set, the main UI module will map this view to a specific path and open a link to a new tab
    */
-  var targetViewPath : Option[String] = None
-  
+  var targetViewPath: Option[String] = None
+
+  def changeTargetViewPath(path: String) = {
+    this.targetViewPath = Some(path)
+    this
+  }
+
   // ! Important, if the View is derived from a Scala Source File, then root it
   //------------------
   var isProxy = false
@@ -35,19 +39,24 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
     case None => super.getClassLoader
     case Some(v) => v.getClassLoader
   }
-  
+
   // Actions
   //---------------
-  
+
   override def getActions = proxiedView match {
     case Some(v) => v.getActions
     case None => super.getActions
   }
-  
+
   // INfos
   //------------
-  def name = {
-
+  
+  /**
+   * Alias for #getUIViewName
+   */
+  //var name = getUIViewName
+  
+  def getUIViewName = {
     this.parentResource match {
       case Some(p: SourceFile) =>
         isProxy = true
@@ -58,7 +67,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
     }
 
   }
- 
+
   def getId = this.parentResource match {
     case Some(p: SourceFile) =>
       isProxy = true
@@ -109,7 +118,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
 
                 // Close old view
                 //this.proxiedView.get.closeView 
-                
+
                 // Set proxy on new view 
                 view.proxy = Some(this)
                 this.proxiedView = Some(view)

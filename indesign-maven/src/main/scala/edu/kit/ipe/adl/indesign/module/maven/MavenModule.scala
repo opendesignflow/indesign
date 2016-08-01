@@ -7,21 +7,17 @@ import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import edu.kit.ipe.adl.indesign.core.module.IndesignModule
 import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import edu.kit.ipe.adl.indesign.core.brain.ExternalBrainRegion
-import edu.kit.ipe.adl.indesign.core.brain.MavenExternalBrainRegionBuilder
 import edu.kit.ipe.adl.indesign.core.module.ui.www.WWWViewHarvester
 import edu.kit.ipe.adl.indesign.module.maven.ui.MavenOverview
 import edu.kit.ipe.adl.indesign.core.brain.Brain
-import edu.kit.ipe.adl.indesign.core.brain.MavenExternalBrainRegion
 import edu.kit.ipe.adl.indesign.core.artifactresolver.AetherResolver
 import edu.kit.ipe.adl.indesign.module.maven.resolver.MavenProjectIndesignWorkspaceReader
 import com.idyria.osi.tea.logging.TLog
+import edu.kit.ipe.adl.indesign.module.maven.region.MavenExternalBrainRegion
+import edu.kit.ipe.adl.indesign.module.maven.region.MavenExternalBrainRegionBuilder
 
- 
 object MavenModule extends IndesignModule {
-  
-  //-- Register Maven Region Builder
-  ExternalBrainRegion.addBuilder(new MavenExternalBrainRegionBuilder)
-  
+
   /**
    * Harvester of maven proejcts to start building
    */
@@ -57,29 +53,66 @@ object MavenModule extends IndesignModule {
   
   
   Harvest.registerAutoHarvesterObject(classOf[MavenProjectHarvester], ProjectsHarvester)*/
-  
-     TLog.setLevel(classOf[MavenProjectIndesignWorkspaceReader], TLog.Level.FULL)
-  
+
+  //TLog.setLevel(classOf[MavenProjectIndesignWorkspaceReader], TLog.Level.FULL)
+
   this.onLoad {
-    println("Loading Maven : "+this.getClass.getClassLoader)
+
+    //-- Register Maven Region Builder
+    ExternalBrainRegion.addBuilder(new MavenExternalBrainRegionBuilder)
+
+    println("Loading Maven : " + MavenModule.getClass.getClassLoader)
     Harvest.registerAutoHarvesterClass(classOf[FileSystemHarvester], classOf[MavenProjectHarvester])
-    WWWViewHarvester.deliverDirect(new MavenOverview)
-    
+
+    // MavenProjectIndesignWorkspaceReader.resetAllProjects
+    //AetherResolver.session.setWorkspaceReader(MavenProjectIndesignWorkspaceReader)
+
+    //println("Loading Maven WWW View---------: "+WWWViewHarvester.hashCode())
+
+    // WWWViewHarvester.deliverDirect(new MavenOverview)
+
   }
-  
-  
-  this.onShutdown {
-    println("Shutting down Maven module: "+Brain.getResources)
- 
-    // Find All Maven Regions in Brain and remove them
-    Brain.getResourcesOfLazyType[MavenExternalBrainRegion].drop(1).foreach {
-      r => 
-        println("Cleaning from brain: "+r)
-        Brain.cleanResource(r)
+
+  this.onStart {
+    println("Start on Maven: " + Harvest.getHarvesters[WWWViewHarvester])
+    Harvest.getHarvesters[WWWViewHarvester] match {
+      case Some(h) =>
+        h.last.deliverDirect(new MavenOverview)
+      case _ =>
     }
-    
   }
-  
+
+  this.onShutdown {
+    println("Shutting down Maven module: " + Brain.getResources)
+
+    
+    //-- Register Maven Region Builder
+    ExternalBrainRegion.addBuilder(new MavenExternalBrainRegionBuilder)
+
+    
+    // Find All Maven Regions in Brain and remove them
+    //------------
+    /*Brain.getResourcesOfLazyType[MavenExternalBrainRegion].drop(1).foreach {
+      case r if (r.isTainted) =>
+        println("Cleaning from brain: " + r.isTainted)
+        Brain.cleanResource(r)
+      case _ =>
+    }*/
+
+  }
+
+  // Ressource Keep
+  //-------------------
+  this.onKept {
+    case h =>
+      println("Maven Module kept: " + Harvest.getHarvesters[WWWViewHarvester])
+      Harvest.getHarvesters[WWWViewHarvester] match {
+        case Some(h) =>
+          h.last.deliverDirect(new MavenOverview)
+        case _ =>
+      }
+  }
+
   def load = {
     //FileSystemHarvester.addChildHarvester(new POMFileHarvester)
     //println("Loading Maven")

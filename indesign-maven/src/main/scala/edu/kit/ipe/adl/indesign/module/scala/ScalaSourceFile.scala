@@ -10,9 +10,11 @@ import org.apache.lucene.document.Document
 import org.apache.lucene.document.TextField
 import org.apache.lucene.document.Field
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.JavaSourceFile
+import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedTextFile
 
-class ScalaSourceFile(r: Path) extends HarvestedFile(r) with LuceneIndexable with JavaSourceFile {
+class ScalaSourceFile(r: Path) extends HarvestedTextFile(r) with LuceneIndexable with JavaSourceFile {
 
+  
   /*
    * Returns the first class or first object
    */
@@ -97,7 +99,7 @@ class ScalaSourceFile(r: Path) extends HarvestedFile(r) with LuceneIndexable wit
     //println(s"loading class: " + loadClass)
 
   getUpchainCompilingProject match {
-      case Some(project) => project.classDomain.loadClass(loadClass)
+      case Some(project) => project.classdomain.get.loadClass(loadClass)
       case None => 
         sys.error(s"Cannot load class $loadClass for $this, no compiling project found in parent resources")
     }
@@ -164,11 +166,11 @@ class ScalaAppSourceFile(r: Path) extends ScalaSourceFile(r) {
 
     var p = getUpchainCompilingProject.get
     p.compile(this)
-    p.withClassLoader(p.classDomain) {
+    p.withClassLoader(p.classdomain.get) {
 
-      var i = p.classDomain.loadClass(runClass)
+      var i = p.classdomain.get.loadClass(runClass)
       println(s"Found class: " + i)
-      println(s"Current cd" + p.classDomain)
+      println(s"Current cd" + p.classdomain.get)
       println(s"Current Thread: " + Thread.currentThread().getContextClassLoader)
       println(s"Class CL: " + i.getClassLoader)
       i.getClassLoader match {

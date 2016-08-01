@@ -9,6 +9,7 @@ import com.idyria.osi.tea.logging.TLogSource
 import edu.kit.ipe.adl.indesign.core.config.Config
 import edu.kit.ipe.adl.indesign.core.config.ConfigSupport
 import com.idyria.osi.tea.compile.ClassDomain
+import java.util.concurrent.Semaphore
 
 /**
  * A harvester will look for resources, and call upon its child harvesters to match them
@@ -51,6 +52,10 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   }
 
+  def -->(h: Harvester): Harvester = {
+    addChildHarvester(h)
+  }
+
   def removeChildHarvester(child: Harvester): Harvester = {
 
     // Remove from list
@@ -62,6 +67,18 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case _ =>
     }
     child
+  }
+
+  /**
+   * Type Check is done but no class casting will be involed
+   * @warning: Useful to find objects matching a type whose definition may be outdated due to classloading reload
+   */
+  def getChildHarvesters[CT <: Harvester](implicit cl: ClassTag[CT]): Option[List[Harvester]] = {
+
+    this.childHarvesters.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r } match {
+      case res if (res.size > 0) => Some(res)
+      case res => None
+    }
   }
 
   def hierarchyName(sep: String = ".", withoutSelf: Boolean = false) = {
@@ -146,14 +163,19 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
     this.getResources.collect { case r if (cl.runtimeClass.isInstance(r)) => r.asInstanceOf[CT] }
   }
-  
+
+  def getResourcesOfTypeClass[CT <: HarvestedResource](cl: Class[CT]): List[CT] = {
+
+    this.getResources.collect { case r if (cl.isInstance(r)) => r.asInstanceOf[CT] }
+  }
+
   /**
    * Type Check is done but no class casting will be involed
    * @warning: Useful to find objects matching a type whose definition may be outdated due to classloading reload
    */
   def getResourcesOfLazyType[CT <: HarvestedResource](implicit cl: ClassTag[CT]): List[HarvestedResource] = {
 
-    this.getResources.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName==r.getClass.getCanonicalName) => r }
+    this.getResources.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r }
   }
 
   /**
@@ -251,29 +273,29 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
           case 0 if (!r.rooted) =>
             logFine[Harvester](s"Resource ${r.getId} not rooted and not in harvested, removing")
             this.availableResources -= r
-            toclean = toclean:+r
-            
+            toclean = toclean :+ r
+
           // Remove from harvested, because already existing
-          case size if (size>0) => 
+          case size if (size > 0) =>
             logFine[Harvester](s"Resource ${r.getId} already present, remove from harvested")
             this.harvestedResources --= harvestedWithSameId
 
-            // Otherwise, keep in harvested resources for adding
+          // Otherwise, keep in harvested resources for adding
           case _ =>
 
         }
 
-       /* this.harvestedResources.find { hr => hr.getId == r.getId } match {
+    }
 
-          // Remove non gathered  and non rooted
-          case None if (!r.rooted) =>
-
-          // Keep, then remove from gathered
-          case Some(matchingHarvested) =>
-            
-
-          case _ =>
-        }*/
+    // Call kept on all kepts resources and children
+    //-------------
+    this.availableResources.foreach {
+      r =>
+        r.@->("kept", this)
+        r.getDerivedResources[HarvestedResource].foreach {
+          dr =>
+            dr.@->("kept", this)
+        }
 
     }
 
@@ -284,53 +306,54 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
         this.availableResources += r
         r.originalHarvester match {
           case None => r.originalHarvester = Some(this)
-          case _ => 
+          case _ =>
         }
         r.@->("added", this)
     }
-    
-    
-    
-    // Clean
+
+    // Clean old resources
     //-----------------
+    logFine[Harvester](s"========= CLEAN ------------")
     toclean.foreach {
-      r => 
+      r =>
+        // println(s"====== $r")
         r.@->("clean", this)
     }
-    
-    
-    
-
-    // Reject
-    //---------------
-    /*this.harvestedResources.foreach {
-      r =>
-        r.@->("rejected", this)
-    }*/
-    
+    logFine[Harvester](s"========= EOF CLEAN ==============")
 
     // Call Gathered
     //--------------------
+
+    //-- Call Gathered on the single resources newly added
     this.harvestedResources.foreach {
       r =>
-        
+        logFine[Harvester](s"Gathered on: " + r)
         r.@->("gathered", this)
     }
-    
-    this.harvestedResources.clear()
-    
-    logFine[Harvester](s"----------- Finish Harvest on " + this.getClass.getCanonicalName + " with : " + this.harvestedResources.toList + " and " + this.availableResources.size + " available")
 
-    // Deliver resources to child harvesters, and run a finish harvect on them too
-    //--------------
-    /*this.childHarvesters.foreach {
-      ch =>
-        this.availableResources.foreach {
-          r =>
-            ch.deliver(r)
-        }
-       //ch.finishHarvest(ch.autoCleanResources)
-    }*/
+    //-- Call GatheredResources on the Harvester itself
+    //println("Gathered resources: "+this.harvestedResources)
+    this.@->("gatheredResources", this.harvestedResources.toList)
+
+    this.harvestedResources.clear()
+
+    // Utilities updates
+    //-----------------------
+
+    //-- Wait for resources
+    this.availableResources.size match {
+
+      // NO resources -> Remove permits
+      case 0 =>
+        this.waitForResourcesAvailableSemaphore.drainPermits()
+      // Some resources and no permits, deliver one 
+      case _ if (this.waitForResourcesAvailableSemaphore.availablePermits()==0) =>
+        this.waitForResourcesAvailableSemaphore.release
+      // Some resources and a permit is already there, do nothing
+      case _ =>
+    }
+
+    logFine[Harvester](s"----------- Finish Harvest on " + this.getClass.getCanonicalName + " with : " + this.harvestedResources.toList + " and " + this.availableResources.size + " available")
 
   }
 
@@ -368,11 +391,11 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
     this.availableResources.synchronized {
       this.availableResources = this.availableResources.filter {
-        case fr if(fr == r || (fr.getId == r.getId))=> 
-          fr.@->("clean",this)
+        case fr if (fr == r || (fr.getId == r.getId)) =>
+          fr.@->("clean", this)
           false
         case _ => true
-          
+
       }
     }
 
@@ -396,6 +419,13 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   // Resource Process
   //----------------------
+
+  def onGatheredResources(cl: List[HarvestedResource] => Unit) = {
+    this.onWith("gatheredResources") {
+      rl: List[HarvestedResource] => cl(rl)
+    }
+  }
+
   def processResources = {
     this.getResources.foreach {
       r =>
@@ -403,6 +433,34 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
           HarvestedResource.moveToState(r, "processed")
         }
+    }
+
+  }
+
+  // Resources Waiting Utilities
+  //-----------------
+
+  /**
+   * The semaphore for resources waiting
+   */
+  val waitForResourcesAvailableSemaphore = new Semaphore(0)
+
+  /**
+   * This function is called by a thread which will be blocking until some resources are available on this harvester
+   */
+  def waitForResourcesAvailable(cl: => Unit) = {
+
+    this.availableResources.size match {
+      case 0 =>
+
+        //-- Acquire and release as waiting procedure
+        waitForResourcesAvailableSemaphore.acquire()
+        waitForResourcesAvailableSemaphore.release()
+
+        //-- Run
+        cl
+
+      case _ => cl
     }
 
   }

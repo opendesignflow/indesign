@@ -11,13 +11,13 @@ trait HighlightJSBuilder extends ExternalBuilder {
      super.externalAdd(targetNode)
     switchToNode(targetNode, {
       // Extra scripts
-      stylesheet(new URI(createSpecialPath("resources", "highlightjs/styles/default.css"))) {
+      stylesheet(new URI(createSpecialPath("resources", "modules/external/highlightjs/styles/default.css"))) {
         
       }
-      script(new URI(createSpecialPath("resources", "highlightjs/highlight.pack.js"))) {
+      script(new URI(createSpecialPath("resources", "modules/external/highlightjs/highlight.pack.js"))) {
         
       }
-      script(new URI(createSpecialPath("resources", "indesign-highlightjs.js"))) {
+      script(new URI(createSpecialPath("resources", "modules/external/indesign-highlightjs.js"))) {
         
       }
 

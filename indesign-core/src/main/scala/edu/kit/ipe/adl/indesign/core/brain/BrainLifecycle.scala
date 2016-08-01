@@ -47,6 +47,14 @@ trait BrainLifecycle extends LFCSupport {
     this.registerStateHandler("shutdown"){cl}
   }
   
+  def resetState= {
+    Brain.resetLFCState(this)
+  }
+  def onResetState(cl: => Unit )= {
+    this.registerStateHandler("##reset##"){cl}
+  }
+ 
+  
 }
 
 trait BrainLifecyleDefinition extends LFCDefinition {

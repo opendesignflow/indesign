@@ -1,5 +1,9 @@
 indesign.createNs("indesign.webdraw");
 console.log("Created indesign webdraw...");
+
+// WebDraw Layout
+//------------------------
+
 indesign.webdraw.layoutRow = function(target) {
 	
 	var availableWidth = $(target).width();
@@ -102,6 +106,9 @@ indesign.webdraw.doAnimate = function() {
 	requestAnimationFrame(indesign.webdraw.doAnimate);
 	
 }
+
+// Init
+//----------------
 
 $(function() {
 

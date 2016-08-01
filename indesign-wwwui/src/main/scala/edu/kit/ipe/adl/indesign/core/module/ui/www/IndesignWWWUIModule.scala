@@ -9,25 +9,31 @@ import edu.kit.ipe.adl.indesign.core.module.IndesignModule
 import edu.kit.ipe.adl.indesign.core.module.ui.www.views.LocalWebView
 import java.awt.event.WindowEvent
 import edu.kit.ipe.adl.indesign.core.module.ui.www.views.IndesignWWWView
+import edu.kit.ipe.adl.indesign.core.module.ui.www.fs.FileSystemHarvesterView
 
 object IndesignWWWUIModule extends IndesignModule {
 
+  var mainHarvesters = new WWWViewHarvester
+  
   this.onLoad {
 
-    Harvest.addHarvester(WWWViewHarvester)
+    Harvest.addHarvester(mainHarvesters)
+  
+     println("Load on WWW UI Module: "+Harvest.getHarvesters[WWWViewHarvester])
 
   }
   this.onInit {
 
     LocalWebEngine.addViewHandler("/", classOf[IndesignWWWView])
-    WWWViewHarvester.deliverDirect(new LocalWebView)
+    mainHarvesters.deliverDirect(new LocalWebView)
+    mainHarvesters.deliverDirect(new FileSystemHarvesterView)
     
     
     
   }
   this.onStart {
     
-    println("RELOADING---------")
+    println("Starting---------: "+mainHarvesters.hashCode())
     LocalWebEngine.lInit
     LocalWebEngine.lStart
     

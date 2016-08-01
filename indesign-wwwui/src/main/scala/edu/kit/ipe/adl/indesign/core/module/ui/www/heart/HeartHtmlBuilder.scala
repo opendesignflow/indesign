@@ -15,7 +15,7 @@ import edu.kit.ipe.adl.indesign.core.heart.model.HeartTaskStatus
 trait HeartHtmlBuilder extends ExternalBuilder {
 
   override def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
-    
+
     super.externalAdd(targetNode)
     switchToNode(targetNode, {
       // Extra scripts
@@ -38,7 +38,7 @@ trait HeartHtmlBuilder extends ExternalBuilder {
         Heart.running(tid) match {
           case None =>
             var ht = new HeartTask[Any] {
-              
+
               def getId = tid
               def doTask = {
                 cl
@@ -56,14 +56,14 @@ trait HeartHtmlBuilder extends ExternalBuilder {
 
   }
 
-  def taskMonitorAltUI(text:String,t: Option[HeartTask[_]])(altUI: => Any) = t match {
+  def taskMonitorAltUI(text: String, t: Option[HeartTask[_]])(altUI: => Any) = t match {
     case Some(t) =>
       "ui active small inline indeterminate text loader" :: div {
-        +@("hearth-task-id"->t.getId)
+        +@("hearth-task-id" -> t.getId)
         textContent(text)
       }
       t.onCleaned {
-        case h => 
+        case h =>
           //println("Sending Backend Message")
           var status = new HeartTaskStatus
           status.ID = t.getId
@@ -77,30 +77,55 @@ trait HeartHtmlBuilder extends ExternalBuilder {
   /**
    * Button for fast task creation
    */
-  def taskButton[RT <: Any](id: String)(name: String)(content: HeartTask[RT] => RT): HeartTaskButton = {
+  def taskButton(id: String)(startName: String, stopName: String)(content: HeartTask[Any] => Any) = {
 
-    //-- Create Button
-    var hButton = "ui button" :: button(name) {
-      "settings icon" :: i {
+    // Check Task is not running
+    //--------------------
+    Heart.running(id) match {
+      case Some(t) =>
 
-      }
+        //-- Create Button
+        "ui button" :: button(stopName) {
+          "settings icon" :: i {
 
-    }
+          }
+          onClickReload {
+            
+            Heart.killTask(t)
+          }
 
-    //-- Create task
-    var task = new HeartTask[RT] {
+        }
 
-      def getId = id
+      case None =>
+        
+        //-- Create Button
+        "ui button" :: button(startName) {
+          "settings icon" :: i {
 
-      def doTask = {
+          }
+          onClickReload {
+            
+            //-- Create task
+            var task = new HeartTask[Any] {
 
-        content(this)
-      }
+              def getId = id
 
+              def doTask = {
+
+                content(this)
+              }
+
+            }
+            
+            //-- Run
+            Heart.pump(task)
+          }
+
+        }
     }
 
     //-- Create Wrapper
-    var taskButton = new HeartTaskButton(hButton, task)
+    /*var taskButton = new HeartTaskButton(hButton, task)
 
     // Now setup run
     switchToNode(hButton, {
@@ -114,7 +139,7 @@ trait HeartHtmlBuilder extends ExternalBuilder {
 
     })
 
-    taskButton
+    taskButton*/
   }
 
 }

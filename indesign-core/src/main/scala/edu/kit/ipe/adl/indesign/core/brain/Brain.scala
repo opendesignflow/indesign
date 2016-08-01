@@ -8,6 +8,8 @@ import edu.kit.ipe.adl.indesign.core.heart.Heart
 import org.eclipse.aether.impl.ArtifactResolver
 import edu.kit.ipe.adl.indesign.core.artifactresolver.AetherResolver
 import edu.kit.ipe.adl.indesign.core.brain.artifact.ArtifactExternalRegion
+import edu.kit.ipe.adl.indesign.core.harvest.Harvest
+import edu.kit.ipe.adl.indesign.core.brain.BrainLifecyleDefinition
 
 trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource with Harvester {
 
@@ -15,11 +17,20 @@ trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSuppo
 
 object Brain extends Brain {
 
+  // Defaults
+  //------------
+
+  // Graceful Shutdown
   sys.addShutdownHook {
-    Brain.moveToShutdown
+    
+    //Brain.moveToShutdown
   }
 
+  // Heart is always a region
   Brain.deliverDirect(Heart)
+
+  // BRain should be in Harvest
+  Harvest.addHarvester(this)
 
   // Regions
   ///--------------------
@@ -81,10 +92,12 @@ object Brain extends Brain {
             var path = key.values(0).toString
 
             logFine[Brain](s"Adding External Region: $path ")
+
             try {
               keepErrorsOn(this) {
 
                 var external = ExternalBrainRegion.build(new File(path).toURI().toURL)
+                println(s"Created $path with: "+external.regionBuilder.get.getClass.getClassLoader)
                 external.configKey = Some(key)
                 gather(external)
               }
@@ -131,14 +144,42 @@ object Brain extends Brain {
       case None =>
     }
 
-    logFine[Brain]("Brain Regions: "+Brain.getResourcesOfType[BrainRegion])
-    
+    logFine[Brain]("Brain Regions: " + Brain.getResourcesOfType[BrainRegion])
+
+  }
+
+  this.onGatheredResources {
+    regions =>
+
+      logFine[Brain](s"Regions gathered moving to latest state ${this.currentState}: $regions")
+
+      //-- Get Target Index
+      this.currentState match {
+        case Some(cs) =>
+
+          var targetIndexState = this.states.indexOf(cs)
+          logFine[Brain](s"Target State: "+targetIndexState)
+          //-- Loop over states until target (included hence to "to" usage) and apply to all gathered regions
+          (0 to targetIndexState).foreach {
+            i =>
+              regions.foreach {
+                r =>
+                  logFine[Brain](s"-> "+Brain.states(i))
+                  r.keepErrorsOn(r)(Brain.moveToState(r,Brain.states(i)))
+              }
+
+          }
+
+        //-- NO State on brain, go nowhere
+        case None =>
+      }
+
   }
 
   // Region Creation
   //----------
   def getObject(cl: ClassLoader, name: String) = {
-    
+
     //-- Get Class
     var objectClass = cl.loadClass(name)
 
@@ -203,6 +244,9 @@ object Brain extends Brain {
   }
   this.onShutdown {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.moveToState(r, "shutdown")))
+  }
+  this.onResetState {
+    this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.resetLFCState(r)))
   }
 
   /*def load = {

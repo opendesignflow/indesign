@@ -17,7 +17,7 @@ object TryKITGitlab extends App {
   
   config.custom.content += gitlab
   
-  gitlab.listProjects
+  //gitlab.listProjects
   
   
 }

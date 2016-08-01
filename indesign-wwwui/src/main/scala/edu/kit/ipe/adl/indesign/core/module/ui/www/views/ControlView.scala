@@ -20,7 +20,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
     div {
 
-      h1("InDesign UI ") {
+      h1("InDesign UI 2") {
 
       }
 
@@ -64,7 +64,10 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
           reload
           onClick {
-            Brain.moveToShutdown
+            Brain.moveToStop
+            println("Shutdown now reset")
+            Brain.resetState
+            println("Now Start")
             Brain.moveToStart
           }
 
@@ -136,7 +139,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                     case true =>
 
                       //-- Add to config
-                      var key = Brain.config.get.addKeyType("external-region")
+                      var key = Brain.config.get.addKey("region", "external-region")
                       key.values.add.setData(f.getCanonicalPath)
                       Brain.config.get.resyncToFile
 
@@ -193,18 +196,17 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
               "collapsing" :: td("") {
                 $(<i class="block layout icon"></i>)
                 $(<i class="settings icon ui popup-activate"></i>)
-                
+
                 "ui flowing popup top left transition hidden" :: div {
                   h4("Config") {
-                    
+
                   }
                   configTable(region.config)
                 }
-                  
-                 span {
+
+                span {
                   textContent(region.name)
                 }
-              
 
               }
 
@@ -213,6 +215,9 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                 case true =>
                   td("") {
                     span(textContent("External: " + region.getClass.getSimpleName))
+                    "text" :: p {
+                      textContent(region.getClass.getClassLoader.toString)
+                    }
                     "text" :: p {
                       textContent(region.asInstanceOf[ExternalBrainRegion].getId)
                     }
@@ -284,7 +289,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                       //-- Make list to add 
                       var available = region.asInstanceOf[ExternalBrainRegion].discoverRegions
                       //var available = region.getDerivedResources[ModuleSourceFile].map { msf => msf.getDiscoveredModules }.flatten.toList.distinct
-                     // println(s"Discovered: $available")
+                      // println(s"Discovered: $available")
 
                       //var regionsClasses = r.derivedResources.map { rs => rs.getClass.getName.trim }.toList
                       var regionsClasses = region.asInstanceOf[ExternalBrainRegion].configKey.get.values.drop(1).map { v => v.toString }
@@ -354,22 +359,28 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                     }
 
                   case false =>
-                    Brain.config.get.isInConfig("region", region.getClass.getName) match {
-                      case true =>
-                        "ui button" :: button(s"Remove from Config") {
-                          onClick {
+                    Brain.config match {
+                      case Some(config) =>
+                        config.isInConfig("region", region.getClass.getName) match {
 
-                            ///-- Delete
-                            Brain.config.get.removeFromConfig("region", region.getClass.getName)
-                            Brain.config.get.resyncToFile
+                          case true =>
+                            "ui button" :: button(s"Remove from Config") {
+                              onClick {
 
-                            //-- Stop
-                            //Brain.regions = Brain.regions.filter(_ != r)
-                            //r.kill
-                          }
+                                ///-- Delete
+                                Brain.config.get.removeFromConfig("region", region.getClass.getName)
+                                Brain.config.get.resyncToFile
+
+                                //-- Stop
+                                //Brain.regions = Brain.regions.filter(_ != r)
+                                //r.kill
+                              }
+                            }
+                          case false =>
+                            span("Internal Non Configured: " + region.getClass.getName)
+
                         }
-                      case false =>
-                        span("Internal Non Configured: " + region.getClass.getName)
+                      case None =>
                     }
                 }
 
@@ -453,15 +464,15 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
                 $(<i class="shipping icon"></i>)
                 $(<i class="settings icon ui popup-activate"></i>)
-                
+
                 "ui flowing popup top left transition hidden" :: div {
                   h4("Config") {
-                    
+
                   }
                   configTable(hv.config)
                 }
                 span(textContent(hv.getClass.getSimpleName))
-                
+
               }
 
               // Resources count

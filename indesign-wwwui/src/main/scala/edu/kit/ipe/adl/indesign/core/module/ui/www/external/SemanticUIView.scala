@@ -12,7 +12,10 @@ import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignUIView
 import java.net.URI
 
 trait SemanticUIView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
-
+ 
+  var semanticUIVersion = "2.1.4"
+  var semanticBasePath = "modules/wwwui/semantic"
+  
   override def render: HTMLNode[HTMLElement, HTMLNode[HTMLElement, _]] = {
 
     // Let Main Rendereing Chain happen
@@ -40,11 +43,18 @@ trait SemanticUIView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
     // ADd scripts
     switchToNode(targetNode, {
       
-      stylesheet(new URI(s"${viewPath}/resources/semantic/semantic.min.css".noDoubleSlash)) {
+      /*stylesheet(new URI(s"${viewPath}/resources/semantic/semantic.min.css".noDoubleSlash)) {
 
       }
   
       script(new URI(s"${viewPath}/resources/semantic/semantic.min.js".noDoubleSlash)) {
+
+      }*/
+      
+      stylesheet(new URI(createSpecialPath("resources", s"$semanticBasePath/semantic.min.css"))) {
+
+      }
+      script(new URI(createSpecialPath("resources", s"$semanticBasePath/semantic.min.js"))) {
 
       }
     })

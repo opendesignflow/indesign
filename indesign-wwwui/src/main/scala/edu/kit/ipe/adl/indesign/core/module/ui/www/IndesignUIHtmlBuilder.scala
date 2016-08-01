@@ -13,7 +13,7 @@ trait IndesignUIHtmlBuilder extends ExternalBuilder {
     super.externalAdd(targetNode)
     switchToNode(targetNode, {
 
-      script(new URI(createSpecialPath("resources", "module/wwwui/indesign.js"))) {
+      script(new URI(createSpecialPath("resources", "modules/wwwui/indesign.js"))) {
 
       }
 

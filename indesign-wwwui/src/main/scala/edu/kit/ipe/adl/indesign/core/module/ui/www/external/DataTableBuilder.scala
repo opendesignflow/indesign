@@ -11,13 +11,13 @@ trait DataTableBuilder extends ExternalBuilder {
      super.externalAdd(targetNode)
     switchToNode(targetNode, {
       // Extra scripts
-      stylesheet(new URI(createSpecialPath("resources", "module/wwwui/external/datatables/datatables.min.css"))) {
+      stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/external/datatables/datatables.min.css"))) {
         
       }
-      script(new URI(createSpecialPath("resources", "module/wwwui/external/datatables/datatables.min.js"))) {
+      script(new URI(createSpecialPath("resources", "modules/wwwui/external/datatables/datatables.min.js"))) {
         
       }
-       script(new URI(createSpecialPath("resources", "module/wwwui/external/datatables/indesign-datatables.js"))) {
+       script(new URI(createSpecialPath("resources", "modules/wwwui/external/datatables/indesign-datatables.js"))) {
         
       }
       

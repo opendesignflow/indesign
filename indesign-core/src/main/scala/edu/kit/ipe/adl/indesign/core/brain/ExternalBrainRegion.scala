@@ -7,6 +7,7 @@ import com.idyria.osi.tea.logging.TLogSource
 import edu.kit.ipe.adl.indesign.core.brain.external.FolderOutBuilder
 import edu.kit.ipe.adl.indesign.core.config.model.CommonConfigTraitValuesKey
 import com.idyria.osi.tea.compile.ClassDomain
+import scala.reflect.ClassTag
 
 /**
  * Loads a Brain Region present in another externaly compiled module
@@ -26,14 +27,11 @@ trait ExternalBrainRegion extends BrainRegion {
   // Region Class Loading
   //--------------
 
+
   /**
-   * Load Sub Regions is Gathered on Brain
+   * Load Sub Regions when in load State
+   * Resolve parent class domain and such during setup
    */
-  /*this.onGathered {
-    case h if (h == Brain) =>
-
-  }*/
-
   this.onLoad {
     logFine[Brain](s"Moving to load on: ${getClass}")
     configKey match {
@@ -156,11 +154,26 @@ object ExternalBrainRegion extends TLogSource {
 
   var builders = List[ExternalBrainRegionBuilder](new FolderOutBuilder)
 
-  def addBuilder(b: ExternalBrainRegionBuilder) = {
+  def removeBuilder[BT <: ExternalBrainRegionBuilder](implicit tag : ClassTag[BT]) : Unit = {
+    this.builders = builders.filter {
+      case r if (r.isTainted) =>
+        false
+      case r if (r.getClass.getCanonicalName==tag.runtimeClass.getCanonicalName) =>
+        //println("Forcing replacement of: "+r)
+        false
+      case _ => 
+        true
+    }
+  }
+  
+  def addBuilder(b: ExternalBrainRegionBuilder,force:Boolean=false) = {
     
     // Clean Tainted
      this.builders = builders.filter {
       case r if (r.isTainted) =>
+        false
+      case r if (force && r.getClass.getCanonicalName==b.getClass.getCanonicalName) =>
+        println("Forcing replacement of: "+r)
         false
       case _ => 
         true
@@ -198,9 +211,11 @@ object ExternalBrainRegion extends TLogSource {
           case res => logWarn[Brain](s"Two Builders have identical scores for $url: $res")
         }
 
-        logFine[Brain](s"Building $url with ${winner._1}")
+        //logFine[Brain](s"Building $url with ${winner._1}")
+        //println(s"Building $url with ${winner._1} "+)
         var resultRegion = winner._1.build(url)
         resultRegion.regionBuilder = Some(winner._1)
+        resultRegion.@->("region.created")
         resultRegion
     }
 

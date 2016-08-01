@@ -15,11 +15,17 @@ object ScalaModule extends IndesignModule {
 
     println("Loading Scala : " + this.getClass.getClassLoader)
   }
+  
   this.onInit {
     println("Init Scala : " + this.getClass.getClassLoader)
     
     // Add UI
-    WWWViewHarvester.deliverDirect(new ScalaOverview)
+    Harvest.getHarvesters[WWWViewHarvester] match {
+      case Some(h) => 
+        h.last.deliverDirect(new ScalaOverview)
+      case _ => 
+    }
+
     
     // Register Harvesters
     //---

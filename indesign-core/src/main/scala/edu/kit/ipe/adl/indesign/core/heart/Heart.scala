@@ -26,7 +26,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   def newThread(r: Runnable) = {
 
     var th = new Thread(threadGroup, r)
-
+    th.setDaemon(true)
     th
   }
 
@@ -165,6 +165,8 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   }
 
   // Lifecycles
+  //-----------------
+  
   this.onStop {
     var all = this.tasks
     all.foreach {

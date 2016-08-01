@@ -11,6 +11,6 @@ object GitModule extends IndesignModule {
   this.onInit {
     Harvest.registerAutoHarvesterClass(classOf[FileSystemHarvester], classOf[GitHarvester])
     Harvest.registerAutoHarvesterClass(classOf[GitHarvester], classOf[MavenProjectHarvester])
-    WWWViewHarvester.deliverDirect(new GitWWWView)
+    //WWWViewHarvester.deliverDirect(new GitWWWView)
   }
 }

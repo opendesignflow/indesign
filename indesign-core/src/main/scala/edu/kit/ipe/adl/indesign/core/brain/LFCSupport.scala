@@ -15,6 +15,21 @@ trait LFCSupport extends ListeningSupport {
   var currentState: Option[String] = None
   val lfcSemaphore = new Semaphore(0)
 
+  def applyResetState = {
+    
+    statesHandlers.get("##reset##") match {
+      case Some(handlers) =>
+        handlers.foreach {
+          h => h()
+        }
+      case None =>
+      //throw new RuntimeException(s"Cannot apply state $str to ${getClass.getName}, no handlers defined")
+    }
+    
+    this.currentState = None
+    this.@->("state.updated")
+    
+  }
   def applyState(str: String) = {
 
     this.synchronized {
@@ -32,7 +47,7 @@ trait LFCSupport extends ListeningSupport {
 
     lfcSemaphore.getQueueLength match {
       case 0 => lfcSemaphore.release()
-      case l => lfcSemaphore.release(l)
+      case other => lfcSemaphore.release(other)
     }
 
     //this.lfcPhaser.register()
@@ -93,6 +108,14 @@ trait LFCDefinition extends ClassDomainSupport with TLogSource {
 
   var states = List[String]()
 
+  
+  def resetLFCState(lifecyclable: LFCSupport) = {
+    logFine[LFCDefinition](s"Resetting state of "+lifecyclable)
+    lifecyclable.applyResetState
+    
+    //lifecyclable.@->("resetState")
+  }
+  
   def defineState(name: String) = {
     states = states :+ name
   }

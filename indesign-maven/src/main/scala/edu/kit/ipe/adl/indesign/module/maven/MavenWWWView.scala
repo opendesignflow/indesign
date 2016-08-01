@@ -9,7 +9,7 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 
 class MavenWWWView (val mavenProject: MavenProjectResource) extends IndesignUIView {
 
-  override def name = mavenProject.projectModel.artifactId
+  override def getUIViewName = mavenProject.projectModel.artifactId
   override def getId = mavenProject.getId
 
 

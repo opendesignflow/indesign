@@ -1,0 +1,10 @@
+
+:name set "Simple FB With Dependencies"
+
+:groupId set "fb-test"
+:artifactId set "simplefb-withdeps"
+:version set "1"
+
+:dependency com.idyria.osi.ooxoo:ooxoo-core:3.1.2-SNAPSHOT
+
+        

@@ -34,10 +34,11 @@ trait CommonConfig extends CommonConfigTrait {
     }
    }
    
-   def addKeyType(name:String) = {
+   def addKey(name:String,t:String) = {
      
      var key = this.values.keys.add
-     key.keyType = name
+     key.keyType = t
+     key.name = name
      key
      
    }

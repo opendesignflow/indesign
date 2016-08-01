@@ -12,8 +12,9 @@ class MavenProjectHarvester extends FileSystemHarvester with LuceneIndexProvider
   this.addChildHarvester(new POMFileHarvester)
 
   override def doHarvest = {
-    println(s"Running Do Harvest on Maven havester, resources: " + this.getResources)
-    println("Testing for double resources")
+   
+    //println(s"Running Do Harvest on Maven havester, resources: " + this.getResources)
+    //println("Testing for double resources")
     /*this.getResources.groupBy { r => r.getId }.foreach {
       case (id,all) if (all.size>1) => 
         println("Found double: "+id)

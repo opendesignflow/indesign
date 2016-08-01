@@ -10,7 +10,7 @@ import com.idyria.osi.tea.io.TeaIOUtils
 class Gitlab extends GitlabTrait{
   
   
-  def listProjects = {
+ /* def listProjects = {
     
     //-- Base URL
     var url = new URL(gitlabURL.toString()+this.aPIBase.toString)
@@ -26,5 +26,5 @@ class Gitlab extends GitlabTrait{
     
     println("REs: "+res)
   }
-  
+  */
 }

@@ -50,6 +50,8 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
   override def name = basePath.getName
   override def getId = basePath.getCanonicalPath
   def id = basePath.getAbsolutePath
+  
+  override def toString = s"FolderRegion: ${getRegionPath}"
 
   // Create CLass Domain
   var classDomain: Option[ClassDomain] = None

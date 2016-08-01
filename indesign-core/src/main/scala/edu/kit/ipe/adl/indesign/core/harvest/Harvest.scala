@@ -6,6 +6,8 @@ import com.idyria.osi.tea.compile.ClassDomain
 import com.idyria.osi.tea.errors.ErrorSupport
 
 import edu.kit.ipe.adl.indesign.core.brain.BrainRegion
+import edu.kit.ipe.adl.indesign.core.heart.HeartTask
+import edu.kit.ipe.adl.indesign.core.heart.Heart
 
 object Harvest extends BrainRegion {
 
@@ -14,23 +16,52 @@ object Harvest extends BrainRegion {
 
   // Register Harvest Task
   //------------
-  
-  
+  var harvestTask = new HeartTask[Any] {
+
+    def getId = "harvest"
+
+    def doTask = {
+
+      Harvest.run
+
+    }
+
+  }
+
+  def scheduleHarvest(everyMS: Int) = {
+
+    harvestTask.scheduleEvery = Some(everyMS)
+    Heart.pump(harvestTask)
+
+  }
+
   // Top Harvesters
   //------------------
 
   var harvesters = List[Harvester]()
-  def addHarvester(h: Harvester)  = {
+  def addHarvester(h: Harvester) = {
     this.harvesters.contains(h) match {
-      case true => 
+      case true =>
       case false => this.harvesters = this.harvesters :+ h
     }
-    
+
     h
   }
   def removeHarvester(h: Harvester): Harvester = {
     this.harvesters = this.harvesters.filter(_ != h)
     h
+  }
+
+  /**
+   * Type Check is done but no class casting will be involed
+   * @warning: Useful to find objects matching a type whose definition may be outdated due to classloading reload
+   */
+  def getHarvesters[CT <: Harvester](implicit cl: ClassTag[CT]): Option[List[Harvester]] = {
+
+    this.harvesters.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r } match {
+      case res if (res.size > 0) => Some(res)
+      case res => None
+    }
   }
 
   /**
@@ -121,29 +152,52 @@ object Harvest extends BrainRegion {
     }
 
   }
-  
-  def collectOnHarvesters[CT <: Harvester,B](cl: PartialFunction[CT, B])(implicit tag: ClassTag[CT])  = {
-    
+
+  def collectOnHarvesters[CT <: Harvester, B](cl: PartialFunction[CT, B])(implicit tag: ClassTag[CT]) = {
+
     var collected = List[B]()
     onHarvesters[CT] {
-      case h if(cl.isDefinedAt(h)) => 
+      case h if (cl.isDefinedAt(h)) =>
         collected = collected :+ cl(h)
     }
     collected
   }
-  
-  def collectResourcesOnHarvesters[CT <: Harvester,RT<:HarvestedResource : ClassTag,B](cl: PartialFunction[RT, B])(implicit htag: ClassTag[CT])  = {
-    
-    var r = collectOnHarvesters[CT,List[B]] {
-      case h => 
+
+  def collectResourcesOnHarvesters[CT <: Harvester, RT <: HarvestedResource: ClassTag, B](cl: PartialFunction[RT, B])(implicit htag: ClassTag[CT]) = {
+
+    var r = collectOnHarvesters[CT, List[B]] {
+      case h =>
         var r = h.getResourcesOfType[RT].collect {
           case hr if (cl.isDefinedAt(hr)) => cl(hr)
         }
         r
-       
+
     }
     r.flatten.toList
   }
+  
+  
+  // Delivering
+  //------------------
+  
+  def deliverToHarvesters[HT<:Harvester : ClassTag](v:HarvestedResource) = {
+    
+    this.getHarvesters[HT] match {
+      case Some(harvesters) => 
+        harvesters.foreach {
+          h => 
+             h.deliverDirect(v)
+        }
+      case None => 
+        
+    }
+    
+  }
+  
+  
+  
+  // Run
+  //------------
 
   def run = {
 
@@ -195,6 +249,9 @@ object Harvest extends BrainRegion {
     autoHarvesterObjects = autoHarvesterObjects.empty
   }
 
+  def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](t : Tuple2[Class[_ <: Harvester], Class[_ <: Harvester]]): Unit = {
+    registerAutoHarvesterClass(t._2,t._1)
+  }
   def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](parentClass: Class[_ <: Harvester], harvesterClass: Class[_ <: Harvester]): Unit = {
 
     autoHarvesterClasses.get(parentClass) match {
@@ -337,6 +394,36 @@ object Harvest extends BrainRegion {
       println(s"$tabs ${h.getClass.getSimpleName} " + h.getResources.size)
 
     }
+  }
+
+  // Utilities
+  //-----------------------
+  this.onInit {
+
+    // Try to load harvesters from config
+    this.config match {
+      case Some(c) =>
+        c.getKeys("harvester", "class").foreach {
+          key =>
+            key.values.headOption match {
+              case Some(className) =>
+
+                this.keepErrorsOn(this) {
+                  
+                  //-- Load class
+                  var cl = getClass.getClassLoader.loadClass(className)
+
+                  //-- Instantiate and add
+                  var h = cl.newInstance().asInstanceOf[Harvester]
+                  addHarvester(h)
+                }
+
+              case None =>
+            }
+        }
+      case None =>
+    }
+
   }
 
 }
