@@ -14,7 +14,8 @@ import java.net.URI
 trait SemanticUIView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
  
   var semanticUIVersion = "2.1.4"
-  var semanticBasePath = "modules/wwwui/semantic"
+  var wwwuiBasePath = "modules/wwwui/"
+  var semanticBasePath = s"$wwwuiBasePath/semantic"
   
   override def render: HTMLNode[HTMLElement, HTMLNode[HTMLElement, _]] = {
 
@@ -55,6 +56,9 @@ trait SemanticUIView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
 
       }
       script(new URI(createSpecialPath("resources", s"$semanticBasePath/semantic.min.js"))) {
+
+      }
+      script(new URI(createSpecialPath("resources", s"$wwwuiBasePath/indesign-semantic.js"))) {
 
       }
     })

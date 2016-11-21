@@ -3,6 +3,7 @@ package edu.kit.ipe.adl.indesign.core.module.ui.www.views
 import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignUIView
 import com.idyria.osi.wsb.webapp.localweb.LocalWebEngine
 import com.idyria.osi.wsb.webapp.localweb.SingleViewIntermediary
+import com.idyria.osi.wsb.webapp.http.message.HTTPPathIntermediary
 
 class LocalWebView extends IndesignUIView {
   
@@ -15,7 +16,7 @@ class LocalWebView extends IndesignUIView {
       
       
       var viewIntermediaries = LocalWebEngine.topViewsIntermediary.intermediaries.collect {
-        case i if(classOf[SingleViewIntermediary].isInstance(i)) => i.asInstanceOf[SingleViewIntermediary]
+        case i if(classOf[HTTPPathIntermediary].isInstance(i)) => i.asInstanceOf[HTTPPathIntermediary]
       }
       
       "ui stripped celled table" :: table {
@@ -42,12 +43,12 @@ class LocalWebView extends IndesignUIView {
                 td(viewIntermediary.basePath) {
                   
                 }
-                td(viewIntermediary.viewClass.getCanonicalName) {
+                /*td(viewIntermediary.viewClass.getCanonicalName) {
                   
                 }
                 td(viewIntermediary.viewPool.size.toString) {
                   
-                }
+                }*/
                 
               }
               

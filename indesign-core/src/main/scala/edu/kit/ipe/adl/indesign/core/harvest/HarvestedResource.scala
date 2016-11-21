@@ -99,6 +99,19 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   }
   
+  def removeDerivedResource[RT <: HarvestedResource](r: RT)(implicit tag : ClassTag[RT]): RT = {
+    
+    derivedResources.get(r.getId) match {
+      case Some(res) if(tag.runtimeClass.isInstance(res)) => 
+        res.parentResource = None
+        derivedResources = derivedResources - r.getId
+        res.asInstanceOf[RT]
+      case _ =>
+       r
+    }
+    
+  }
+  
   def cleanDerivedResources = {
     
     // Remove Parent reference from derived resources
@@ -149,7 +162,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
        case (id, r) if (tag.runtimeClass.isInstance(r)) =>
         r.asInstanceOf[CT]
       
-    }
+    }.toList
   }
   
   def getSubDerivedResources [CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
@@ -198,17 +211,38 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }
   }
   def onGathered(cl: PartialFunction[Harvester, Unit]) = {
-    this.onWith("gathered") {
+    this.onWith[Harvester]("gathered") {
       h: Harvester =>
+        //println("Running a gathered even on "+this)
         cl.isDefinedAt(h) match {
-          case true => keepErrorsOn(this){cl(h)}
+          case true => 
+            // println("Ev defined")
+             cl(h)
+            //keepErrorsOn(this){cl(h)}
           case false =>
+            //println("Ev not defined")
         }
     }
 
   }
+  def onGatheredBy(h:Harvester)(cl: => Unit) = {
+    this.onGathered {
+      case gh if (gh==h) => cl
+    }
 
-  def onCleaned(cl: PartialFunction[Harvester, Unit]) = {
+  }
+  
+  def clean = {
+    this.@->("clean")
+  }
+
+  def onClean(cl: =>Any) : Unit = {
+    this.on("clean") {
+      cl
+    }
+  }
+  def onClean(cl: PartialFunction[Harvester, Unit]) : Unit = onCleaned(cl)
+  def onCleaned(cl: PartialFunction[Harvester, Unit]) : Unit = {
     this.onWith("clean") {
       h: Harvester =>
         cl.isDefinedAt(h) match {

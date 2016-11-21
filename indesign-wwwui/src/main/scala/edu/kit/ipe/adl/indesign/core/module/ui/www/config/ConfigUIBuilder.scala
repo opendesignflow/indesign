@@ -66,7 +66,9 @@ trait ConfigUIBuilder extends ExternalBuilder {
 
                         }
                         td("") {
-                          $(<i class="remove circle icon"></i>)
+                          $(<i class="remove circle icon"></i>) {
+
+                          }
                           "remove circle icon" :: i {
                             onClick {
                               key.values -= value

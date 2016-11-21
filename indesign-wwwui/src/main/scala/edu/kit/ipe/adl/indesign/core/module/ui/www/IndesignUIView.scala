@@ -2,7 +2,6 @@ package edu.kit.ipe.adl.indesign.core.module.ui.www
 
 import edu.kit.ipe.adl.indesign.core.harvest.HarvestedResource
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
-import org.hamcrest.core.IsInstanceOf
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIewCompiler
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.JavaSourceFile
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.SourceFile

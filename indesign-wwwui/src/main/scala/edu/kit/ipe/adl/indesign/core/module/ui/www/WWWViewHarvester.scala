@@ -18,15 +18,18 @@ class WWWViewHarvester extends Harvester {
   this.onDeliver {
     case r: IndesignUIView =>
       gather(r)
-      //println(s"Got a view delivered, size now: " + this.getResources.size)
+      //println(s"Got a view delivered $r, size now: " + this.getResources.size)
       r.onGathered {
-        case h if(h==this) => 
+        case h => 
           
+         // println(s"View gathered")
           // If View has a specific target path, then register it in Local Web Tree
           r.targetViewPath match {
             case Some(path)  =>
+              //println("Adding view as standlone: "+path)
               LocalWebEngine.addViewHandler(path, r.getClass)
             case _ => 
+             // println(s"View In other WWW h")
           }
       }
       true

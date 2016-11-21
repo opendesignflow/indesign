@@ -50,7 +50,14 @@ object IndesignWWWUIModule extends IndesignModule {
   }
 
   this.onStop {
+    println("Stopping WWW UI")
     LocalWebEngine.lStop
+    LocalWebEngine.uiFrame match {
+      case Some(f) =>
+        f.dispose()
+        f.setVisible(false)
+      case None => 
+    }
   }
 
 }

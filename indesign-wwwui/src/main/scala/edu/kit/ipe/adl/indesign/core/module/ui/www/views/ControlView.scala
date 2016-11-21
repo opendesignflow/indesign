@@ -51,7 +51,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 */
       // Brain
       //-------------------
-      $(<h2 class="ui header">
+      importHTML(<h2 class="ui header">
           <i class="settings icon"></i>
           <div class="content">
             Brain
@@ -194,8 +194,8 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
               // name
               "collapsing" :: td("") {
-                $(<i class="block layout icon"></i>)
-                $(<i class="settings icon ui popup-activate"></i>)
+                importHTML(<i class="block layout icon"></i>)
+                importHTML(<i class="settings icon ui popup-activate"></i>)
 
                 "ui flowing popup top left transition hidden" :: div {
                   h4("Config") {
@@ -259,7 +259,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                     span(textContent(region.errors.size.toString))
                   case false =>
                     classes("positive")
-                    $(<i class="icon checkmark"></i>)
+                    importHTML(<i class="icon checkmark"></i>)
                     span(textContent("None"))
                 }
 
@@ -403,7 +403,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
       // Harvest
       //------------------
-      $(<h2 class="ui header">
+      importHTML(<h2 class="ui header">
           <i class="settings icon"></i>
           <div class="content">
             Harvest
@@ -462,8 +462,8 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
               td("") {
 
-                $(<i class="shipping icon"></i>)
-                $(<i class="settings icon ui popup-activate"></i>)
+                importHTML(<i class="shipping icon"></i>)
+                importHTML(<i class="settings icon ui popup-activate"></i>)
 
                 "ui flowing popup top left transition hidden" :: div {
                   h4("Config") {

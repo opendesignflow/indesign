@@ -63,7 +63,7 @@ object LuceneTry extends App with TimingSupport {
     }
   })
   fsh.harvest
-  h.finishGather
+ // h.finishGather
   
   println(s"Total of "+h.getResources.size)
   

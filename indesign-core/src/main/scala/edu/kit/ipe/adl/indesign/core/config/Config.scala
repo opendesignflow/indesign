@@ -72,4 +72,13 @@ object Config extends BrainRegion {
     }
 
   }
+  
+  // Def Builders
+  //------------------
+  def apply (imp: ConfigImplementation) = {
+    
+    this.setImplementation(imp)
+    
+    this
+  }
 }

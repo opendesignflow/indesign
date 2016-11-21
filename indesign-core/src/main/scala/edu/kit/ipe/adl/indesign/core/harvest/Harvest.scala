@@ -40,9 +40,10 @@ object Harvest extends BrainRegion {
 
   var harvesters = List[Harvester]()
   def addHarvester(h: Harvester) = {
+ 
     this.harvesters.contains(h) match {
       case true =>
-      case false => this.harvesters = this.harvesters :+ h
+      case false => this.harvesters = this.harvesters :+ h.getTopHarvester
     }
 
     h

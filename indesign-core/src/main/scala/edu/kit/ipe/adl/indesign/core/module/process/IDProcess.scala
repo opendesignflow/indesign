@@ -19,7 +19,8 @@ class IDProcess(val processBuilder: ProcessBuilder) extends HarvestedResource wi
   def inheritIO = process match {
     case None =>
       processBuilder.redirectErrorStream(true)
-      processBuilder.inheritIO()
+      processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+    //processBuilder.inheritIO()
     case _ => throw new RuntimeException("Process Already Started")
   }
 
@@ -33,7 +34,7 @@ class IDProcess(val processBuilder: ProcessBuilder) extends HarvestedResource wi
       var th = createThread {
 
         // Started when the process starts 
-        var br =process.get.getInputStream
+        var br = process.get.getInputStream
 
         // Output buffer
         outputBuffer = Some(new ByteArrayOutputStream(4096))
@@ -90,7 +91,18 @@ class IDProcess(val processBuilder: ProcessBuilder) extends HarvestedResource wi
    */
   def startProcessAndWait = {
     this.startProcess
-    this.process.get.waitFor()
+    waitOnProcess
+  }
+
+  def waitOnProcess = this.process match {
+    case Some(p) if (p.isAlive) =>
+      this.process.get.waitFor()
+      this.process = None
+
+    case Some(p) =>
+      this.process = None
+    case _ =>
+
   }
 
   def killProcess = process match {
@@ -105,13 +117,16 @@ class IDProcess(val processBuilder: ProcessBuilder) extends HarvestedResource wi
   // Cleaning
   //----------------
 
-  def clean = process match {
-    case Some(p) =>
-      throw new RuntimeException("Cannot clean during tool run")
+  this.onClean {
+    process match {
 
-    case None =>
-      this.outputBuffer = None
-      this.outputBufferThread = None
-      System.gc
+      case Some(p) =>
+        throw new RuntimeException("Cannot clean during tool run")
+
+      case None =>
+        this.outputBuffer = None
+        this.outputBufferThread = None
+        System.gc
+    }
   }
 }

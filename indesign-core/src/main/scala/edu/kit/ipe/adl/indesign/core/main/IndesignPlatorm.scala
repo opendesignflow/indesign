@@ -31,6 +31,10 @@ object IndesignPlatorm extends App {
     Harvest.run
   }
 
+  def stop = {
+    Brain.moveToShutdown
+  }
+  
   def use(r: BrainRegion): BrainRegion = {
     Brain.deliverDirect(r)
     r

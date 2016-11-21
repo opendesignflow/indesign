@@ -54,7 +54,9 @@ class project extends projectTrait {
 
 object project {
 
-  def apply(url: java.net.URL) = {
+  def apply(f: java.io.File) : project= apply(f.toURI().toURL())
+  
+  def apply(url: java.net.URL) : project = {
 
     // Instanciate
     var res = new project

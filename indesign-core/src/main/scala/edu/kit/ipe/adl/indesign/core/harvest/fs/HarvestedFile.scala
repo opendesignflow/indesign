@@ -9,7 +9,7 @@ import java.io.File
 
 class HarvestedFile(val path: Path) extends HarvestedResource {
 
-  def getId = path.toAbsolutePath().toString()
+  def getId = getClass.getCanonicalName+":"+path.toAbsolutePath().toString()
   def getName = path.getFileName.toString()
   
   override def toString = getClass.getSimpleName.replace("$", "") + ": " + getId
@@ -49,4 +49,13 @@ class HarvestedFile(val path: Path) extends HarvestedResource {
 
   }
 
+}
+
+object HarvestedFile {
+  
+  def apply (f:File) = new HarvestedFile(f.toPath)
+  def apply (f:Path) = new HarvestedFile(f)
+  
+  implicit def harvestedFileToJavaFile(hf:HarvestedFile) = hf.path.toFile().getCanonicalFile
+  
 }

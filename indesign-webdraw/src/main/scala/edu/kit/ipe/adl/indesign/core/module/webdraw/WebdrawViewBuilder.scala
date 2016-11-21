@@ -6,6 +6,7 @@ import com.idyria.osi.vui.html.HTMLNode
 import org.w3c.dom.html.HTMLElement
 
 trait WebdrawViewBuilder extends ExternalBuilder {
+  
   override def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
 
     super.externalAdd(targetNode)

@@ -37,7 +37,9 @@ Typical Child Harvesters of FSH will  gather repositories like GIT, or projects 
           // Get All Paths
           //--------------------
           "ui raised segment" :: div {
-            $(<a class="ui blue ribbon label">Runtime Paths</a>)
+            $(<a class="ui blue ribbon label">Runtime Paths</a>) {
+              
+            }
 
             p(textContent("""
               The runtime paths are the paths used by FSH at the moment.
@@ -93,9 +95,9 @@ Typical Child Harvesters of FSH will  gather repositories like GIT, or projects 
           // Get Config Paths
           //--------------------
           "ui raised segment" :: div {
-            $(<a class="ui blue ribbon label">Configuration Paths</a>)
+            importHTML(<a class="ui blue ribbon label">Configuration Paths</a>) 
 
-            $("""
+            p("""
               The configuration paths are set in the FSH config.
               When added or removed, it will affect the FSH runtime paths accross restarts of Indesign
               """)

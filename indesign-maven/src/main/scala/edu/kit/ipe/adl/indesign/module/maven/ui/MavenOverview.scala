@@ -31,7 +31,7 @@ class MavenOverview extends IndesignUIView {
         case _ =>
           "ui raised segment" :: div {
 
-            $(<a class="ui blue ribbon label">Maven External Regions</a>)
+            importHTML(<a class="ui blue ribbon label">Maven External Regions</a>)
 
             var regionsContainer = mavenRegions.map {
               r => r.asInstanceOf[ArtifactRegion]
@@ -72,12 +72,12 @@ class MavenOverview extends IndesignUIView {
       }
       projects.size match {
         case 0 =>
-          "ui info message" :: $("No Maven Projects Detected")
+          "ui info message" :: p("No Maven Projects Detected")
         case _ =>
           "ui raised segment" :: div {
 
-            $(<a class="ui blue ribbon label">Maven Projects</a>)
-            $("""Please find here a summary of the Detected Maven Projects""")
+            importHTML(<a class="ui blue ribbon label">Maven Projects</a>)
+            p("""Please find here a summary of the Detected Maven Projects""")
 
             ul {
 

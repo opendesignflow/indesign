@@ -80,6 +80,10 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
   def waitForRunning = this.waitForState(HeartTask.RUNNING.name)
 
   var stopSignal = new Semaphore(0)
+  
+  def kill = {
+    Heart.killTask(this)
+  }
 
   // Timings
   //----------------
@@ -131,7 +135,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
     HeartTask.moveToState(this, HeartTask.DONE.name)
     (scheduleAfter, scheduleEvery) match {
       case (None, None) =>
-        this.@->("clean", this.originalHarvester.get)
+        this.@->("clean", this.originalHarvester)
       case _ =>
     }
     this.scheduleFuture = None
@@ -145,6 +149,8 @@ trait DefaultHeartTask extends HeartTask[Unit] {
 
   def getId = hashCode.toString
 }
+
+
 
 object HeartTask extends LFCDefinition {
 

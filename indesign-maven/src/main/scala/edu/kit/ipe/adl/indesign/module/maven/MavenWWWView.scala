@@ -30,7 +30,7 @@ class MavenWWWView (val mavenProject: MavenProjectResource) extends IndesignUIVi
       }
       
       "ui segment" :: div {
-        $(<a class="ui blue ribbon label">Dependencies</a>)
+        importHTML(<a class="ui blue ribbon label">Dependencies</a>)
         
         "ui table" :: table {
           thead {

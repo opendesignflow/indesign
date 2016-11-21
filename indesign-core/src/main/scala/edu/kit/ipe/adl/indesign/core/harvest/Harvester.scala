@@ -17,7 +17,7 @@ import java.util.concurrent.Semaphore
  */
 trait Harvester extends LFCSupport with ErrorSupport with TLogSource with ConfigSupport {
 
-  override def getId = "default"
+  //override def getId = "default"
 
   // Config And Statistics
   //--------------
@@ -26,8 +26,8 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   // Focused Mode
   // -- Don't run harvester unless explicitely
   //---------------
-  var focused = false
-  def isFocused = focused
+  //var focused = false
+  //def isFocused = focused
 
   // Taint Check
   def isTainted = this.getClass.getClassLoader.isInstanceOf[ClassDomain] && this.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted
@@ -79,6 +79,41 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case res if (res.size > 0) => Some(res)
       case res => None
     }
+  }
+  
+  /**
+   * Return Top Harvester
+   */
+  def getTopHarvester = {
+    
+    var current = this
+    while (current.parentHarvester.isDefined) {
+      current = current.parentHarvester.get 
+    }
+    current
+    
+  }
+
+  /**
+   * Process Depth first ordered
+   */
+  def onChildHarvestersLevelOrder(cl: Harvester => Unit): Unit = {
+
+    var processList = new scala.collection.mutable.Stack[Harvester]()
+    processList ++= this.childHarvesters
+
+    while (processList.nonEmpty) {
+
+      var h = processList.pop()
+
+      keepErrorsOn(h) {
+        // Process Current harvester
+        cl(h)
+        // Add children to end of process list to keep level order
+        processList.pushAll(h.childHarvesters)
+      }
+    }
+
   }
 
   def hierarchyName(sep: String = ".", withoutSelf: Boolean = false) = {
@@ -134,6 +169,10 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.harvestedResources += r
     r
   }
+  def gatherAll[CT <: HarvestedResource](r: List[CT]) = {
+    this.harvestedResources ++= (r)
+    r
+  }
 
   /**
    * Return available resources list
@@ -155,19 +194,40 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case None => None
     }
   }
+  
+  def getResourceExact[CT <: HarvestedResource](implicit cl: ClassTag[CT]): Option[CT] = {
+
+    this.getResources.find { r => cl.runtimeClass.isInstance(r) && cl.runtimeClass==r} match {
+      case Some(r) => Some(r.asInstanceOf[CT])
+      case None => None
+    }
+  }
 
   /**
-   * Do Exact Type check
+   * Do Type check, will match all resources of type CT
    */
   def getResourcesOfType[CT <: HarvestedResource](implicit cl: ClassTag[CT]): List[CT] = {
 
     this.getResources.collect { case r if (cl.runtimeClass.isInstance(r)) => r.asInstanceOf[CT] }
   }
-
+  
+   /**
+   *  @see getResourcesOfType
+   */
   def getResourcesOfTypeClass[CT <: HarvestedResource](cl: Class[CT]): List[CT] = {
 
     this.getResources.collect { case r if (cl.isInstance(r)) => r.asInstanceOf[CT] }
   }
+  
+  /**
+   * Returns only the resources whose type is exactly CT
+   */
+  def getResourcesOfExactType[CT <: HarvestedResource](implicit cl: ClassTag[CT]): List[CT] = {
+
+    this.getResources.collect { case r if (cl.runtimeClass.isInstance(r) && cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r.asInstanceOf[CT] }
+  }
+
+ 
 
   /**
    * Type Check is done but no class casting will be involed
@@ -178,57 +238,96 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.getResources.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r }
   }
 
+  def hasResources = this.availableResources.size match {
+    case 0 => false
+    case _ => true
+  }
+  /**
+   * Runs closure if no resources are available
+   */
+  def noResources(cl: => Any): Option[Any] = hasResources match {
+    case true =>
+      None
+    case false =>
+      Some(cl)
+  }
+
+  /**
+   * Runs closure if resources are available
+   */
+  def ifResources(cl: => Any): Option[Any] = hasResources match {
+    case true =>
+      Some(cl)
+    case false =>
+      None
+  }
+
+  def withResources[CT <: HarvestedResource](closure: List[CT] => Any)(implicit cl: ClassTag[CT]): Option[Any] = {
+    var resourcesList = this.getResourcesOfType[CT]
+    resourcesList.isEmpty match {
+      case true =>
+        None
+      case false =>
+        Some(closure(resourcesList))
+    }
+  }
+
   /**
    * Harvest Gather ressources, wich are added to gathered resources
    * implementations should override this method, then call super.harvest at the end
    */
   def harvest = {
+    this.synchronized {
+      logFine[Harvester](s"----------- Starting Harvest on " + this.getClass.getCanonicalName)
 
-    logFine[Harvester](s"----------- Starting Harvest on " + this.getClass.getCanonicalName)
-
-    // Deliver current resources to childnre
-    //--------------------
-    this.childHarvesters.foreach {
-      ch =>
-        this.availableResources.foreach {
-          r =>
-          //ch.deliver(r)
-        }
-      //ch.finishHarvest(ch.autoCleanResources)
-    }
-
-    // Do harvest implementation for extra resources
-    //-----------------
-    var oldcl = Thread.currentThread().getContextClassLoader
-    try {
-      this.lastRun = System.currentTimeMillis()
-      Thread.currentThread().setContextClassLoader(this.getClass.getClassLoader)
-      //finishGather
-      try {
-        doHarvest
-        finishGather
-      } catch {
-        case e: NothingGatheredException =>
-        case e: Throwable => throw e
+      // Deliver current resources to childnre
+      //--------------------
+      this.childHarvesters.foreach {
+        ch =>
+          this.availableResources.foreach {
+            r =>
+            //ch.deliver(r)
+          }
+        //ch.finishHarvest(ch.autoCleanResources)
       }
 
-    } catch {
-      case e: Throwable =>
-        e.printStackTrace()
-        throw e
-    } finally {
-      Thread.currentThread().setContextClassLoader(oldcl)
-    }
-
-    // Finish Gathering on children
-    //-------------
-    this.childHarvesters.foreach {
-      c =>
-        this.availableResources.filter(r => !r.local).foreach {
-          r =>
-            c.deliver(r)
+      // Do harvest implementation for extra resources
+      //-----------------
+      var oldcl = Thread.currentThread().getContextClassLoader
+      try {
+        this.lastRun = System.currentTimeMillis()
+        Thread.currentThread().setContextClassLoader(this.getClass.getClassLoader)
+        //finishGather
+        try {
+          doHarvest
+          finishGather()
+        } catch {
+          case e: NothingGatheredException =>
+          case e: Throwable => throw e
         }
-        c.finishGather
+
+      } catch {
+        case e: Throwable =>
+          e.printStackTrace()
+          throw e
+      } finally {
+        Thread.currentThread().setContextClassLoader(oldcl)
+      }
+
+      // Finish Gathering on children
+      //-------------
+      this.childHarvesters.foreach {
+        c =>
+          c.synchronized {
+            this.availableResources.filter(r => !r.local).foreach {
+              r =>
+                c.deliver(r)
+            }
+            c.finishGather()
+          }
+
+      }
+
     }
     //finishHarvest(autoCleanResources)
   }
@@ -243,7 +342,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   /**
    * Finish harvest by reloading harvested and gathered resources
    */
-  def finishGather: Unit = {
+  def finishGather(dispatchResources: Boolean = false): Unit = {
 
     logFine[Harvester](s"----------- Starting finish Harvest on " + this.getClass.getCanonicalName + " with : " + this.harvestedResources.toList + " and " + this.availableResources.size + " available")
 
@@ -256,6 +355,11 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
         r.@->("clean", this)
       case _ =>
     }
+    
+    // Clean Gathered Resources: Remove duplicate ID
+    /*this.harvestedResources.groupBy { r => r.getId }.foreach {
+      case (k,vals) => vals.drop(1).foreach(this.harvestedResources.remove(_))
+    }*/
 
     // Go through available resources
     //  -> Remove the ones which are not in the gathered, if autoclean is set to true
@@ -329,6 +433,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       r =>
         logFine[Harvester](s"Gathered on: " + r)
         r.@->("gathered", this)
+        this.@->("gathered", r)
     }
 
     //-- Call GatheredResources on the Harvester itself
@@ -347,7 +452,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case 0 =>
         this.waitForResourcesAvailableSemaphore.drainPermits()
       // Some resources and no permits, deliver one 
-      case _ if (this.waitForResourcesAvailableSemaphore.availablePermits()==0) =>
+      case _ if (this.waitForResourcesAvailableSemaphore.availablePermits() == 0) =>
         this.waitForResourcesAvailableSemaphore.release
       // Some resources and a permit is already there, do nothing
       case _ =>
@@ -355,9 +460,22 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
     logFine[Harvester](s"----------- Finish Harvest on " + this.getClass.getCanonicalName + " with : " + this.harvestedResources.toList + " and " + this.availableResources.size + " available")
 
-  }
+    // Deliber to children
+    if (dispatchResources) {
+      this.childHarvesters.foreach {
+        c =>
+          c.synchronized {
+            this.availableResources.filter(r => !r.local).foreach {
+              r =>
+                c.deliver(r)
+            }
+            c.finishGather(dispatchResources=true)
+          }
 
-  var deliverClosure: PartialFunction[HarvestedResource, Boolean] = { case _ => false }
+      }
+    }
+
+  }
 
   //def deliver_=(pf:PartialFunction[HarvestedResource,Boolean]) : Unit = this.deliverClosure = pf
   //def deliver :  PartialFunction[HarvestedResource,Boolean] = this.deliverClosure
@@ -367,17 +485,19 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
    * Deliver is called by parent
    */
   def deliver(r: HarvestedResource): Boolean = {
-    deliverClosure.isDefinedAt(r) match {
+
+    deliverClosures.filter { p => p.isDefinedAt(r) }.map { p => p(r) }.find { _ == true }.isDefined
+    /* deliverClosure.isDefinedAt(r) match {
       case true => deliverClosure(r)
       case false => false
-    }
+    }*/
   }
 
   def deliverDirect(r: HarvestedResource): Boolean = {
     this.deliver(r) match {
       case true =>
         r.root
-        this.finishGather
+        this.finishGather()
         true
       case false => false
     }
@@ -401,12 +521,52 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   }
 
+  def cleanResources = {
+    this.availableResources.clear()
+    this.harvestedResources.clear()
+  }
+  
+  def cleanResourcesOfType[RT <: HarvestedResource](implicit tag: ClassTag[RT]) = {
+    
+    this.getResourcesOfType[RT].foreach(cleanResource(_))
+  }
+
+  /**
+   * Replace all resources of matching type with new ones
+   */
+  def replaceResourcesOfType[RT <: HarvestedResource](newR: List[RT])(implicit tag: ClassTag[RT]) = {
+
+    // Clean resources of type
+    this.getResourcesOfType[RT].foreach(cleanResource(_))
+
+    this.gatherDirectAll(newR)
+  }
+
+  /**
+   * Replace single resource of certain type with one
+   */
+  def replaceResourceOfType[RT <: HarvestedResource](newR: RT)(implicit tag: ClassTag[RT]) = {
+
+    // Clean resources of type
+    this.getResource[RT] match {
+      case Some(r) => this.cleanResource(r)
+      case None =>
+    }
+    this.gatherDirect(newR)
+  }
+
+  // Delivery
+  //--------------
+
+  var deliverClosures: List[PartialFunction[HarvestedResource, Boolean]] = List({ case _ => false })
+
   def onDeliver(pf: PartialFunction[HarvestedResource, Boolean]): Unit = {
-    this.deliverClosure = pf
+    this.deliverClosures = deliverClosures :+ pf
   }
 
   def onDeliverFor[CT <: HarvestedResource](pf: PartialFunction[CT, Boolean])(implicit cl: ClassTag[CT]): Unit = {
-    this.deliverClosure = {
+
+    var realClosure: PartialFunction[HarvestedResource, Boolean] = {
       case r if (cl.runtimeClass.isInstance(r)) =>
 
         pf.isDefinedAt(r.asInstanceOf[CT]) match {
@@ -415,6 +575,65 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
         }
 
     }
+    this.deliverClosures = deliverClosures :+ realClosure
+  }
+
+  /**
+   * Gathers a resource and calls finish harvest
+   * Resource is not rooted
+   */
+  def gatherDirect(r: HarvestedResource) = {
+    this.synchronized {
+      this.gather(r)
+      this.finishGather(true)
+    }
+
+  }
+
+  def gatherDirectAll(r: List[HarvestedResource]) = {
+    this.synchronized {
+      this.gatherAll(r)
+      this.finishGather(true)
+    }
+
+  }
+
+  /**
+   * Gathers a resource and calls finish harvest
+   * Resource is  rooted
+   *
+   */
+  def gatherPermanent(r: HarvestedResource) = {
+    this.synchronized {
+      r.root
+      this.gather(r)
+      this.finishGather(true)
+    }
+
+    /*this.availableResources.contains(r) match {
+      case true => 
+        false
+      case false => 
+        r.root
+        this.availableResources += r
+        true
+    }*/
+  }
+  /**
+   * Direct gather just adds a resource to the availableResources
+   * @returns true if added, false if not
+   */
+  def saveToAvailableResources(r: HarvestedResource) = {
+
+    this.availableResources.contains(r) match {
+      case true =>
+        false
+      case false =>
+        r.root
+        this.availableResources += r
+        true
+    }
+
   }
 
   // Resource Process
@@ -423,6 +642,12 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   def onGatheredResources(cl: List[HarvestedResource] => Unit) = {
     this.onWith("gatheredResources") {
       rl: List[HarvestedResource] => cl(rl)
+    }
+  }
+
+  def onGathered[T <: HarvestedResource](cl: T => Unit)(implicit tag: ClassTag[T]) = {
+    this.onWith[T]("gathered") {
+      rl: T => cl(rl)
     }
   }
 
