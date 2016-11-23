@@ -17,13 +17,7 @@ trait SuperChartBuilder extends ExternalBuilder {
     super.externalAdd(targetNode)
     switchToNode(targetNode, {
 
-      var n = script(new URI(createSpecialPath("resources", "modules/webdraw/superchart/superchart.js"))) {
-
-      }
-
-      stylesheet(new URI(createSpecialPath("resources", "modules/webdraw/superchart/superchart.css"))) {
-
-      }
+     
 
       stylesheet(getViewResourcePath("modules/webdraw/superchart/jqplot/jquery.jqplot.css")) {
 
@@ -36,6 +30,14 @@ trait SuperChartBuilder extends ExternalBuilder {
           script(getViewResourcePath(s"modules/webdraw/superchart/jqplot/plugins/jqplot.${pn}.min.js")) {
 
           }
+
+      }
+      
+       var n = script(new URI(createSpecialPath("resources", "modules/webdraw/superchart/superchart.js"))) {
+
+      }
+
+      stylesheet(new URI(createSpecialPath("resources", "modules/webdraw/superchart/superchart.css"))) {
 
       }
 
