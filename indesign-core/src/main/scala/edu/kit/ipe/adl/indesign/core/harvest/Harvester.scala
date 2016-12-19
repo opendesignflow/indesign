@@ -242,6 +242,18 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     case 0 => false
     case _ => true
   }
+  
+  def hasResource(obj:HarvestedResource) : Boolean = {
+    this.availableResources.contains(obj)
+  }
+  
+  def withResource(obj:HarvestedResource)(cl: => Unit) : Unit = {
+    this.hasResource(obj) match {
+      case true => 
+        cl
+      case false => 
+    }
+  }
   /**
    * Runs closure if no resources are available
    */

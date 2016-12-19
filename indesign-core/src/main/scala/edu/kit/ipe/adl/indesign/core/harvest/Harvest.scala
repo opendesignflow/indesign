@@ -57,10 +57,10 @@ object Harvest extends BrainRegion {
    * Type Check is done but no class casting will be involed
    * @warning: Useful to find objects matching a type whose definition may be outdated due to classloading reload
    */
-  def getHarvesters[CT <: Harvester](implicit cl: ClassTag[CT]): Option[List[Harvester]] = {
+  def getHarvesters[CT <: Harvester](implicit cl: ClassTag[CT]): Option[List[CT]] = {
 
     this.harvesters.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r } match {
-      case res if (res.size > 0) => Some(res)
+      case res if (res.size > 0) => Some(res.map { h => h.asInstanceOf[CT]})
       case res => None
     }
   }

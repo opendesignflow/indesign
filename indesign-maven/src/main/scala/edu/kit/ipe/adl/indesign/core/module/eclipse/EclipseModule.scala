@@ -15,16 +15,29 @@ import edu.kit.ipe.adl.indesign.core.module.IndesignModule
 
 object EclipseModule extends IndesignModule {
 
-  def load = {
-
-    Harvest.registerAutoHarvesterClass(classOf[FileSystemHarvester], classOf[EclipseWorkspaceHarvester])
-
+  
+  this.onInit {
+    Harvest.addHarvester(EclipseWorkspaceHarvester)
   }
+  
+  
 
 }
 
-class EclipseWorkspaceHarvester extends Harvester {
+object EclipseWorkspaceHarvester extends Harvester {
 
+  
+  override def doHarvest = {
+    
+    var sources = (EclipseModule.getDerivedResources[HarvestedFile] ::: this.getResourcesOfExactType[HarvestedFile])
+    sources.foreach {
+      case folder if (folder.isDirectory && folder.hasSubFile(".metadata", "version.ini").isDefined) =>
+        this.deliver(folder)
+      case other => 
+    }
+    
+  }
+  
   this.onDeliverFor[HarvestedFile] {
     case folder if (folder.isDirectory && folder.hasSubFile(".metadata", "version.ini").isDefined) =>
 
@@ -43,7 +56,7 @@ class EclipseWorkspaceHarvester extends Harvester {
 
           case Some(lockFile) =>
 
-            println(s"****(Eclipse) Eclipse workspace is open, check lock: " + lockFile)
+            //println(s"****(Eclipse) Eclipse workspace is open, check lock: " + lockFile)
             OSDetector.getOS match {
               case OSDetector.OS.LINUX =>
                 var p = Process(Seq("lsof", "-l", "+D", lockFile.getParentFile.getAbsolutePath))

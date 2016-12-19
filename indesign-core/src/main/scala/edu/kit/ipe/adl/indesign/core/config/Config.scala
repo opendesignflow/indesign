@@ -7,6 +7,7 @@ import edu.kit.ipe.adl.indesign.core.config.model.HarvesterConfig
 import edu.kit.ipe.adl.indesign.core.config.model.DefaultConfig
 import edu.kit.ipe.adl.indesign.core.config.model.RegionConfig
 import edu.kit.ipe.adl.indesign.core.config.model.CommonConfig
+import com.idyria.osi.ooxoo.db.store.DocumentContainer
 
 object Config extends BrainRegion {
 
@@ -81,4 +82,24 @@ object Config extends BrainRegion {
     
     this
   }
+  
+  // Generic Database Access
+  //------------------------
+  
+   def getContainerFor(cl:String) : Option[DocumentContainer] = {
+    
+    this.implementation match {
+      case Some(implementation) => 
+        Some(implementation.getContainer(cl))
+      case None => None
+    }
+    
+  }
+  
+  /**
+   * Returns a container named after the class
+   */
+  def getContainerFor(cl:Class[_]) : Option[DocumentContainer] = getContainerFor(cl.getCanonicalName.replace("$", ""))
+  
+  def getContainerFor(o:AnyRef) : Option[DocumentContainer] =  this.getContainerFor(o.getClass)
 }

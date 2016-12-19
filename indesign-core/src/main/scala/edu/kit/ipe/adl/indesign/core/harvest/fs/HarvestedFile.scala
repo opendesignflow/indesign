@@ -26,6 +26,19 @@ class HarvestedFile(val path: Path) extends HarvestedResource {
       case false => None
     }
   }
+  
+  def getExtension = path.toFile.getName.split("\\.").last
+  
+  // Check rights
+  //---------
+  
+  def canWrite = {
+    path.toFile().canWrite()
+  }
+  
+  def canRead = {
+    path.toFile().canRead()
+  }
 
   // Get And Cache Content
   //--------
@@ -48,6 +61,8 @@ class HarvestedFile(val path: Path) extends HarvestedResource {
     }
 
   }
+  
+ 
 
 }
 

@@ -2,6 +2,7 @@ package edu.kit.ipe.adl.indesign.core.harvest.fs
 
 import java.nio.file.Path
 import java.nio.file.Files
+import java.io.File
 
 class HarvestedTextFile(path: Path) extends HarvestedFile(path) {
 
@@ -81,4 +82,10 @@ class HarvestedTextFile(path: Path) extends HarvestedFile(path) {
 
   }
 
+}
+
+object HarvestedTextFile {
+  
+  def apply (f:File) = new HarvestedTextFile(f.toPath)
+  def apply (f:Path) = new HarvestedTextFile(f)
 }

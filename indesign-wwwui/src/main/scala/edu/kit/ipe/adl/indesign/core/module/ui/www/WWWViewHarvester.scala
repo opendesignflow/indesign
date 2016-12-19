@@ -4,6 +4,8 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvester
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.module.buildsystem.JavaSourceFile
 import com.idyria.osi.wsb.webapp.localweb.LocalWebEngine
+import com.idyria.osi.vui.core.view.AView
+import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
 
 class WWWViewHarvester extends Harvester {
 
@@ -13,6 +15,12 @@ class WWWViewHarvester extends Harvester {
     
    // println("Doing harvest on ")
     
+  }
+  
+  def deliverDirectToPath(pair:(String , IndesignUIView)) = {
+    var v = pair._2
+    v.changeTargetViewPath(pair._1)
+    this.deliverDirect(v)
   }
   
   this.onDeliver {
