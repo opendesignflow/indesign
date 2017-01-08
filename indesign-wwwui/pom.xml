@@ -6,9 +6,9 @@
 
 
 	<parent>
-		<groupId>edu.kit.ipe.adl.indesign</groupId>
+		<groupId>org.odfi.indesign</groupId>
 		<artifactId>indesign-parent</artifactId>
-		<version>0.0.1</version>
+		<version>1.0.0</version>
 		<relativePath>../</relativePath>
 	</parent>
 
@@ -94,9 +94,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.idyria.osi.wsb</groupId>
+			<groupId>org.odfi.wsb</groupId>
 			<artifactId>wsb-webapp</artifactId>
-			<version>2.0.0</version>
+			<version>2.1.1</version>
 		</dependency>
 
 	</dependencies>

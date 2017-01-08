@@ -5,9 +5,9 @@
 	<name>InDesign Git</name>
 
 	<parent>
-		<groupId>edu.kit.ipe.adl.indesign</groupId>
+		<groupId>org.odfi.indesign</groupId>
 		<artifactId>indesign-parent</artifactId>
-		<version>0.0.1</version>
+		<version>1.0.0</version>
 		<relativePath>../</relativePath>
 	</parent>
 
