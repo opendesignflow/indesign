@@ -17,7 +17,7 @@ node {
 
     if (env.BRANCH_NAME == 'master') {
       sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore test"
-    else {
+    } else {
       sh "${mvnHome}/bin/mvn -B test"
     }
     junit '**/target/surefire-reports/TEST-*.xml'
