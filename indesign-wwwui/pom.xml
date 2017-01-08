@@ -94,9 +94,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.idyria.osi.wsb</groupId>
+			<groupId>org.odfi.wsb</groupId>
 			<artifactId>wsb-webapp</artifactId>
-			<version>2.0.0</version>
+			<version>2.1.1</version>
 		</dependency>
 
 	</dependencies>
