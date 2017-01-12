@@ -1,6 +1,7 @@
-package edu.kit.ipe.adl.indesign.core.artifactresolver
+package org.odfi.indesign.core.artifactresolver
 
 import org.scalatest.FunSuite
+import org.odfi.indesign.core.artifactresolver.AetherResolver;
 import org.scalatest.BeforeAndAfterAll
 import java.io.File
 import org.scalatest.BeforeAndAfterAllConfigMap

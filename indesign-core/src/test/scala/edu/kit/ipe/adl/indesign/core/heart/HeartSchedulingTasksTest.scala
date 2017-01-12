@@ -1,5 +1,6 @@
-package edu.kit.ipe.adl.indesign.core.heart
+package org.odfi.indesign.core.heart
 
+import org.odfi.indesign.core.heart.Heart;
 import org.scalatest.FunSuite
 import java.util.concurrent.Semaphore
 import com.idyria.osi.tea.logging.TLog

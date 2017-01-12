@@ -1,7 +1,8 @@
-package edu.kit.ipe.adl.indesign.core.harvest
+package org.odfi.indesign.core.harvest
 
 import org.scalatest.FunSuite
 import org.scalatest.GivenWhenThen
+import org.odfi.indesign.core.harvest.Harvest;
 import org.scalatest.BeforeAndAfter
 
 class HarvesterA extends Harvester {
