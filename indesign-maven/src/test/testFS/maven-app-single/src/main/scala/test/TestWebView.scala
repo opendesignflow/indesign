@@ -1,6 +1,6 @@
 package test 
 
-import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignUIView
+import org.odfi.indesign.core.module.ui.www.IndesignUIView
 import java.io.File
 import java.io.StringWriter
 import java.io.PrintWriter

@@ -1,6 +1,6 @@
 package appDep.test
 
-import edu.kit.ipe.adl.indesign.core.module._
+import org.odfi.indesign.core.module._
 
 object AppDepModule extends IndesignModule  {
   
