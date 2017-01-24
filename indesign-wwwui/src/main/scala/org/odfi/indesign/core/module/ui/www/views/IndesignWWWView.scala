@@ -119,10 +119,10 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
               // Group UI Views and make menus from each
               //-------------
               var wwwvieh = Harvest.getHarvesters[WWWViewHarvester].get.last
-              println("WWWh: "+wwwvieh)
+             // println("WWWh: "+wwwvieh)
               var views = wwwvieh.getResourcesOfType[IndesignUIView]
-               println("Views: "+views)
-               println("Views lazy: "+wwwvieh.getResourcesOfLazyType[IndesignUIView])
+              // println("Views: "+views)
+              // println("Views lazy: "+wwwvieh.getResourcesOfLazyType[IndesignUIView])
               var groupedViews = views.groupBy { view => view.originalHarvester.get.getClass.getCanonicalName.split("\\.").last }
               groupedViews.foreach {
                 case (key, moduleViews) if (moduleViews.size > 0) =>
