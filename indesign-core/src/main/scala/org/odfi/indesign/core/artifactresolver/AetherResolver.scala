@@ -82,7 +82,8 @@ class AetherConfiguration extends ListeningSupport {
   def addDefaultRemoteRepository(id: String, url: URL) = {
 
     var rb = new RemoteRepository.Builder(id, "default", url.toExternalForm())
-    this.repositories = this.repositories :+ rb.build()
+    var rep =  rb.build()
+    this.repositories = this.repositories :+ rep
 
   }
 
