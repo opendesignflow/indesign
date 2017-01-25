@@ -1,3 +1,10 @@
+// Take the string and echo it.
+def transformIntoStep(jobFullName) {
+    return {
+       build job: jobFullName
+    }
+}
+
 // Indesign
 node {
  
@@ -32,6 +39,36 @@ node {
         sh "${mvnHome}/bin/mvn -B -DskipTests=true -Dmaven.test.failure.ignore deploy"
         step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
     }
+
+    // Trigger sub builds on dev
+    if (env.BRANCH_NAME == 'dev') {
+
+      stage('Downstream') {
+
+        def downstreams = ['../indesign-ide/dev']
+        def stepsForParallel = [:]
+        for (x in downstreams) {
+          def ds = x 
+          stepsForParallel[ds] = transformIntoStep(ds) 
+          /*{
+              //node {
+                stage("Downstream for "+ds) {
+                  build job: ds
+                }
+              //}
+            }*/
+        }
+        
+
+        parallel stepsForParallel
+
+      }
+
+      
+
+      
+    }
+
 
   } else {
     stage('Package') {
