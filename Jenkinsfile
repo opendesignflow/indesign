@@ -1,7 +1,7 @@
 // Take the string and echo it.
 def transformIntoStep(jobFullName) {
     return {
-       build job: jobFullName
+       build job: jobFullName , wait: false, propagate: false
     }
 }
 
@@ -50,22 +50,11 @@ node {
         for (x in downstreams) {
           def ds = x 
           stepsForParallel[ds] = transformIntoStep(ds) 
-          /*{
-              //node {
-                stage("Downstream for "+ds) {
-                  build job: ds
-                }
-              //}
-            }*/
         }
-        
 
         parallel stepsForParallel
 
       }
-
-      
-
       
     }
 
