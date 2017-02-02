@@ -140,7 +140,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
                       //-- Add to config
                       var key = Brain.config.get.addKey("region", "external-region")
-                      key.values.add.setData(f.getCanonicalPath)
+                      key.values.add.data = f.getCanonicalPath
                       Brain.config.get.resyncToFile
 
                     //-- Update Brain

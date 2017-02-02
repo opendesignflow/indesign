@@ -13,6 +13,7 @@ import org.odfi.indesign.core.brain.BrainRegion
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.indesign.core.brain.ExternalBrainRegion
+import org.odfi.indesign.core.heart.Heart
 
 object IndesignPlatorm extends App {
 
@@ -24,6 +25,11 @@ object IndesignPlatorm extends App {
     Brain.deliverDirect(Config)
     Harvest.scheduleHarvest(2000)
     Harvest.addHarvester(Brain)
+  }
+  
+  def setHarvestDelay(delay:Int) = {
+    Harvest.harvestTask.scheduleEvery = Some(delay)
+    Heart.repump(Harvest.harvestTask)
   }
 
   def start = {

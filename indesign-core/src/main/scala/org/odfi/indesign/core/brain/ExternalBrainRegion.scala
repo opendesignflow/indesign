@@ -87,7 +87,7 @@ trait ExternalBrainRegion extends BrainRegion {
       //-- Make sure it is in config
       configKey match {
         case Some(key) if (key.values.find { v => v.toString() == cl }.isEmpty) =>
-          key.values.add.setData(cl)
+          key.values.add.data = (cl)
         case _ =>
       }
 
