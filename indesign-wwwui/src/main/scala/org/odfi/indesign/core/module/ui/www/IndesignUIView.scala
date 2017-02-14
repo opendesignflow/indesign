@@ -3,8 +3,7 @@ package org.odfi.indesign.core.module.ui.www
 import org.odfi.indesign.core.harvest.HarvestedResource
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIewCompiler
-import org.odfi.indesign.core.module.buildsystem.JavaSourceFile
-import org.odfi.indesign.core.module.buildsystem.SourceFile
+
 
 class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with IndesignUIHtmlBuilder {
 
@@ -55,26 +54,9 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
    */
   //var name = getUIViewName
   
-  def getUIViewName = {
-    this.parentResource match {
-      case Some(p: SourceFile) =>
-        isProxy = true
-        p.path.toFile().getName
-      case _ =>
+  def getUIViewName = getClass.getSimpleName.replace("$", "")
 
-        getClass.getSimpleName.replace("$", "")
-    }
-
-  }
-
-  def getId = this.parentResource match {
-    case Some(p: SourceFile) =>
-      isProxy = true
-      p.path.toFile().getName
-    case _ =>
-
-      getClass.getCanonicalName
-  }
+  def getId =  getClass.getCanonicalName
 
   var reloadEnable = true
 
@@ -86,7 +68,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
       case true if (proxiedView == None) =>
         this.parentResource match {
 
-          case Some(p: JavaSourceFile) =>
+          /*case Some(p: JavaSourceFile) =>
 
             // Ensure Compilation is done
             p.ensureCompiled
@@ -129,7 +111,7 @@ class IndesignUIView extends LocalWebHTMLVIew with HarvestedResource with Indesi
             }
 
             proxiedView.get.rerender
-
+*/
           case _ =>
             super.render
         }

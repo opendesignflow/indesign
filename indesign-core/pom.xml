@@ -138,10 +138,10 @@
 			<artifactId>lucene-queryparser</artifactId>
 			<version>6.0.0</version>
 		</dependency>
-		<dependency>
+		<dependency>   
 			<groupId>org.odfi.ooxoo</groupId>
 			<artifactId>ooxoo-db</artifactId>
-			<version>3.2.2</version> 
+			<version>3.2.3-SNAPSHOT</version> 
 		</dependency>
 	</dependencies>
 </project>

@@ -87,7 +87,6 @@
 
 	<modules>
 		<module>indesign-core</module>
-		<module>indesign-maven</module>
 		<module>indesign-git</module>
 		<module>indesign-native</module>
 		<module>indesign-webdraw</module>

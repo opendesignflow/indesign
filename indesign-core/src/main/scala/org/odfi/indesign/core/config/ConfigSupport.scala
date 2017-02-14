@@ -2,8 +2,9 @@ package org.odfi.indesign.core.config
 
 import org.odfi.indesign.core.config.model.CommonConfigTrait
 import org.odfi.indesign.core.config.model.CommonConfig
+import com.idyria.osi.tea.listeners.ListeningSupport
 
-trait ConfigSupport {
+trait ConfigSupport extends ListeningSupport {
 
   def getId = "default"
 
@@ -12,6 +13,16 @@ trait ConfigSupport {
    */
   def updateAvailableKeysToConfig = {
     
+  }
+  
+  def triggerConfigUpdated = {
+    this.@->("config.updated")
+  }
+  
+  def onConfigUpdated(cl: => Any) = {
+    this.on("config.updated") {
+      cl
+    }
   }
   
   /**

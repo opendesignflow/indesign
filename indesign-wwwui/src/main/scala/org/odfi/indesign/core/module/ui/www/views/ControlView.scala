@@ -11,7 +11,6 @@ import com.idyria.osi.ooxoo.core.buffers.structural.xelement
 import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.module.ui.www.IndesignUIView
 import com.google.inject.spi.ModuleSource
-import org.odfi.indesign.core.module.buildsystem.ModuleSourceFile
 import org.odfi.indesign.core.module.ui.www.config.ConfigUIBuilder
 
 class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuilder {

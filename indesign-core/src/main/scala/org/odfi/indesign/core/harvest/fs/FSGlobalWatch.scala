@@ -1,11 +1,19 @@
 package org.odfi.indesign.core.harvest.fs
 
 import com.idyria.osi.tea.files.FileWatcherAdvanced
+import org.odfi.indesign.core.module.IndesignModule
 
-object FSGlobalWatch {
+object FSGlobalWatch extends IndesignModule {
   
   var watcher = new FileWatcherAdvanced
   
-  watcher.start
+  this.onStart {
+    watcher.start
+  }
+  
+  this.onStop {
+    watcher.stop
+  }
+  
   
 }

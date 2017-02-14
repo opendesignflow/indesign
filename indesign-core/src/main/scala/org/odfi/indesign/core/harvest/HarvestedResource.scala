@@ -144,6 +144,23 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }
 
   }
+  
+  def mapUpchainResources[T](cl: HarvestedResource => T): List[T] = {
+
+    var res= scala.collection.mutable.ArrayBuffer[T]()
+    var currentParent = this.parentResource
+    while (currentParent.isDefined) {
+
+      //-- Closure
+      res += cl(currentParent.get)
+      
+      //-- Next
+      currentParent = currentParent.get.parentResource 
+
+    }
+
+    res.toList
+  }
 
   def onDerivedResources[CT <: HarvestedResource](cl: PartialFunction[CT, Unit])(implicit tag: ClassTag[CT]): Unit = {
     // println(s"onDerivedResources on $this which has: ${derivedResources.size}")

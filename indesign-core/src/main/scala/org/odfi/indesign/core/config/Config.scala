@@ -8,11 +8,19 @@ import org.odfi.indesign.core.config.model.DefaultConfig
 import org.odfi.indesign.core.config.model.RegionConfig
 import org.odfi.indesign.core.config.model.CommonConfig
 import com.idyria.osi.ooxoo.db.store.DocumentContainer
+import org.odfi.indesign.core.module.IndesignModule
+import org.odfi.indesign.core.harvest.fs.FSGlobalWatch
+import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
 
-object Config extends BrainRegion {
+object Config extends IndesignModule {
 
   // Make this region always present
   this.root
+  
+  // Require file watcher
+  this.onLoad {
+    requireModule(FSGlobalWatch)
+  }
 
   var implementation: Option[ConfigImplementation] = None
 
@@ -40,7 +48,8 @@ object Config extends BrainRegion {
 
     try {
 
-      implementation match {
+      // Get Document
+      var document = implementation match {
         case Some(impl) =>
           target.getClass match {
 
@@ -66,6 +75,22 @@ object Config extends BrainRegion {
           }
         case None => None
       }
+      
+      //-- See if we can listen to changes
+      document match {
+        case Some(doc : STAXSyncTrait) =>
+          doc.staxFileWatcher = Some(FSGlobalWatch.watcher)
+          doc.onFileReload(this) { 
+            f => 
+              
+              doc.parentContainer.get.clearCached(documentName(target))  
+              target.__config = getConfigFor(target)
+              target.triggerConfigUpdated
+          }
+        case other  => 
+      }
+      
+      document
     } catch {
       case e: Throwable =>
         //e.printStackTrace()

@@ -2,7 +2,6 @@ package org.odfi.indesign.core.module.ui.www
 
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.harvest.Harvest
-import org.odfi.indesign.core.module.buildsystem.JavaSourceFile
 import com.idyria.osi.wsb.webapp.localweb.LocalWebEngine
 import com.idyria.osi.vui.core.view.AView
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
@@ -41,7 +40,7 @@ class WWWViewHarvester extends Harvester {
           }
       }
       true
-    case r: JavaSourceFile =>
+    /*case r: JavaSourceFile =>
 
       r.getLines.find { line => line.contains(s"extends ${classOf[IndesignUIView].getSimpleName.replace("$","")}") }.isDefined match {
         case true =>
@@ -52,7 +51,7 @@ class WWWViewHarvester extends Harvester {
           true
         case _ =>
           false
-      }
+      }*/
     case r => 
       println(s"Deliber direct of: $r");
       r.asInstanceOf[IndesignUIView]

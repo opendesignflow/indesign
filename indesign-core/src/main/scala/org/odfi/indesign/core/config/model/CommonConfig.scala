@@ -1,11 +1,26 @@
 package org.odfi.indesign.core.config.model
 
-trait CommonConfig extends CommonConfigTrait {
+import com.idyria.osi.ooxoo.db.store.DocumentContainer
+import com.idyria.osi.ooxoo.db.traits.DBContainerReference
+
+trait CommonConfig extends CommonConfigTrait with DBContainerReference {
+  
+ 
+  
   
   def isInConfig(keyType:String,value:String) = {
     this.values.keys.find {
       key => key.keyType === keyType && key.values.find {v => v === value}.isDefined
     }.isDefined
+  }
+  
+  /**
+   * Get first match for key name
+   */
+  def getKey(name:String) = {
+    
+    this.values.keys.find(_.name.toString()==name)
+    
   }
   
   /**
