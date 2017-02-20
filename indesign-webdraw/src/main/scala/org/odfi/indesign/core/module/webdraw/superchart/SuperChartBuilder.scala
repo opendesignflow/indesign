@@ -19,15 +19,15 @@ trait SuperChartBuilder extends ExternalBuilder {
 
      
 
-      stylesheet(getViewResourcePath("modules/webdraw/superchart/jqplot/jquery.jqplot.css")) {
+      stylesheet(getViewResourcePath("modules/webdraw/superchart/external/jqplot/jquery.jqplot.css")) {
 
       }
-      script(getViewResourcePath("modules/webdraw/superchart/jqplot/jquery.jqplot.min.js")) {
+      script(getViewResourcePath("modules/webdraw/superchart/external/jqplot/jquery.jqplot.min.js")) {
 
       }
       List("dateAxisRenderer", "cursor", "highlighter").foreach {
         pn =>
-          script(getViewResourcePath(s"modules/webdraw/superchart/jqplot/plugins/jqplot.${pn}.min.js")) {
+          script(getViewResourcePath(s"modules/webdraw/superchart/external/jqplot/plugins/jqplot.${pn}.min.js")) {
 
           }
 

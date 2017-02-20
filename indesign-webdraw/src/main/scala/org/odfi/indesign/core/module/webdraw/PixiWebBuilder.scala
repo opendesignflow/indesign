@@ -11,7 +11,7 @@ trait PixiWebBuilder extends WebdrawViewBuilder {
      super.externalAdd(targetNode)
     switchToNode(targetNode, {
 
-      script(new URI(createSpecialPath("resources", "modules/webdraw/pixi-v3/pixi.min.js"))) {
+      script(new URI(createSpecialPath("resources", "modules/webdraw/external/pixi-v3/pixi.min.js"))) {
         
       }
 
