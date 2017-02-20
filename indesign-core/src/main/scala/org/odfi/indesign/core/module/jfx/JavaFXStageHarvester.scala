@@ -10,6 +10,8 @@ import javafx.stage.WindowEvent
 
 object JavaFXStageHarvester extends Harvester {
   
+  
+  
   this.onDeliverFor[FXStageResource] {
     case stage =>
       gather(stage)
