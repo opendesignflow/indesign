@@ -2,8 +2,6 @@ package org.odfi.indesign.module.git.gitlab
 
 import org.odfi.indesign.module.git.GitModule
 
-import org.odfi.indesign.module.git.gitlab.Gitlab;
-
 import org.odfi.indesign.core.config.Config
 import org.odfi.indesign.core.config.DefaultMemoryConfigImplementation
 

@@ -61,6 +61,12 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   }
 
   def removeTask(t: HeartTask[_]) = {
+    
+    //-- Make sure executor has no task
+    t.scheduleFuture = None
+    //t.scheduleEvery = None
+    
+    //-- REmove
     tasks.synchronized {
       tasks.contains(t.getId) match {
         case true =>
@@ -105,7 +111,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
     try {
       t.isRunning match {
         case true =>
-
+        
           var taskFuture = t.scheduleFuture.get
           //-- If Task is single run, just wait a bit or based otherwise kill
           t.scheduleEvery match {
@@ -142,6 +148,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
         // t.scheduleFuture.get.
         case false =>
+          
       }
     } catch {
       case e: InterruptedException =>

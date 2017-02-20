@@ -51,7 +51,13 @@ class ArtifactExternalRegion(val gid: String, val aid: String, val version: Stri
   //-- Load 
   def loadRegionClass(cl: String) = {
     updateClassDomain
-    Brain.createRegion(classdomain.get, cl)
+    classdomain match {
+      case Some(cd) =>
+        ESome(Brain.createRegion(cd, cl))
+      case None =>
+        ENone
+    }
+
   }
 
   this.onInit {

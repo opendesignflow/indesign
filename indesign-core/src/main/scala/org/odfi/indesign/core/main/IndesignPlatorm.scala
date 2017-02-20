@@ -31,6 +31,12 @@ object IndesignPlatorm extends App {
     Harvest.harvestTask.scheduleEvery = Some(delay)
     Heart.repump(Harvest.harvestTask)
   }
+  
+  def stopHarvest = {
+    Harvest.scheduleHarvest(0)
+    
+    Heart.killTask(Harvest.harvestTask)
+  }
 
   def start = {
     Brain.moveToStart
@@ -42,7 +48,7 @@ object IndesignPlatorm extends App {
   }
   
   def use(r: BrainRegion): BrainRegion = {
-    Brain.deliverDirect(r)
+    Brain.gatherPermanent(r)
     r
   }
 

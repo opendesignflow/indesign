@@ -8,8 +8,10 @@ import com.idyria.osi.tea.errors.ErrorSupport
 import org.odfi.indesign.core.brain.BrainRegion
 import org.odfi.indesign.core.heart.HeartTask
 import org.odfi.indesign.core.heart.Heart
+import com.idyria.osi.tea.listeners.ListeningSupport
+import org.odfi.indesign.core.config.ConfigSupport
 
-object Harvest extends BrainRegion {
+object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
   // Make this region always present
   this.root
@@ -29,9 +31,14 @@ object Harvest extends BrainRegion {
   }
 
   def scheduleHarvest(everyMS: Int) = {
-
-    harvestTask.scheduleEvery = Some(everyMS)
-    Heart.pump(harvestTask)
+    everyMS match {
+      case 0 =>
+        harvestTask.scheduleEvery = None
+        Heart.killTask(harvestTask)
+      case other =>
+        harvestTask.scheduleEvery = Some(other)
+        Heart.repump(harvestTask)
+    }
 
   }
 
@@ -40,7 +47,7 @@ object Harvest extends BrainRegion {
 
   var harvesters = List[Harvester]()
   def addHarvester(h: Harvester) = {
- 
+
     this.harvesters.contains(h) match {
       case true =>
       case false => this.harvesters = this.harvesters :+ h.getTopHarvester
@@ -60,7 +67,7 @@ object Harvest extends BrainRegion {
   def getHarvesters[CT <: Harvester](implicit cl: ClassTag[CT]): Option[List[CT]] = {
 
     this.harvesters.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r } match {
-      case res if (res.size > 0) => Some(res.map { h => h.asInstanceOf[CT]})
+      case res if (res.size > 0) => Some(res.map { h => h.asInstanceOf[CT] })
       case res => None
     }
   }
@@ -176,33 +183,30 @@ object Harvest extends BrainRegion {
     }
     r.flatten.toList
   }
-  
-  
+
   // Delivering
   //------------------
-  
-  def deliverToHarvesters[HT<:Harvester : ClassTag](v:HarvestedResource) = {
-    
+
+  def deliverToHarvesters[HT <: Harvester: ClassTag](v: HarvestedResource) = {
+
     this.getHarvesters[HT] match {
-      case Some(harvesters) => 
+      case Some(harvesters) =>
         harvesters.foreach {
-          h => 
-             h.deliverDirect(v)
+          h =>
+            h.deliverDirect(v)
         }
-      case None => 
-        
+      case None =>
+
     }
-    
+
   }
-  
-  
-  
+
   // Run
   //------------
 
   def run = {
 
-    // Harvest
+    //--- Harvest
     //---------------
     this.onAllHarvesters {
       h =>
@@ -213,7 +217,7 @@ object Harvest extends BrainRegion {
         }
     }
 
-    // Process
+    //-- Process
     //-------------------
     this.onAllHarvesters {
       h =>
@@ -224,6 +228,17 @@ object Harvest extends BrainRegion {
         }
     }
 
+    //-- Done
+    this.@->("done")
+    
+  }
+  
+  def onHarvestDone(cl: => Any) = {
+    
+    this.on("done") {
+      cl
+    }
+    
   }
 
   /* harvesters.foreach {
@@ -250,8 +265,8 @@ object Harvest extends BrainRegion {
     autoHarvesterObjects = autoHarvesterObjects.empty
   }
 
-  def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](t : Tuple2[Class[_ <: Harvester], Class[_ <: Harvester]]): Unit = {
-    registerAutoHarvesterClass(t._2,t._1)
+  def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](t: Tuple2[Class[_ <: Harvester], Class[_ <: Harvester]]): Unit = {
+    registerAutoHarvesterClass(t._2, t._1)
   }
   def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](parentClass: Class[_ <: Harvester], harvesterClass: Class[_ <: Harvester]): Unit = {
 
@@ -410,7 +425,7 @@ object Harvest extends BrainRegion {
               case Some(className) =>
 
                 this.keepErrorsOn(this) {
-                  
+
                   //-- Load class
                   var cl = getClass.getClassLoader.loadClass(className)
 

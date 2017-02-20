@@ -8,37 +8,89 @@ import org.odfi.indesign.core.brain.external.FolderOutBuilder
 import org.odfi.indesign.core.config.model.CommonConfigTraitValuesKey
 import com.idyria.osi.tea.compile.ClassDomain
 import scala.reflect.ClassTag
+import org.odfi.indesign.core.harvest.Harvester
+import org.odfi.indesign.core.harvest.HarvestedResource
+
+class RegionClassName(val className: String) extends HarvestedResource {
+
+  override def getId = className
+
+}
 
 /**
  * Loads a Brain Region present in another externaly compiled module
  */
-trait ExternalBrainRegion extends BrainRegion {
+trait ExternalBrainRegion extends BrainRegion with Harvester {
 
   // Associated Key Config
   var configKey: Option[CommonConfigTraitValuesKey] = None
 
   // Path Information
-  def getRegionPath:String
-  
+  def getRegionPath: String
+
+  override def getId = super.getId
+
   // Building
   //------------
-  var regionBuilder : Option[ExternalBrainRegionBuilder]  = None
-  
+  var regionBuilder: Option[ExternalBrainRegionBuilder] = None
+
   // Region Class Loading
   //--------------
-
 
   /**
    * Load Sub Regions when in load State
    * Resolve parent class domain and such during setup
    */
-  this.onLoad {
-    logFine[Brain](s"Moving to load on: ${getClass}")
+  override def doHarvest = {
+    logFine[Brain](s"Moving to load on external region: ${getClass}")
     configKey match {
       case Some(key) =>
         key.values.drop(1).foreach {
           cv =>
-            logFine[Brain](s"Loading Region $cv")
+            logFine[Brain](s"Loading Region/Module from config: $cv")
+
+            //-- Create Region
+            //var region = loadRegionClass(cv)
+
+            //-- Gather
+            gather(new RegionClassName(cv))
+
+        }
+      case None =>
+    }
+  }
+
+  // Created gatehered resources
+  //---------------
+  this.onGatheredResources {
+    resources =>
+      resources.collect { case e: RegionClassName => e }.foreach {
+        regionClass =>
+
+          var region = addRegionClass(regionClass.getId) match {
+            case ESome(region) =>
+              region.onCleaned {
+                case h if (h == ExternalBrainRegion.this) =>
+                  region.moveToShutdown
+
+              }
+            case other =>
+          }
+
+      }
+  }
+
+  /**
+   * Load Sub Regions when in load State
+   * Resolve parent class domain and such during setup
+   */
+  /*this.onLoad {
+    logFine[Brain](s"Moving to load on external region: ${getClass}")
+    configKey match {
+      case Some(key) =>
+        key.values.drop(1).foreach {
+          cv =>
+            logFine[Brain](s"Loading Region/Module from config: $cv")
             /* var current = external.subRegions.size
               external.loadRegionClass(cv)
               var now = external.subRegions.size
@@ -52,7 +104,7 @@ trait ExternalBrainRegion extends BrainRegion {
         }
       case None =>
     }
-  }
+  }*/
 
   this.onShutdown {
     // Remove all sub regions
@@ -70,47 +122,53 @@ trait ExternalBrainRegion extends BrainRegion {
   /**
    * Load a Region Class using this external region method
    */
-  def loadRegionClass(cl: String): BrainRegion
+  def loadRegionClass(cl: String): ErrorOption[BrainRegion]
 
   /**
    * Uses Load Region to create instance, and deliver
    */
-  def addRegionClass(cl: String): BrainRegion = {
+  def addRegionClass(cl: String): ErrorOption[BrainRegion] = {
 
     //-- Create
     try {
       logFine[Brain](s"Add Region: $cl ")
-      var create = loadRegionClass(cl)
-      var region = addDerivedResource(create)
-      //println(s"Create ${create.hashCode()} ; return ${region.hashCode()}")
+      loadRegionClass(cl) match {
+        case ESome(create) =>
+          addDerivedResource(create)
 
-      //-- Make sure it is in config
-      configKey match {
-        case Some(key) if (key.values.find { v => v.toString() == cl }.isEmpty) =>
-          key.values.add.data = (cl)
-        case _ =>
+          //-- Make sure it is in config
+          configKey match {
+            case Some(key) if (key.values.find { v => v.toString() == cl }.isEmpty) =>
+              key.values.add.data = (cl)
+            case _ =>
+          }
+
+          //-- Move to same state
+          this.currentState match {
+            case Some(s) =>
+              keepErrorsOn(create)(Brain.moveToState(create, s))
+            case None =>
+          }
+
+          ESome(create)
+
+        case other =>
+          other
       }
 
-      //-- Move to same state
-      this.currentState match {
-        case Some(s) =>
-          keepErrorsOn(region)(Brain.moveToState(region, s))
-        case None =>
-      }
-      region
     } catch {
       case e: Throwable =>
         e.printStackTrace()
         throw e
     }
   }
-  
+
   // Region Discover
   //--------------
-  
-  def discoverRegions : List[String] = {
+
+  def discoverRegions: List[String] = {
     List[String]()
-    
+
   }
   // Reload
   //------------
@@ -146,7 +204,7 @@ trait ExternalBrainRegionBuilder {
 
   def accept(url: URL): Integer
   def build(url: URL): ExternalBrainRegion
-  
+
   def isTainted = getClass.getClassLoader.isInstanceOf[ClassDomain] && getClass.getClassLoader.asInstanceOf[ClassDomain].tainted
 }
 
@@ -154,31 +212,31 @@ object ExternalBrainRegion extends TLogSource {
 
   var builders = List[ExternalBrainRegionBuilder](new FolderOutBuilder)
 
-  def removeBuilder[BT <: ExternalBrainRegionBuilder](implicit tag : ClassTag[BT]) : Unit = {
+  def removeBuilder[BT <: ExternalBrainRegionBuilder](implicit tag: ClassTag[BT]): Unit = {
     this.builders = builders.filter {
       case r if (r.isTainted) =>
         false
-      case r if (r.getClass.getCanonicalName==tag.runtimeClass.getCanonicalName) =>
+      case r if (r.getClass.getCanonicalName == tag.runtimeClass.getCanonicalName) =>
         //println("Forcing replacement of: "+r)
         false
-      case _ => 
+      case _ =>
         true
     }
   }
-  
-  def addBuilder(b: ExternalBrainRegionBuilder,force:Boolean=false) = {
-    
+
+  def addBuilder(b: ExternalBrainRegionBuilder, force: Boolean = false) = {
+
     // Clean Tainted
-     this.builders = builders.filter {
+    this.builders = builders.filter {
       case r if (r.isTainted) =>
         false
-      case r if (force && r.getClass.getCanonicalName==b.getClass.getCanonicalName) =>
-        println("Forcing replacement of: "+r)
+      case r if (force && r.getClass.getCanonicalName == b.getClass.getCanonicalName) =>
+        println("Forcing replacement of: " + r)
         false
-      case _ => 
+      case _ =>
         true
     }
-    
+
     // Add
     this.builders.find { eb => eb == b || eb.getClass == b.getClass } match {
       case Some(existing) =>

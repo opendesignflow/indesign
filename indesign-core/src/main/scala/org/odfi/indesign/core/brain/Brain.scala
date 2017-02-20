@@ -9,7 +9,7 @@ import org.eclipse.aether.impl.ArtifactResolver
 import org.odfi.indesign.core.artifactresolver.AetherResolver
 import org.odfi.indesign.core.brain.artifact.ArtifactExternalRegion
 import org.odfi.indesign.core.harvest.Harvest
-import org.odfi.indesign.core.brain.BrainLifecyleDefinition
+import org.odfi.indesign.core.brain.LFCDefinition
 
 trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource with Harvester {
 
@@ -22,12 +22,12 @@ object Brain extends Brain {
 
   // Graceful Shutdown
   sys.addShutdownHook {
-    
+
     //Brain.moveToShutdown
   }
 
   // Heart is always a region
-  Brain.deliverDirect(Heart)
+  Brain.gatherPermanent(Heart)
 
   // BRain should be in Harvest
   Harvest.addHarvester(this)
@@ -75,6 +75,8 @@ object Brain extends Brain {
 
   override def doHarvest = {
 
+    logFine[Brain](s"Starting Brain Harvest")
+
     // Get Regions
     //-------------------
     this.config match {
@@ -97,7 +99,7 @@ object Brain extends Brain {
               keepErrorsOn(this) {
 
                 var external = ExternalBrainRegion.build(new File(path).toURI().toURL)
-                println(s"Created $path with: "+external.regionBuilder.get.getClass.getClassLoader)
+                println(s"Created $path with: " + external.regionBuilder.get.getClass.getClassLoader)
                 external.configKey = Some(key)
                 gather(external)
               }
@@ -149,12 +151,29 @@ object Brain extends Brain {
   }
 
   this.onGatheredResources {
-    regions =>
+    resources =>
+
+      var regions = resources.collect { 
+        case e : ExternalBrainRegion => 
+          addChildHarvester(e)
+          e
+      case e: BrainRegion => e 
+        
+      }
 
       logFine[Brain](s"Regions gathered moving to latest state ${this.currentState}: $regions")
 
-      //-- Get Target Index
       this.currentState match {
+        case Some(state) =>
+          regions.foreach {
+            region =>
+              region.keepErrorsOn(region)(this.moveToState(region, state))
+          }
+        case None =>
+      }
+
+    //-- Get Target Index
+    /*this.currentState match {
         case Some(cs) =>
 
           var targetIndexState = this.states.indexOf(cs)
@@ -172,7 +191,7 @@ object Brain extends Brain {
 
         //-- NO State on brain, go nowhere
         case None =>
-      }
+      }*/
 
   }
 

@@ -49,7 +49,9 @@ object LuceneTry extends App with TimingSupport {
 
   val keywords = List("javadoc","sources")
   
-  var fsh = new FileSystemHarvester
+  var fsh = new FileSystemHarvester {
+    
+  }
   fsh.addPath(new File("""C:\Users\leysr_000\.m2\repository""").toPath)
   var h = fsh.addChildHarvester(new Harvester {
     

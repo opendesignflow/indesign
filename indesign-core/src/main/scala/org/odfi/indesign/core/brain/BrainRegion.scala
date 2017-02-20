@@ -6,7 +6,7 @@ import org.odfi.indesign.core.harvest.HarvestedResource
 import com.idyria.osi.tea.compile.ClassDomain
 import org.odfi.indesign.core.config.ConfigSupport
 
-trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with HarvestedResource with ConfigSupport {
+trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with HarvestedResource  {
   
   
  

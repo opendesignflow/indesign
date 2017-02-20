@@ -9,7 +9,16 @@ class OOXOOFSConfigImplementation(var baseFile : File) extends ConfigImplementat
   // Create FSStore
   var fsStore = new FSStore(baseFile)
   
+  var realmFSStore : Option[FSStore] = None
+  
+  def openConfigRealm(str:String) = {
+    this.realmFSStore = Some(new FSStore(new File(baseFile,str)))
+  }
+  
   // Containers
-  def getContainer(str:String) = fsStore.container(str)
+  def getContainer(str:String) = this.realmFSStore match {
+    case Some(store) => store.container(str)
+    case None => throw new IllegalArgumentException("Cannot open container if no realm has been opened")
+  }
   
 }

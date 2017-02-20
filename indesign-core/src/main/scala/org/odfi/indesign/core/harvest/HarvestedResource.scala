@@ -182,6 +182,9 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }.toList
   }
   
+  /**
+   * Get Derived Resources Recursively
+   */
   def getSubDerivedResources [CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
     var res = this.derivedResources.collect {
        case (id, r) if (tag.runtimeClass.isInstance(r)) =>

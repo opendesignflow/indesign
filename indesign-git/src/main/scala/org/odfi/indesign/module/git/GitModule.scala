@@ -9,8 +9,8 @@ import org.odfi.indesign.module.maven.MavenProjectHarvester
 object GitModule extends IndesignModule {
 
   this.onInit {
-    Harvest.registerAutoHarvesterClass(classOf[FileSystemHarvester], classOf[GitHarvester])
-    Harvest.registerAutoHarvesterClass(classOf[GitHarvester], classOf[MavenProjectHarvester])
+    //Harvest.registerAutoHarvesterClass(classOf[FileSystemHarvester], classOf[GitHarvester])
+    //Harvest.registerAutoHarvesterClass(classOf[GitHarvester], classOf[MavenProjectHarvester])
     //WWWViewHarvester.deliverDirect(new GitWWWView)
   }
 }

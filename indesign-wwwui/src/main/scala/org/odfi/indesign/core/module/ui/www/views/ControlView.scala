@@ -12,6 +12,7 @@ import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.module.ui.www.IndesignUIView
 import com.google.inject.spi.ModuleSource
 import org.odfi.indesign.core.module.ui.www.config.ConfigUIBuilder
+import org.odfi.indesign.core.config.ConfigHolder
 
 class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuilder {
 
@@ -51,12 +52,12 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
       // Brain
       //-------------------
       importHTML(<h2 class="ui header">
-          <i class="settings icon"></i>
-          <div class="content">
-            Brain
-            <div class="sub header">Brain Region/Modules</div>
-          </div>
-        </h2>)
+                   <i class="settings icon"></i>
+                   <div class="content">
+                     Brain
+                     <div class="sub header">Brain Region/Modules</div>
+                   </div>
+                 </h2>)
 
       div {
         "ui button" :: button("Restart") {
@@ -194,15 +195,22 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
               // name
               "collapsing" :: td("") {
                 importHTML(<i class="block layout icon"></i>)
-                importHTML(<i class="settings icon ui popup-activate"></i>)
 
-                "ui flowing popup top left transition hidden" :: div {
-                  h4("Config") {
+                // Config?
+                region.isInstanceOf[ConfigHolder] match {
+                  case true =>
+                    importHTML(<i class="settings icon ui popup-activate"></i>)
 
-                  }
-                  configTable(region.config)
+                    "ui flowing popup top left transition hidden" :: div {
+                      h4("Config") {
+
+                      }
+                      configTable(region.asInstanceOf[ConfigHolder].config)
+                    }
+                  case false =>
                 }
 
+                // Name
                 span {
                   textContent(region.name)
                 }
@@ -403,12 +411,12 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
       // Harvest
       //------------------
       importHTML(<h2 class="ui header">
-          <i class="settings icon"></i>
-          <div class="content">
-            Harvest
-            <div class="sub header">Harvesters and Found Resources</div>
-          </div>
-        </h2>)
+                   <i class="settings icon"></i>
+                   <div class="content">
+                     Harvest
+                     <div class="sub header">Harvesters and Found Resources</div>
+                   </div>
+                 </h2>)
 
       //-- harvest run
       div {

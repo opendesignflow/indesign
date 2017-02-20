@@ -11,6 +11,8 @@ import com.idyria.osi.ooxoo.db.store.DocumentContainer
 import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.harvest.fs.FSGlobalWatch
 import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
+import org.odfi.indesign.core.harvest.HarvestedResource
+import org.odfi.indesign.core.harvest.Harvest
 
 object Config extends IndesignModule {
 
@@ -22,16 +24,39 @@ object Config extends IndesignModule {
     requireModule(FSGlobalWatch)
   }
 
+  
+  
   var implementation: Option[ConfigImplementation] = None
 
-  def setImplementation(i: ConfigImplementation) = implementation = Some(i)
+  def setImplementation(i: ConfigImplementation) = {
+    
+    
+    implementation = Some(i)
+    implementation.get.openConfigRealm(this.currentRealm)
+  }
 
+  // Config realm
+  //------
+  
+  var __currentRealm = "default"
+  
+  def currentRealm_=(str:String) = {
+    this.__currentRealm = str
+    implementation match {
+      case Some(impl) => impl.openConfigRealm(str)
+      case None=>
+    }
+  }
+  
+  def currentRealm = __currentRealm
+  
+  
   /*def getImplementation = implementation match {
     case Some(i) => i 
     case None => th
   }*/
 
-  def documentName(target: ConfigSupport): String = {
+  def documentName(target: HarvestedResource): String = {
 
     target.getClass.getCanonicalName match {
       // Object
@@ -86,6 +111,9 @@ object Config extends IndesignModule {
               doc.parentContainer.get.clearCached(documentName(target))  
               target.__config = getConfigFor(target)
               target.triggerConfigUpdated
+              
+              println(s"**** Reloaded -> Harvest")
+              Harvest.run
           }
         case other  => 
       }

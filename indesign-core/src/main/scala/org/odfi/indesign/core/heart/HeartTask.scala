@@ -80,7 +80,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
   def waitForRunning = this.waitForState(HeartTask.RUNNING.name)
 
   var stopSignal = new Semaphore(0)
-  
+
   def kill = {
     Heart.killTask(this)
   }
@@ -109,14 +109,20 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
               taskStopped
           }
 
-        } 
-        catch {
-          case e : InterruptedException => 
+        } catch {
+          case e: InterruptedException =>
             taskStopped
-        }
-        finally {
+        } finally {
 
           // Close Task: Either clean or let got if it is periodical
+          this.scheduleFuture match {
+            case None =>
+              //try { this.kill } catch { case e: Throwable => }
+              this.stopSignal.release()
+              taskStopped
+            case Some(f) => 
+          }
+          
           (scheduleAfter, scheduleEvery) match {
             case (None, None) =>
               taskStopped
@@ -138,6 +144,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
         this.@->("clean", this.originalHarvester)
       case _ =>
     }
+
     this.scheduleFuture = None
   }
 
@@ -149,8 +156,6 @@ trait DefaultHeartTask extends HeartTask[Unit] {
 
   def getId = hashCode.toString
 }
-
-
 
 object HeartTask extends LFCDefinition {
 

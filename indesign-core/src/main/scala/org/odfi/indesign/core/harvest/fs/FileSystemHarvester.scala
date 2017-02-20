@@ -7,46 +7,59 @@ import java.nio.file.Files
 import scala.language.implicitConversions
 import org.odfi.indesign.core.harvest.HarvestedResource
 
-class FileSystemHarvester extends Harvester {
+trait FileSystemHarvester extends Harvester {
 
   //var searchPaths = List[Path]()
 
-  def addPath(f:File)  : Boolean = addPath(f.toPath())
-  def addPath(p: Path) : Boolean = {
+  def addPath(f: File): Boolean = addPath(f.toPath())
+  def addPath(p: Path): Boolean = {
     var f = new HarvestedFile(p)
     f.root
     f.local = true
-    deliverDirect(f)
+    gatherDirect(f)
+    true
     //this.searchPaths = this.searchPaths :+ p.toFile.getAbsoluteFile.toPath()
   }
 
+  this.onConfigUpdated {
+    this.config match {
+      case Some(conf) =>
+        conf.values.keys.foreach {
+          case key if (key.keyType === "file") =>
+            key.values.foreach {
+              v =>
+                 println("Found File: "+v)
+                this.addPath(new File(v).getCanonicalFile.toPath)
+
+            }
+
+          case key =>
+          // println("Key in config: "+key.keyType)
+        }
+      case None =>
+    }
+  }
+  
+  
   //def createResourceFromPath(p:Path) : RT
 
-  this.onDeliver {
+  /*this.onDeliver {
     case r: HarvestedFile =>
       (r.path.toFile().exists(), r.path.toFile().isDirectory()) match {
         case (true, true) =>
-          this.availableResources.find {
-            case hf: HarvestedFile if (hf.getId==r.getId) => true
-            case _ => false
-          } match {
-            case Some(_) => 
-              false
-            case _ =>
-              gather(r)
-              true
-          }
+          gather(r)
+          true
 
         case _ => false
 
       }
 
-  }
+  }*/
 
   override def doHarvest = {
 
     // Use Config to find base paths
-    this.config match {
+    /*this.config match {
       case Some(conf) =>
         conf.values.keys.foreach {
           case key if (key.keyType === "file") =>
@@ -61,9 +74,9 @@ class FileSystemHarvester extends Harvester {
           // println("Key in config: "+key.keyType)
         }
       case None =>
-    }
+    }*/
 
-    // println(s"Harvesting on : ${this} -> ${this.childHarvesters.size}")
+    logFine[FileSystemHarvester](s"Harvesting on : ${this} -> ${this.childHarvesters.size}")
 
     /**
      * For each child harvester, a list of paths to stop at during walk
@@ -78,6 +91,8 @@ class FileSystemHarvester extends Harvester {
 
     this.onResources[HarvestedFile] {
       case resource =>
+
+        logFine[FileSystemHarvester](s"---- Starting on: ${resource}")
 
         // Readd Resource to Gathered to make sure it won't dissapear
         // If rooted, don't readd
@@ -128,6 +143,7 @@ class FileSystemHarvester extends Harvester {
             var stream = Files.walk(f.toPath())
             stream.forEach {
               inputPath =>
+                logFine[FileSystemHarvester](s"---- Processing: $inputPath")
                 // println(s"---- Processing: $inputPath")
                 doF(inputPath)
 
@@ -143,7 +159,9 @@ class FileSystemHarvester extends Harvester {
   }
 }
 
-object FileSystemHarvester {
+object FileSystemHarvester extends FileSystemHarvester {
 
+  
+  
   implicit def pathToResource(p: Path) = new HarvestedFile(p)
 }
