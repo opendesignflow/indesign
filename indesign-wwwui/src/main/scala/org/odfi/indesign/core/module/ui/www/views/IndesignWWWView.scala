@@ -25,20 +25,20 @@ class IndesignWWWView extends LocalWebHTMLVIew with DefaultLocalWebHTMLBuilder {
         }*/
         
         
-        script(new URI(createSpecialPath("resources", "modules/wwwui/jquery/jquery.min.js"))) {
+        script(new URI(createSpecialPath("resources", "modules/wwwui/external/jquery/jquery.min.js"))) {
 
         }
         
-        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/semantic/semantic.min.css"))) {
+        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/external/semantic/semantic.min.css"))) {
 
         }
-        script(new URI(createSpecialPath("resources", "modules/wwwui/semantic/semantic.min.js"))) {
+        script(new URI(createSpecialPath("resources", "modules/wwwui/external/semantic/semantic.min.js"))) {
 
         }
-        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/jquery/jquery.treetable.css"))) {
+        stylesheet(new URI(createSpecialPath("resources", "modules/wwwui/external/jquery/jquery.treetable.css"))) {
 
         }
-        script(new URI(createSpecialPath("resources", "modules/wwwui/jquery/jquery.treetable.js"))) {
+        script(new URI(createSpecialPath("resources", "modules/wwwui/external/jquery/jquery.treetable.js"))) {
 
         }
 

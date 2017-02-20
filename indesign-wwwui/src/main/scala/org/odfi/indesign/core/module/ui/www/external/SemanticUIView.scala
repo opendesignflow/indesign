@@ -15,7 +15,7 @@ trait SemanticUIView extends ExternalBuilder {
 
   var semanticUIVersion = "2.1.4"
   var wwwuiBasePath = "modules/wwwui/"
-  var semanticBasePath = s"$wwwuiBasePath/semantic"
+  var semanticBasePath = s"$wwwuiBasePath/external/semantic"
 
   override def externalAdd(targetNode: HTMLNode[HTMLElement, Any]): Unit = {
     super.externalAdd(targetNode)
