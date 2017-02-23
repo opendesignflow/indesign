@@ -8,7 +8,12 @@ import org.odfi.indesign.core.config.ConfigSupport
 trait IndesignModule extends BrainRegion with ConfigSupport  {
   
   def requireModule(obj:IndesignModule) = {
-    Brain.gatherPermanent(obj)
+    Brain.gatherPermanent(obj) match {
+      case true => 
+        obj.moveToLoad
+      case false => 
+    }
+    
   }
   
 }

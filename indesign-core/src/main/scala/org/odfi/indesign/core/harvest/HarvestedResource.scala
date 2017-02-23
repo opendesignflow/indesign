@@ -12,16 +12,14 @@ import com.idyria.osi.tea.compile.ClassDomain
 
 trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSupport with TLogSource {
 
-   // Taint Check
+  // Taint Check
   def isTainted = this.getClass.getClassLoader.isInstanceOf[ClassDomain] && this.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted
 
-  
-  
   /**
    * ID used for cleanup
    */
   def getId: String
-  
+
   /**
    * Display name for gui, should be not too long
    */
@@ -49,8 +47,8 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   // Harvester Relatio
   //----------------
-  var originalHarvester : Option[Harvester] = None
-  
+  var originalHarvester: Option[Harvester] = None
+
   // Parenting and Derived Resources
   //-------------------
 
@@ -63,6 +61,10 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
    */
   def deriveFrom(parentResource: HarvestedResource): HarvestedResource = {
 
+    this.parentResource = Some(parentResource)
+    parentResource.addDerivedResource(this)
+
+    /*
     this.parentResource match {
       case Some(p) =>
       case None =>
@@ -73,7 +75,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
             println(s"*** Resource gathered : $this , time to set derived resource to $parentResource *****")
             
         }*/
-    }
+    }*/
 
     this
   }
@@ -81,46 +83,73 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
   /**
    * Add a Resource as derived
    * If same type and same id already exist; don't add an return the existing resource
-   * 
+   *
    */
   def addDerivedResource[RT <: HarvestedResource](r: RT): RT = {
 
     // Add to local list, but not if already there
     derivedResources.get(r.getId) match {
-      case Some(res) => 
+      case Some(res) =>
         res.asInstanceOf[RT]
       case None =>
         derivedResources = derivedResources + (r.getId -> r)
 
+        r.parentResource match {
+          case Some(p) =>
+          case None =>
+            r.parentResource = Some(this)
+        }
+
         // Make sure we are the parent
-        r.deriveFrom(this)
+        //r.deriveFrom(this)
         r
     }
 
   }
-  
-  def removeDerivedResource[RT <: HarvestedResource](r: RT)(implicit tag : ClassTag[RT]): RT = {
-    
+
+  def removeDerivedResource[RT <: HarvestedResource](r: RT)(implicit tag: ClassTag[RT]): RT = {
+
     derivedResources.get(r.getId) match {
-      case Some(res) if(tag.runtimeClass.isInstance(res)) => 
+      case Some(res) if (tag.runtimeClass.isInstance(res)) =>
         res.parentResource = None
         derivedResources = derivedResources - r.getId
         res.asInstanceOf[RT]
       case _ =>
-       r
+        r
     }
+
+  }
+
+  def cleanDerivedResources : Unit = {
+
+    // Clean List 
+    val toClean = this.derivedResources
+    this.derivedResources = this.derivedResources.empty
+    
+    // Remove Parent reference from derived resources
+    toClean.foreach {
+      case dr if(dr!=this) => 
+        dr._2.clean
+        dr._2.parentResource = None
+      case other => 
+        
+    }
+
     
   }
   
-  def cleanDerivedResources = {
-    
-    // Remove Parent reference from derived resources
-    this.derivedResources.foreach {
-      dr => dr._2.parentResource = None
+  def cleanDerivedResource(r:HarvestedResource) = {
+    r.parentResource match {
+      case Some(p) if(p==this) =>
+        r.parentResource = None
+      case other => 
     }
-    
-    // Clean List 
-    this.derivedResources = this.derivedResources.empty
+    this.derivedResources = this.derivedResources.filter(_!=r)
+  }
+  
+   def cleanDerivedResourcesOfType[RT <: HarvestedResource](implicit tag: ClassTag[RT]) = {
+
+    this.getDerivedResources[RT].foreach(cleanDerivedResource(_))
   }
 
   def findUpchainResource[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Option[CT] = {
@@ -144,18 +173,18 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }
 
   }
-  
+
   def mapUpchainResources[T](cl: HarvestedResource => T): List[T] = {
 
-    var res= scala.collection.mutable.ArrayBuffer[T]()
+    var res = scala.collection.mutable.ArrayBuffer[T]()
     var currentParent = this.parentResource
     while (currentParent.isDefined) {
 
       //-- Closure
       res += cl(currentParent.get)
-      
+
       //-- Next
-      currentParent = currentParent.get.parentResource 
+      currentParent = currentParent.get.parentResource
 
     }
 
@@ -174,28 +203,28 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   }
 
-  def getDerivedResources [CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
+  def getDerivedResources[CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
     this.derivedResources.collect {
-       case (id, r) if (tag.runtimeClass.isInstance(r)) =>
+      case (id, r) if (tag.runtimeClass.isInstance(r)) =>
         r.asInstanceOf[CT]
-      
+
     }.toList
   }
-  
+
   /**
    * Get Derived Resources Recursively
    */
-  def getSubDerivedResources [CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
+  def getSubDerivedResources[CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
     var res = this.derivedResources.collect {
-       case (id, r) if (tag.runtimeClass.isInstance(r)) =>
+      case (id, r) if (tag.runtimeClass.isInstance(r)) =>
         List(r.asInstanceOf[CT])
-       case (id,r) => 
-         r.getDerivedResources[CT]
-      
+      case (id, r) =>
+        r.getDerivedResources[CT]
+
     }.flatten.toList
     res
   }
-  
+
   def hasDerivedResourceOfType[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Boolean = {
 
     this.derivedResources.find {
@@ -225,7 +254,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     this.onWith("added") {
       h: Harvester =>
         cl.isDefinedAt(h) match {
-          case true => keepErrorsOn(this){cl(h)}
+          case true => keepErrorsOn(this) { cl(h) }
           case false =>
         }
     }
@@ -235,48 +264,58 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
       h: Harvester =>
         //println("Running a gathered even on "+this)
         cl.isDefinedAt(h) match {
-          case true => 
+          case true =>
             // println("Ev defined")
-             cl(h)
-            //keepErrorsOn(this){cl(h)}
+            cl(h)
+          //keepErrorsOn(this){cl(h)}
           case false =>
-            //println("Ev not defined")
+          //println("Ev not defined")
         }
     }
 
   }
-  def onGatheredBy(h:Harvester)(cl: => Unit) = {
+  def onGatheredBy(h: Harvester)(cl: => Unit) = {
     this.onGathered {
-      case gh if (gh==h) => cl
+      case gh if (gh == h) => cl
     }
 
   }
-  
-  def clean = {
+
+  /**
+   * Clean recursively
+   */
+  def clean : Unit = {
     this.@->("clean")
+    this.originalHarvester match {
+      case Some(h) => 
+       h.availableResources =  this.originalHarvester.get.availableResources - this 
+      case None => 
+    }
+    
+    this.cleanDerivedResources
   }
 
-  def onClean(cl: =>Any) : Unit = {
+  def onClean(cl: => Any): Unit = {
     this.on("clean") {
       cl
     }
   }
-  def onClean(cl: PartialFunction[Harvester, Unit]) : Unit = onCleaned(cl)
-  def onCleaned(cl: PartialFunction[Harvester, Unit]) : Unit = {
+  def onClean(cl: PartialFunction[Harvester, Unit]): Unit = onCleaned(cl)
+  def onCleaned(cl: PartialFunction[Harvester, Unit]): Unit = {
     this.onWith("clean") {
       h: Harvester =>
         cl.isDefinedAt(h) match {
-          case true => keepErrorsOn(this){cl(h)}
+          case true => keepErrorsOn(this) { cl(h) }
           case false =>
         }
     }
   }
-  
+
   def onKept(cl: PartialFunction[Harvester, Unit]) = {
     this.onWith("kept") {
       h: Harvester =>
         cl.isDefinedAt(h) match {
-          case true => keepErrorsOn(this){cl(h)}
+          case true => keepErrorsOn(this) { cl(h) }
           case false =>
         }
     }
@@ -287,7 +326,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
       cl
     }
   }
-  
+
   // Naming Utils
   //------------
   def resourceHierarchyName(sep: String = ".", withoutSelf: Boolean = false) = {

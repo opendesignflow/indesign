@@ -18,38 +18,68 @@ object Config extends IndesignModule {
 
   // Make this region always present
   this.root
-  
+
   // Require file watcher
   this.onLoad {
     requireModule(FSGlobalWatch)
   }
 
-  
-  
   var implementation: Option[ConfigImplementation] = None
 
+  /**
+   * Set implementation realm
+   * Ask implementation if it knows about the latest used realm
+   */
   def setImplementation(i: ConfigImplementation) = {
-    
-    
+
     implementation = Some(i)
+    println(s"Starting from last realm with impl: "+i)
+    i.detectLatestRealm match {
+      case Some(realm) =>
+        currentRealm = realm
+        println("Found previous realm detected: "+realm)
+      case None =>
+        println("Not previous realm detected")
+    }
+    println(s"******************* OPENING ${currentRealm} *********************")
     implementation.get.openConfigRealm(this.currentRealm)
+  }
+
+  def listAvailableRealms = implementation match {
+    case Some(i) => i.listAllRealms
+    case None => List()
   }
 
   // Config realm
   //------
-  
+
   var __currentRealm = "default"
-  
-  def currentRealm_=(str:String) = {
-    this.__currentRealm = str
-    implementation match {
-      case Some(impl) => impl.openConfigRealm(str)
-      case None=>
-    }
+
+  def currentRealm_=(str: String) = str match {
+    case sameascurrent if (sameascurrent == __currentRealm) =>
+    case other =>
+      this.__currentRealm = str
+      implementation match {
+        case Some(impl) => 
+          impl.openConfigRealm(str)
+          this.@->("realm.changed")
+        case None =>
+      }
+  }
+
+  def currentRealm = __currentRealm
+
+  def addRealm(name:String) = implementation match {
+    case Some(i) =>
+      i.addRealm(name)
+    case None => 
   }
   
-  def currentRealm = __currentRealm
-  
+  def onRealmChanged(cl: => Any) = {
+    this.on("realm.changed") {
+      cl
+    }
+  }
   
   /*def getImplementation = implementation match {
     case Some(i) => i 
@@ -100,24 +130,24 @@ object Config extends IndesignModule {
           }
         case None => None
       }
-      
+
       //-- See if we can listen to changes
       document match {
-        case Some(doc : STAXSyncTrait) =>
+        case Some(doc: STAXSyncTrait) if(!FSGlobalWatch.watcher.isMonitoredBy(this, doc.staxPreviousFile.get)) =>
           doc.staxFileWatcher = Some(FSGlobalWatch.watcher)
-          doc.onFileReload(this) { 
-            f => 
-              
-              doc.parentContainer.get.clearCached(documentName(target))  
+          doc.onFileReload(this) {
+            f =>
+              println(s"File reload")
+              doc.parentContainer.get.clearCached(documentName(target))
               target.__config = getConfigFor(target)
               target.triggerConfigUpdated
-              
-              println(s"**** Reloaded -> Harvest")
-              Harvest.run
+
+              //println(s"**** Reloaded -> Harvest")
+             // Harvest.run
           }
-        case other  => 
+        case other =>
       }
-      
+
       document
     } catch {
       case e: Throwable =>
@@ -126,33 +156,33 @@ object Config extends IndesignModule {
     }
 
   }
-  
+
   // Def Builders
   //------------------
-  def apply (imp: ConfigImplementation) = {
-    
+  def apply(imp: ConfigImplementation) = {
+
     this.setImplementation(imp)
-    
+
     this
   }
-  
+
   // Generic Database Access
   //------------------------
-  
-   def getContainerFor(cl:String) : Option[DocumentContainer] = {
-    
+
+  def getContainerFor(cl: String): Option[DocumentContainer] = {
+
     this.implementation match {
-      case Some(implementation) => 
+      case Some(implementation) =>
         Some(implementation.getContainer(cl))
       case None => None
     }
-    
+
   }
-  
+
   /**
    * Returns a container named after the class
    */
-  def getContainerFor(cl:Class[_]) : Option[DocumentContainer] = getContainerFor(cl.getCanonicalName.replace("$", ""))
-  
-  def getContainerFor(o:AnyRef) : Option[DocumentContainer] =  this.getContainerFor(o.getClass)
+  def getContainerFor(cl: Class[_]): Option[DocumentContainer] = getContainerFor(cl.getCanonicalName.replace("$", ""))
+
+  def getContainerFor(o: AnyRef): Option[DocumentContainer] = this.getContainerFor(o.getClass)
 }

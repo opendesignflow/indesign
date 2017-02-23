@@ -12,6 +12,9 @@ import org.odfi.indesign.core.brain.ExternalBrainRegionBuilder
 import com.idyria.osi.tea.compile.ClassDomain
 import com.idyria.osi.tea.compile.ClassDomainSupport
 import org.odfi.indesign.core.module.IndesignModule
+import org.odfi.indesign.core.brain.LFCDefinition
+import org.odfi.indesign.core.harvest.fs.FSGlobalWatch
+import org.odfi.indesign.core.harvest.Harvest
 
 class FolderOutBuilder extends ExternalBrainRegionBuilder {
 
@@ -45,16 +48,38 @@ class FolderOutBuilder extends ExternalBrainRegionBuilder {
 class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends ExternalBrainRegion with ClassDomainSupport {
   // this.addPath(basePath.toPath())
 
+  //tlogEnableFull[LFCDefinition]
+
   def getRegionPath = basePath.getAbsolutePath
 
-  override def name = basePath.getName
+  override def getName = basePath.getName
   override def getId = basePath.getCanonicalPath
   def id = basePath.getAbsolutePath
 
   override def toString = s"FolderRegion: ${getRegionPath}"
 
-  // Create CLass Domain
+  // Auto Reload
+  //---------------------
+  var beautyTime = 2000
+  var lastTime = 0L
+  this.onAdded {
+    case h if(h==Brain)=> 
+    FSGlobalWatch.watcher.watchDirectoryRecursive(this, outputPath) {
+      case f if (f.exists && f.getName.endsWith(".class")) =>
 
+        println(s"######### Detected compilation on ${this.hashCode()}, reloading class ###########")
+        if (lastTime < (System.currentTimeMillis() - beautyTime)) {
+          lastTime = System.currentTimeMillis() 
+          this.reload
+          Harvest.run
+        }
+
+      case other =>
+    }
+  }
+
+  // Create CLass Domain
+  //------------------
   var classDomain: Option[ClassDomain] = None
 
   this.onSetup {
@@ -72,6 +97,11 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
 
       case false =>
     }
+  }
+
+  this.onStop {
+    println(s"**** Stopping folder")
+
   }
 
   this.onShutdown {
@@ -121,57 +151,39 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
   }
 
   //-- Discover
-  override def discoverRegions: List[String] = {
+  override def discoverRegions: List[String] = this.classDomain match {
 
-    var stream = Files.walk(outputPath.toPath())
-    var regions = List[String]()
-    stream.forEach {
-      f =>
+    case Some(cd) =>
 
-        // var relativeF = f.resolve(outputPath.toPath())
-        //println("Lookin at: "+relativeF.toString())
-        if (f.getFileName.toString().endsWith("$.class")) {
+      var stream = Files.walk(outputPath.toPath())
+      var regions = List[String]()
+      stream.forEach {
+        f =>
 
-          var className = f.toString().replace(outputPath.getCanonicalPath + File.separator, "").replace(File.separator.toString, ".").replace(".class", "")
-          // println("Lookin at: "+className)
-          Brain.getObject(this.classDomain.get, className) match {
-            case Some(obj) =>
-              classOf[IndesignModule].isInstance(obj) match {
-                case true =>
-                  //println("Found object")
-                  regions = regions :+ obj.getClass.getCanonicalName
-                  Some(obj.getClass.getCanonicalName)
-                case false => None
-              }
-            case None => None
-          }
-        }
-    }
+          // var relativeF = f.resolve(outputPath.toPath())
+          //println("Lookin at: "+relativeF.toString())
+          if (f.getFileName.toString().endsWith("$.class")) {
 
-    regions
-
-    /*var jf = new File(this.getRegionPath)
-    (jf.exists && jf.getName.endsWith(".jar")) match {
-      case true =>
-
-        // Open Jar File
-        var jar = new JarFile(jf)
-        jar.entries().collect {
-          case entry if (entry.getName.endsWith("$.class")) =>
-            //println("Entry: "+entry)
-            Brain.getObject(this.classdomain.get, entry.getName.replace("/", ".").replace(".class", "")) match {
+            var className = f.toString().replace(outputPath.getCanonicalPath + File.separator, "").replace(File.separator.toString, ".").replace(".class", "")
+            // println("Lookin at: "+className)
+            Brain.getObject(cd, className) match {
               case Some(obj) =>
                 classOf[IndesignModule].isInstance(obj) match {
-                  case true => Some(obj.getClass.getCanonicalName)
+                  case true =>
+                    //println("Found object")
+                    regions = regions :+ obj.getClass.getCanonicalName
+                    Some(obj.getClass.getCanonicalName)
                   case false => None
                 }
               case None => None
             }
+          }
+      }
 
-        }.collect { case rno if (rno.isDefined) => rno.get }.toList
+      regions
 
-      case false => List()
-    }*/
+    case None =>
+      List[String]()
 
   }
 

@@ -212,7 +212,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
 
                 // Name
                 span {
-                  textContent(region.name)
+                  textContent(region.getName)
                 }
 
               }
@@ -308,7 +308,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                             textContent("No Regions available to add")
                           }
                         case other =>
-                          tempBufferSelect(s"${region.name}-regionLoad", remaining.map { name => (name, name.split("\\.").last) })
+                          tempBufferSelect(s"${region.getName}-regionLoad", remaining.map { name => (name, name.split("\\.").last) })
 
                           "ui info error" :: div {
 
@@ -319,7 +319,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                             "add icon" :: i()
 
                             onClick {
-                              var name = getTempBufferValue[String](s"${region.name}-regionLoad") match {
+                              var name = getTempBufferValue[String](s"${region.getName}-regionLoad") match {
                                 case None =>
                                   remaining.head
                                 case Some(v) => v

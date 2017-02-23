@@ -238,7 +238,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.getResources.collect { case r if (cl.runtimeClass.isInstance(r) || cl.runtimeClass.getCanonicalName == r.getClass.getCanonicalName) => r }
   }
 
-  def getResourcesByTypeAndUpchainParent[CT <: HarvestedResource, UT <: HarvestedResource : ClassTag](upChain: UT)(implicit cl: ClassTag[CT]): List[HarvestedResource] = {
+  def getResourcesByTypeAndUpchainParent[CT <: HarvestedResource, UT <: HarvestedResource : ClassTag](upChain: UT)(implicit cl: ClassTag[CT]): List[CT] = {
     this.getResourcesOfType[CT].filter {
       r =>
         r.findUpchainResource[UT] match {

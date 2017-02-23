@@ -7,6 +7,18 @@ class DefaultMemoryConfigImplementation extends ConfigImplementation {
   
   var realmString = ""
   
+  def addRealm(name:String) = {
+    
+  }
+  
+  def detectLatestRealm: Option[String] = {
+    None
+  }
+  
+  def listAllRealms = {
+    List()
+  }
+  
   def openConfigRealm(str:String) = {
     realmString = str
   }

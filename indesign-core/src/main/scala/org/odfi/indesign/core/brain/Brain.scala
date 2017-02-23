@@ -9,7 +9,6 @@ import org.eclipse.aether.impl.ArtifactResolver
 import org.odfi.indesign.core.artifactresolver.AetherResolver
 import org.odfi.indesign.core.brain.artifact.ArtifactExternalRegion
 import org.odfi.indesign.core.harvest.Harvest
-import org.odfi.indesign.core.brain.LFCDefinition
 
 trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource with Harvester {
 
@@ -63,6 +62,18 @@ object Brain extends Brain {
     }
 
   }*/
+  
+  // Config help
+  //-------------------
+  def addExternalFolderRegion(file:File) = {
+    this.config match {
+      case Some(conf) if(!conf.isInConfig("external-region-folder", file.getCanonicalPath)) =>
+        var k = conf.addKey("region", "external-region-folder")
+        k.values.add.set(file.getCanonicalPath)
+        conf.resyncToFile
+      case other => 
+    }
+  }
 
   // Region Harvesting
   //-----------------

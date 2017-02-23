@@ -16,7 +16,7 @@ class ArtifactExternalRegion(val gid: String, val aid: String, val version: Stri
 
   //-- ID and so
   override def getId = s"$gid:$aid:$version"
-  override def name = aid
+  override def getName  = aid
 
   def getRegionPath: String = {
     AetherResolver.resolveArtifact(gid, aid, version, classifier) match {

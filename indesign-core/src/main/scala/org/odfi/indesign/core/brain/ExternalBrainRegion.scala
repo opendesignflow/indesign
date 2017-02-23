@@ -11,9 +11,34 @@ import scala.reflect.ClassTag
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.harvest.HarvestedResource
 
-class RegionClassName(val className: String) extends HarvestedResource {
-
+class RegionClassName(val className: String,val region:ExternalBrainRegion) extends HarvestedResource {
+  this.deriveFrom(region)
+  
   override def getId = className
+  
+  def isType[T](implicit tag : ClassTag[T]) = {
+    load[T] match {
+      //case ESome(cl) if (tag.runtimeClass.isAssignableFrom(cl)) => true 
+      case ESome(r) if (tag.runtimeClass.isInstance(r)) => true 
+      case ENone => false
+      case EError(err) => 
+        addError(err)
+        false
+    }
+  }
+  
+  def load[T](implicit tag : ClassTag[T]) = region.loadRegionClass(className) match {
+      //case ESome(cl) if (tag.runtimeClass.isAssignableFrom(cl)) => true 
+      case ESome(r) if (tag.runtimeClass.isInstance(r)) =>
+        
+        this.addDerivedResource(r)
+        ESome(r.asInstanceOf[T]) 
+      case ENone => ENone
+      case EError(err) => 
+        addError(err)
+        ENone
+      case other => ENone
+    }
 
 }
 
@@ -42,8 +67,19 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
    * Resolve parent class domain and such during setup
    */
   override def doHarvest = {
-    logFine[Brain](s"Moving to load on external region: ${getClass}")
-    configKey match {
+    logFine[ExternalBrainRegion](s"Harvesting on external region: ${getClass}")
+    
+    this.discoverRegions.foreach {
+      name => 
+        
+        logFine[ExternalBrainRegion](s"Found Module name: "+name)
+        
+        //-- Gather
+        gather(new RegionClassName(name,this))
+    }
+    
+    
+    /*configKey match {
       case Some(key) =>
         key.values.drop(1).foreach {
           cv =>
@@ -57,7 +93,7 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
 
         }
       case None =>
-    }
+    }*/
   }
 
   // Created gatehered resources
@@ -178,8 +214,8 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
    */
   def reload = {
     keepErrorsOn(this)(this.moveToShutdown)
-    keepErrorsOn(this)(this.moveToLoad)
-    keepErrorsOn(this)(this.moveToInit)
+    keepErrorsOn(this)(this.resetState)
+    keepErrorsOn(this)(this.moveToStart)
   }
 
   //var wrappedRegion : BrainRegion

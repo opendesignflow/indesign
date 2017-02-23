@@ -26,7 +26,7 @@ trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with
   /**
    * Return a simple name
    */
-  def name = getClass.getSimpleName.replace("$","")
+  def getName = getClass.getSimpleName.replace("$","")
   override def getId = getClass.getCanonicalName
   
   // Lifecycle Management

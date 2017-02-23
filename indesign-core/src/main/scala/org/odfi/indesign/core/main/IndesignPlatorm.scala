@@ -14,6 +14,7 @@ import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.heart.Heart
+import org.odfi.indesign.core.module.HarvesterModule
 
 object IndesignPlatorm extends App {
 
@@ -23,7 +24,6 @@ object IndesignPlatorm extends App {
   def prepareDefault = {
     Brain.deliverDirect(Harvest)
     Brain.deliverDirect(Config)
-    Harvest.scheduleHarvest(2000)
     Harvest.addHarvester(Brain)
   }
   
@@ -49,12 +49,18 @@ object IndesignPlatorm extends App {
   
   def use(r: BrainRegion): BrainRegion = {
     Brain.gatherPermanent(r)
+    r.moveToSetup
     r
   }
 
   def use(h: Harvester): Harvester = {
     Harvest.addHarvester(h)
     h
+  }
+  
+  def use(r: HarvesterModule): HarvesterModule = {
+    Brain.gatherPermanent(r)
+    r
   }
 
   // Indesign Standalone Main

@@ -9,9 +9,9 @@ import com.idyria.osi.tea.logging.TLogSource
 /**
  * @author zm4632
  */
-trait LFCSupport extends ListeningSupport {
+trait LFCSupport extends ListeningSupport with TLogSource {
 
-  val statesHandlers = scala.collection.mutable.Map[String, scala.collection.mutable.ListBuffer[() => Unit]]()
+  var statesHandlers = Map[String, List[() => Unit]]()
   var currentState: Option[String] = None
   val lfcSemaphore = new Semaphore(0)
 
@@ -32,14 +32,27 @@ trait LFCSupport extends ListeningSupport {
   }
   def applyState(str: String) = {
 
+     
+    
     this.synchronized {
       this.currentState = Some(str)
     }
 
     statesHandlers.get(str) match {
       case Some(handlers) =>
+        
+        logFine[LFCDefinition](s"Applying $str ${handlers.size} handlers onto ${getClass.getCanonicalName}")
+        
         handlers.foreach {
-          h => h()
+          h => 
+            logFine[LFCDefinition](s"Running ${getClass.getCanonicalName} closure...."+h.hashCode())
+            try {
+              h()
+            } catch {
+              case e : Throwable => 
+                e.printStackTrace()
+                throw e
+            }
         }
       case None =>
       //throw new RuntimeException(s"Cannot apply state $str to ${getClass.getName}, no handlers defined")
@@ -55,16 +68,35 @@ trait LFCSupport extends ListeningSupport {
     this.@->("state.updated")
   }
 
-  def registerStateHandler(str: String)(h: => Unit) = {
+  def registerStateHandler(state: String)(h: => Unit) = {
 
-    var handlers = this.statesHandlers.getOrElseUpdate(str, new scala.collection.mutable.ListBuffer[() => Unit])
-    handlers += { () => h }
+    val cl = {
+      () => h
+    }
+    logFine[LFCDefinition](s"Registering $state handler on ${getClass.getCanonicalName}...."+cl.hashCode())
+    
+    this.statesHandlers.get(state) match {
+      case Some(handlers) =>
+        
+        this.statesHandlers = this.statesHandlers.updated(state, handlers :+ cl)
+        
+      case None => 
+        this.statesHandlers = this.statesHandlers.updated(state, List(cl))
+        
+    }
+    
+    /*var handlers = this.statesHandlers.getOrElseUpdate(str, new scala.collection.mutable.ListBuffer[() => Unit])
+    handlers += { () => h }*/
   }
 
-  def onState(str: String)(h: => Unit) = {
+  def onState(state: String)(h: => Unit) = {
 
-    var handlers = this.statesHandlers.getOrElseUpdate(str, new scala.collection.mutable.ListBuffer[() => Unit])
-    handlers += { () => h }
+    registerStateHandler(state) {
+      h
+    }
+    
+  /*  var handlers = this.statesHandlers.getOrElseUpdate(str, new scala.collection.mutable.ListBuffer[() => Unit])
+    handlers += { () => h }*/
   }
 
   /**
@@ -136,7 +168,7 @@ trait LFCDefinition extends ClassDomainSupport with TLogSource {
         case Some(current) => this.states.indexOf(current)
         case None => -1
       }
-      logFine[LFCDefinition](s"Moving from $currentStateIndex to $targetStateIndex")
+      logFine[LFCDefinition](s"Moving ${lifecyclable} from $currentStateIndex to $targetStateIndex")
       // println(s"Current: $currentStateIndex")
       // If target is before current, just jump to it 
       (targetStateIndex - currentStateIndex) match {
@@ -181,7 +213,7 @@ trait LFCDefinition extends ClassDomainSupport with TLogSource {
         case Some(current) => this.states.indexOf(current)
         case None => -1
       }
-      logFine[LFCDefinition](s"Moving from $currentStateIndex to $targetStateIndex")
+      logFine[LFCDefinition](s"Moving ${lifecyclable} from $currentStateIndex to $targetStateIndex")
       // println(s"Current: $currentStateIndex")
       // If target is before current, just jump to it 
       (targetStateIndex - currentStateIndex) match {
@@ -193,16 +225,17 @@ trait LFCDefinition extends ClassDomainSupport with TLogSource {
         case r if (r <= 0) =>
           lifecyclable.applyState(states(0))
           moveToState(lifecyclable, states(targetStateIndex))
-        //lifecyclable.applyState(states(targetStateIndex))
+        
+          //lifecyclable.applyState(states(targetStateIndex))
 
         // Go to
         case r =>
 
           // Scroll to target state, and execute all the states which are higher than current state
-          (0 to targetStateIndex) foreach {
+          ((currentStateIndex+1) to targetStateIndex) foreach {
             case i if (i > currentStateIndex) =>
               lifecyclable.applyState(states(i))
-              currentStateIndex = i
+              currentStateIndex += 1
             case _ =>
           }
       }

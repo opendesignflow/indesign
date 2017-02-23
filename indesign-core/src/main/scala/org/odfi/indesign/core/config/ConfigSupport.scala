@@ -14,13 +14,23 @@ trait ConfigSupport extends ConfigHolder with HarvestedResource {
    */
   var __config: Option[CommonConfig] = None
 
-  def isConfigLoaded: Boolean = __config.isDefined
+  // Clean config on reload
+  Config.onRealmChanged {
+    synchronized {
+      __config = None
+    }
 
-  def config: Option[CommonConfig] = __config match {
-    case Some(_) => __config
-    case None =>
-      __config = Config.getConfigFor(this)
-      __config
+  }
+
+  def isConfigLoaded: Boolean = synchronized { __config.isDefined }
+
+  def config: Option[CommonConfig] = synchronized {
+    __config match {
+      case Some(_) => __config
+      case None =>
+        __config = Config.getConfigFor(this)
+        __config
+    }
   }
 
 }
