@@ -15,6 +15,11 @@ object IndesignWWWUIModule extends IndesignModule {
 
   var mainHarvesters = new WWWViewHarvester
   
+  
+  def addView[T <:IndesignUIView](v:T) = {
+    this.mainHarvesters.gatherPermanent(v)
+  }
+  
   this.onLoad {
 
     Harvest.addHarvester(mainHarvesters)
