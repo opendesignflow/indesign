@@ -17,31 +17,30 @@ class OOXOOFSConfigImplementation(var baseFile: File) extends ConfigImplementati
 
   var realmFSStore: Option[FSStore] = None
 
-  def addRealm(name:String) = listAllRealms.find(_==name) match {
+  def addRealm(name: String) = listAllRealms.find(_ == name) match {
     case None =>
       new File(baseFile, name).mkdirs()
-    case Some(newRealm) => 
+    case Some(newRealm) =>
   }
-  
+
   def detectLatestRealm: Option[String] = {
-    
-   
+
     var latestRealmFile = new File(baseFile, "config-properties.xml")
-    
-     println(s"Using file to reload properties: "+latestRealmFile)
-    
+
+    //println(s"Using file to reload properties: " + latestRealmFile)
+
     latestRealmFile.exists() match {
       case true =>
 
         var props = new Properties()
         var is = new FileInputStream(latestRealmFile)
         props.loadFromXML(is)
-        props.list(System.out)
+       // props.list(System.out)
         try {
           props.containsKey("realm.current") match {
             case true =>
-              println(s"Found key: "+props.getProperty("realm.current"))
-              println(s"Found key: "+props.getProperty("realm.current"))
+              //println(s"Found key: " + props.getProperty("realm.current"))
+             //println(s"Found key: " + props.getProperty("realm.current"))
               Some(props.getProperty("realm.current"))
             case false =>
               None
@@ -52,14 +51,14 @@ class OOXOOFSConfigImplementation(var baseFile: File) extends ConfigImplementati
       case false => None
     }
   }
-  
+
   def listAllRealms = {
-    baseFile.listFiles().filter(_.isDirectory()).map{_.getName}.toList
+    baseFile.listFiles().filter(_.isDirectory()).map { _.getName }.toList
   }
 
   def openConfigRealm(str: String) = {
     this.realmFSStore = Some(new FSStore(new File(baseFile, str)))
-    
+
     var latestRealmFile = new File(baseFile, "config-properties.xml")
     var properties = latestRealmFile.exists() match {
       case true =>
@@ -75,9 +74,8 @@ class OOXOOFSConfigImplementation(var baseFile: File) extends ConfigImplementati
 
     properties.put("realm.current", str)
     var os = new FileOutputStream(latestRealmFile)
-    properties.storeToXML(os , "UTF8")
+    properties.storeToXML(os, "UTF8")
     os.close()
-    
 
   }
 

@@ -48,6 +48,10 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
     case None if (lastRun==0) => false
     case _ => true
   }*/
+  
+  // Period managing
+  //------------
+  def isPeriodical = (scheduleAfter.isDefined || scheduleEvery.isDefined)
 
   // Activity to help clever scheduling
   //-----------------
@@ -99,38 +103,55 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
         try {
 
           // Run Task
-          logFine[HeartTask[_]]("Running Task")
+          logFine[HeartTask[_]]("Running Task: "+getId)
           this.stopSignal.tryAcquire() match {
             case false =>
               logFine[HeartTask[_]]("No Stop")
-              doTask
+              Some(doTask)
             case true =>
               logFine[HeartTask[_]]("Stop")
               taskStopped
+              None
           }
 
         } catch {
           case e: InterruptedException =>
             taskStopped
+            None
         } finally {
 
-          // Close Task: Either clean or let got if it is periodical
+          // If Future is still present, and task is not periodical, clean
           this.scheduleFuture match {
+           
+            case Some(f) if (!isPeriodical) => 
+               taskStopped
+            case other => 
+          }
+          
+          None
+          
+          // Close Task: Either clean or let got if it is periodical
+          /*this.scheduleFuture match {
             case None =>
               //try { this.kill } catch { case e: Throwable => }
               this.stopSignal.release()
               taskStopped
             case Some(f) => 
-          }
+              //-- Closre
+          }*/
           
-          (scheduleAfter, scheduleEvery) match {
+         /* (scheduleAfter, scheduleEvery) match {
             case (None, None) =>
               taskStopped
             case _ =>
-          }
+          }*/
         }
-      }.asInstanceOf[PT]
+      }
+    } match {
+      case Some(rt) => rt.asInstanceOf[PT]
+      case None => null.asInstanceOf[PT]
     }
+   
   }
 
   /**
@@ -138,14 +159,22 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
    */
   private def taskStopped = {
 
+    //-- Move to done state
     HeartTask.moveToState(this, HeartTask.DONE.name)
+    
+    //-- Call clean
     (scheduleAfter, scheduleEvery) match {
       case (None, None) =>
         this.@->("clean", this.originalHarvester)
       case _ =>
     }
 
+    //-- Cancel to make sure task gets removed from executor
+    this.scheduleFuture.get.cancel(true)
     this.scheduleFuture = None
+    
+    //-- Clean stop signal
+    this.stopSignal.drainPermits()
   }
 
   def doTask: PT

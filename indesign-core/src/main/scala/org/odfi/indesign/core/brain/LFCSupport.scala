@@ -33,11 +33,18 @@ trait LFCSupport extends ListeningSupport with TLogSource {
   def applyState(str: String) = {
 
      
-    
+    //-- Update state
     this.synchronized {
       this.currentState = Some(str)
     }
-
+    
+    //-- Make sure waiters advance
+    lfcSemaphore.getQueueLength match {
+      case 0 => lfcSemaphore.release()
+      case other => lfcSemaphore.release(other)
+    }
+    
+    //-- Execute state closures
     statesHandlers.get(str) match {
       case Some(handlers) =>
         
@@ -58,10 +65,7 @@ trait LFCSupport extends ListeningSupport with TLogSource {
       //throw new RuntimeException(s"Cannot apply state $str to ${getClass.getName}, no handlers defined")
     }
 
-    lfcSemaphore.getQueueLength match {
-      case 0 => lfcSemaphore.release()
-      case other => lfcSemaphore.release(other)
-    }
+    
 
     //this.lfcPhaser.register()
     //this.lfcPhaser.arriveAndDeregister()

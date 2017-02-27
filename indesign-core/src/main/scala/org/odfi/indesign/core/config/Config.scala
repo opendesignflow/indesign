@@ -33,15 +33,15 @@ object Config extends IndesignModule {
   def setImplementation(i: ConfigImplementation) = {
 
     implementation = Some(i)
-    println(s"Starting from last realm with impl: "+i)
+   // println(s"Starting from last realm with impl: "+i)
     i.detectLatestRealm match {
       case Some(realm) =>
         currentRealm = realm
-        println("Found previous realm detected: "+realm)
+      //  println("Found previous realm detected: "+realm)
       case None =>
-        println("Not previous realm detected")
+     //   println("Not previous realm detected")
     }
-    println(s"******************* OPENING ${currentRealm} *********************")
+  //  println(s"******************* OPENING ${currentRealm} *********************")
     implementation.get.openConfigRealm(this.currentRealm)
   }
 

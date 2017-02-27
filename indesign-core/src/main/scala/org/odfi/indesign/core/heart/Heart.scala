@@ -15,13 +15,11 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   override def isTainted = super.isTainted
 
- 
-  
   // Thread creations 
   //---------------------
 
   //-- Thread group
-  var threadGroup = new ThreadGroup("Indesign.Heart")
+  var threadGroup = new ThreadGroup("heart")
 
   def newThread(r: Runnable) = {
 
@@ -61,11 +59,11 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   }
 
   def removeTask(t: HeartTask[_]) = {
-    
+
     //-- Make sure executor has no task
     t.scheduleFuture = None
     //t.scheduleEvery = None
-    
+
     //-- REmove
     tasks.synchronized {
       tasks.contains(t.getId) match {
@@ -111,44 +109,64 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
     try {
       t.isRunning match {
         case true =>
-        
+
           var taskFuture = t.scheduleFuture.get
+
+          logFine[HeartTask[_]]("Task is running, wait a bit or cancel")
+
           //-- If Task is single run, just wait a bit or based otherwise kill
           t.scheduleEvery match {
             case Some(scheduleRate) =>
 
+              logFine[HeartTask[_]]("Task is periodic, Relasing stop signal")
               t.stopSignal.release
               try {
                 taskFuture.get(scheduleRate, TimeUnit.MILLISECONDS)
               } catch {
                 case e: TimeoutException =>
                   try {
+                    logFine[HeartTask[_]]("Task stop timed out, cancelling")
                     taskFuture.cancel(true)
                   } catch {
                     case e: CancellationException =>
+                      onLogFine[HeartTask[_]] {
+                        e.printStackTrace()
+                      }
+
                   }
-                case e: CancellationException =>
+                case e: Throwable =>
+                  onLogFine[HeartTask[_]] {
+                    e.printStackTrace()
+                  }
 
               }
             case None =>
+              logFine[HeartTask[_]]("Task not periodic, releasing stop signal")
               t.stopSignal.release
               try {
                 taskFuture.get(100, TimeUnit.MILLISECONDS)
               } catch {
                 case e: TimeoutException =>
                   try {
+                    logFine[HeartTask[_]]("Task stop timed out, cancelling")
                     taskFuture.cancel(true)
                   } catch {
                     case e: CancellationException =>
+                      onLogFine[HeartTask[_]] {
+                        e.printStackTrace()
+                      }
                   }
                 case e: CancellationException =>
+                  onLogFine[HeartTask[_]] {
+                    e.printStackTrace()
+                  }
               }
 
           }
 
         // t.scheduleFuture.get.
         case false =>
-          
+
       }
     } catch {
       case e: InterruptedException =>
@@ -173,7 +191,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   // Lifecycles
   //-----------------
-  
+
   this.onStop {
     var all = this.tasks
     all.foreach {

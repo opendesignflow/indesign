@@ -1,6 +1,5 @@
 package org.odfi.indesign.core.heart
 
-import org.odfi.indesign.core.heart.Heart;
 import org.scalatest.FunSuite
 import java.util.concurrent.Semaphore
 import com.idyria.osi.tea.logging.TLog
@@ -71,8 +70,11 @@ class HeartSchedulingTasksTest extends FunSuite {
     //-- Task
     var t = new DefaultHeartTask {
       
+      override def getId = "Test Task"
+      
       this.scheduleEvery = Some(1000)
       def doTask = {
+        println(s"Run Task, acquire advance")
         advanceS.acquire()
         receiveS.release()
       }
@@ -89,7 +91,9 @@ class HeartSchedulingTasksTest extends FunSuite {
     
     //-- Repump
     Heart.killTask(t)
+    println(s"Waiting for done")
     t.waitForDone
+     println(s"Task done")
     Heart.pump(t)
     
     //-- Release 5 credits and acquire 5
