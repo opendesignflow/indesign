@@ -11,34 +11,34 @@ import scala.reflect.ClassTag
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.harvest.HarvestedResource
 
-class RegionClassName(val className: String,val region:ExternalBrainRegion) extends HarvestedResource {
+class RegionClassName(val className: String, val region: ExternalBrainRegion) extends HarvestedResource {
   this.deriveFrom(region)
-  
-  override def getId = className
-  
-  def isType[T](implicit tag : ClassTag[T]) = {
+
+  override def getId = getClass.getCanonicalName+":"+className
+
+  def isType[T](implicit tag: ClassTag[T]) = {
     load[T] match {
       //case ESome(cl) if (tag.runtimeClass.isAssignableFrom(cl)) => true 
-      case ESome(r) if (tag.runtimeClass.isInstance(r)) => true 
+      case ESome(r) if (tag.runtimeClass.isInstance(r)) => true
       case ENone => false
-      case EError(err) => 
+      case EError(err) =>
         addError(err)
         false
     }
   }
-  
-  def load[T](implicit tag : ClassTag[T]) = region.loadRegionClass(className) match {
-      //case ESome(cl) if (tag.runtimeClass.isAssignableFrom(cl)) => true 
-      case ESome(r) if (tag.runtimeClass.isInstance(r)) =>
-        
-        this.addDerivedResource(r)
-        ESome(r.asInstanceOf[T]) 
-      case ENone => ENone
-      case EError(err) => 
-        addError(err)
-        ENone
-      case other => ENone
-    }
+
+  def load[T](implicit tag: ClassTag[T]) = region.loadRegionClass(className) match {
+    //case ESome(cl) if (tag.runtimeClass.isAssignableFrom(cl)) => true 
+    case ESome(r) if (tag.runtimeClass.isInstance(r)) =>
+
+      this.addDerivedResource(r)
+      ESome(r.asInstanceOf[T])
+    case ENone => ENone
+    case EError(err) =>
+      addError(err)
+      ENone
+    case other => ENone
+  }
 
 }
 
@@ -68,17 +68,19 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
    */
   override def doHarvest = {
     logFine[ExternalBrainRegion](s"Harvesting on external region: ${getClass}")
-    
+
+    //-- Gather Region Classes
     this.discoverRegions.foreach {
-      name => 
-        
-        logFine[ExternalBrainRegion](s"Found Module name: "+name)
-        
+      name =>
+
+        logFine[ExternalBrainRegion](s"Found Module name: " + name)
+
         //-- Gather
-        gather(new RegionClassName(name,this))
+        gather(new RegionClassName(name, this))
     }
-    
-    
+
+    //-- Gather Region themselves
+
     /*configKey match {
       case Some(key) =>
         key.values.drop(1).foreach {
@@ -103,44 +105,85 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
       resources.collect { case e: RegionClassName => e }.foreach {
         regionClass =>
 
-          var region = addRegionClass(regionClass.getId) match {
-            case ESome(region) =>
-              region.onCleaned {
-                case h if (h == ExternalBrainRegion.this) =>
-                  region.moveToShutdown
+          //-- IF the region is kept found, recheck it's state with the main config
+          regionClass.onKept {
+            case h if (h == this) =>
 
+              logFine[ExternalBrainRegion]("Region kept: " + regionClass.className + " -> Checking for setup")
+
+              configKey match {
+                case Some(configBase) =>
+
+                  configBase.values.foreach {
+                    v =>
+                      logFine[ExternalBrainRegion]("-- Available config: " + v)
+                  }
+                  
+                  this.derivedResources.foreach {
+                    case (id,region : BrainRegion) => 
+                      logFine[ExternalBrainRegion]("-- Region present: "+region.getClass.getCanonicalName)
+                    case other => 
+                  }
+
+                  configBase.values.find { v => v.toString() == regionClass.className } match {
+
+                    //-- Region is configured and not present
+                    case Some(configured) if(this.findDerivedResourceOfTypeAnd[BrainRegion](_.getClass.getCanonicalName == regionClass.className).isEmpty) =>
+
+                      this.loadRegionClass(regionClass.className) match {
+                        case ESome(region) =>
+
+                          logFine[ExternalBrainRegion]("Saving REgion: "+regionClass.className)
+                          
+                          //-- Save Region
+                          this.addDerivedResource(region)
+
+                          //-- Cleaning
+                          region.onClean {
+                            region.moveToShutdown
+                          }
+
+                          //-- Move to same state as this one
+                          this.currentState match {
+                            case Some(state) =>
+                              Brain.moveToState(region, state)
+                            case None =>
+                            //Brain.moveToState(region, this.currentState.get)
+                          }
+
+                        case ENone =>
+                        case EError(e) => addError(e)
+                      }
+
+                    //-- Not configured
+                    case None =>
+
+                      //-- Look if regino is present, if then remove
+                      this.derivedResources.find {
+                        case (id, resource: BrainRegion) if (resource.getClass.getCanonicalName == regionClass.className) =>
+                          true
+                        case other =>
+                          false
+                      } match {
+                        case Some((id, region)) =>
+                          this.cleanDerivedResource(region)
+                        case None =>
+                      }
+
+                    //-- Present
+                    case other => 
+                      
+                  }
+
+                case None =>
               }
-            case other =>
+
           }
 
+      
       }
   }
 
-  /**
-   * Load Sub Regions when in load State
-   * Resolve parent class domain and such during setup
-   */
-  /*this.onLoad {
-    logFine[Brain](s"Moving to load on external region: ${getClass}")
-    configKey match {
-      case Some(key) =>
-        key.values.drop(1).foreach {
-          cv =>
-            logFine[Brain](s"Loading Region/Module from config: $cv")
-            /* var current = external.subRegions.size
-              external.loadRegionClass(cv)
-              var now = external.subRegions.size
-              if (now <= current) {
-                logWarn[Brain]("No errors during region load, it should be added to sub regions")
-              }*/
-
-            //-- Create Region
-            var region = addRegionClass(cv)
-
-        }
-      case None =>
-    }
-  }*/
 
   this.onShutdown {
     // Remove all sub regions
@@ -148,7 +191,7 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
   }
   this.onCleaned {
     case h =>
-      logFine[Brain](s"Cleaning External Region")
+      logFine[ExternalBrainRegion](s"Cleaning External Region")
       this.cleanDerivedResources
       this.moveToShutdown
   }
@@ -160,44 +203,7 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
    */
   def loadRegionClass(cl: String): ErrorOption[BrainRegion]
 
-  /**
-   * Uses Load Region to create instance, and deliver
-   */
-  def addRegionClass(cl: String): ErrorOption[BrainRegion] = {
-
-    //-- Create
-    try {
-      logFine[Brain](s"Add Region: $cl ")
-      loadRegionClass(cl) match {
-        case ESome(create) =>
-          addDerivedResource(create)
-
-          //-- Make sure it is in config
-          configKey match {
-            case Some(key) if (key.values.find { v => v.toString() == cl }.isEmpty) =>
-              key.values.add.data = (cl)
-            case _ =>
-          }
-
-          //-- Move to same state
-          this.currentState match {
-            case Some(s) =>
-              keepErrorsOn(create)(Brain.moveToState(create, s))
-            case None =>
-          }
-
-          ESome(create)
-
-        case other =>
-          other
-      }
-
-    } catch {
-      case e: Throwable =>
-        e.printStackTrace()
-        throw e
-    }
-  }
+ 
 
   // Region Discover
   //--------------
@@ -218,21 +224,7 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
     keepErrorsOn(this)(this.moveToStart)
   }
 
-  //var wrappedRegion : BrainRegion
-
-  /*
-  override def name = wrappedRegion.name
   
-
-  this.onInit {
-    //println(s"External INIT")
-    Brain.moveToState(wrappedRegion, "init")
-  }
-
-  this.onLoad {
-   //  println(s"External LOAD")
-    Brain.moveToState(wrappedRegion, "load")
-  }*/
 
 }
 
