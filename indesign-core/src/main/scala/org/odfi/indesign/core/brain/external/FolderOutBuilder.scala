@@ -57,10 +57,12 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
   def id = basePath.getAbsolutePath
 
   override def toString = s"FolderRegion: ${getRegionPath}"
+  
+  override def getDisplayName = s"Folder Region: ${basePath.getParentFile.getName+File.separator+basePath.getName} "
 
   // Auto Reload
   //---------------------
-  var beautyTime = 2000
+  var beautyTime = 5000
   var lastTime = 0L
   this.onAdded {
     case h if(h==Brain)=> 
@@ -71,6 +73,7 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
         if (lastTime < (System.currentTimeMillis() - beautyTime)) {
           lastTime = System.currentTimeMillis() 
           this.reload
+          Harvest.run
           Harvest.run
         }
 
