@@ -21,7 +21,7 @@ trait FileSystemHarvester extends Harvester {
     //this.searchPaths = this.searchPaths :+ p.toFile.getAbsoluteFile.toPath()
   }
 
-  this.onConfigUpdated {
+  /*this.onConfigUpdated {
     this.config match {
       case Some(conf) =>
         conf.values.keys.foreach {
@@ -38,7 +38,7 @@ trait FileSystemHarvester extends Harvester {
         }
       case None =>
     }
-  }
+  }*/
   
   
   //def createResourceFromPath(p:Path) : RT
@@ -59,13 +59,13 @@ trait FileSystemHarvester extends Harvester {
   override def doHarvest = {
 
     // Use Config to find base paths
-    /*this.config match {
+    this.config match {
       case Some(conf) =>
         conf.values.keys.foreach {
           case key if (key.keyType === "file") =>
             key.values.foreach {
               v =>
-                // println("Found File: "+v)
+                 println("***** FS Found File: "+v)
                 this.addPath(new File(v).getCanonicalFile.toPath)
 
             }
@@ -74,7 +74,7 @@ trait FileSystemHarvester extends Harvester {
           // println("Key in config: "+key.keyType)
         }
       case None =>
-    }*/
+    }
 
     logFine[FileSystemHarvester](s"Harvesting on : ${this} -> ${this.childHarvesters.size}")
 
@@ -96,9 +96,12 @@ trait FileSystemHarvester extends Harvester {
 
         // Readd Resource to Gathered to make sure it won't dissapear
         // If rooted, don't readd
-        if (!resource.rooted) {
-          gather(resource)
+        resource.rooted match {
+          case true => 
+          case false => 
+           gather(resource)
         }
+       
         // Walk Through the files, stop if a child harvester gathered a directory, and set current resource as parent to all created resources
 
         var basePath = resource.path
@@ -138,7 +141,20 @@ trait FileSystemHarvester extends Harvester {
 
           }
         }
-        basePath.toFile().listFiles().foreach {
+        
+        //-- Deliver Base Path as doF
+        doF(basePath)
+        
+        //-- Walk Base Path
+        var stream = Files.walk(basePath)
+        stream.forEach {
+          inputPath =>
+            logFine[FileSystemHarvester](s"---- Processing: $inputPath")
+            // println(s"---- Processing: $inputPath")
+            doF(inputPath)
+
+        }
+        /*basePath.toFile().listFiles().foreach {
           f =>
             var stream = Files.walk(f.toPath())
             stream.forEach {
@@ -148,9 +164,10 @@ trait FileSystemHarvester extends Harvester {
                 doF(inputPath)
 
             }
-        }
+        }*/
 
     }
+    // Loop resources
 
   }
 

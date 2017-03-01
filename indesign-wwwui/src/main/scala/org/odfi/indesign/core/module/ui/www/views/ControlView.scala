@@ -324,7 +324,7 @@ class ControlView extends IndesignUIView with DataTableBuilder with ConfigUIBuil
                                   remaining.head
                                 case Some(v) => v
                               }
-                              region.asInstanceOf[ExternalBrainRegion].addRegionClass(name.toString)
+                              //region.asInstanceOf[ExternalBrainRegion].addRegionClass(name.toString)
                               Brain.config.get.resyncToFile
                             }
                           }

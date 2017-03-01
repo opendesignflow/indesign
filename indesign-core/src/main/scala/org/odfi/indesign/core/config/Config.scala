@@ -134,7 +134,7 @@ object Config extends IndesignModule {
       //-- See if we can listen to changes
       document match {
         case Some(doc: STAXSyncTrait) if(!FSGlobalWatch.watcher.isMonitoredBy(this, doc.staxPreviousFile.get)) =>
-          doc.staxFileWatcher = Some(FSGlobalWatch.watcher)
+          doc.staxFileWatcher = FSGlobalWatch.watcher
           doc.onFileReload(this) {
             f =>
               println(s"File reload")

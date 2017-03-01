@@ -673,6 +673,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.availableResources.contains(r) match {
       case true =>
         false
+      case false if (this.availableResources.find(_.getId==r.getId).isDefined) => false
       case false =>
         r.root
         r.originalHarvester = Some(this)

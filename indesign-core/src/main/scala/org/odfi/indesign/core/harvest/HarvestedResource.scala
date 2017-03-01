@@ -90,6 +90,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Add to local list, but not if already there
     derivedResources.get(r.getId) match {
       case Some(res) =>
+        logWarn("Readding derived resource of ID: "+r.getId+s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
         res.asInstanceOf[RT]
       case None =>
         derivedResources = derivedResources + (r.getId -> r)
@@ -122,6 +123,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   def cleanDerivedResources : Unit = {
 
+    println("Cleaning Derived Resources")
     // Clean List 
     val toClean = this.derivedResources
     this.derivedResources = this.derivedResources.empty
@@ -173,6 +175,26 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }
 
   }
+  
+  def findTopMostResource[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Option[CT] = {
+    
+    var currentParent = this.parentResource
+    var lastFound : Option[CT]  = None
+    while (currentParent.isDefined) {
+
+      tag.runtimeClass.isInstance(currentParent.get) match {
+        case true =>
+          lastFound = Some(currentParent.get.asInstanceOf[CT])
+          currentParent = currentParent.get.parentResource
+        case false =>
+          currentParent = currentParent.get.parentResource
+      }
+
+    }
+
+    lastFound
+    
+  }
 
   def mapUpchainResources[T](cl: HarvestedResource => T): List[T] = {
 
@@ -204,6 +226,12 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
   }
 
   def getDerivedResources[CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
+    
+    /*this.derivedResources.foreach {
+      case (id,r) => 
+        
+        //println(s""" DRST ${tag.runtimeClass} against ${r.getClass} """)
+    }*/
     this.derivedResources.collect {
       case (id, r) if (tag.runtimeClass.isInstance(r)) =>
         r.asInstanceOf[CT]
@@ -238,6 +266,9 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     //this.derivedResources.find{case (id,r) if (tag.runtimeClass.isInstance(r))=>true;case _ => false }.isDefined
   }
 
+  /**
+   * Recursive!!
+   */
   def findDerivedResourceOfType[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Option[CT] = {
     this.derivedResources.collectFirst {
       case (id, r) if (tag.runtimeClass.isInstance(r)) =>
@@ -245,6 +276,17 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
       case (id, r) if (r.hasDerivedResourceOfType[CT]) =>
         // println(s"Recursino on $r which has: ${r.derivedResources.size}")
         r.findDerivedResourceOfType[CT].get
+    }
+  }
+  
+  /**
+   * Not Recursive!!
+   */
+  def findDerivedResourceOfTypeAnd[CT <: HarvestedResource](cl : CT => Boolean)(implicit tag: ClassTag[CT]): Option[CT] = {
+    this.derivedResources.collectFirst {
+      case (id, r) if (tag.runtimeClass.isInstance(r) && cl(r.asInstanceOf[CT])) =>
+        r.asInstanceOf[CT]
+     
     }
   }
 
