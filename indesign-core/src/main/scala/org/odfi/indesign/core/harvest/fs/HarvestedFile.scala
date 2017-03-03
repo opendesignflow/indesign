@@ -17,6 +17,14 @@ class HarvestedFile(val path: Path) extends HarvestedResource {
   // Utils
   //---------------
 
+  def sameAs(r:HarvestedFile) : Boolean = {
+    r.path.toFile().getCanonicalPath==this.path.toFile().getCanonicalPath
+  }
+  
+  def sameAs(r:Path) : Boolean = {
+    r.toFile().getCanonicalPath==this.path.toFile().getCanonicalPath
+  }
+  
   def isDirectory = path.toFile().isDirectory()
 
   def hasSubFile(filePath: String*): Option[File] = {

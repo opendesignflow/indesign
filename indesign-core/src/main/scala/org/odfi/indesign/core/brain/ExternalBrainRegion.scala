@@ -139,9 +139,9 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
                           this.addDerivedResource(region)
 
                           //-- Cleaning
-                          region.onClean {
+                          /*region.onClean {
                             region.moveToShutdown
-                          }
+                          }*/
 
                           //-- Move to same state as this one
                           this.currentState match {
@@ -186,6 +186,11 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
 
 
   this.onShutdown {
+    /*println(s"Cleaning derived resources")
+    this.derivedResources.foreach {
+      r => 
+        println(s"-> "+r)
+    }*/
     // Remove all sub regions
     this.cleanDerivedResources
   }
@@ -212,6 +217,16 @@ trait ExternalBrainRegion extends BrainRegion with Harvester {
     List[String]()
 
   }
+  
+  // Type Discover
+  //------------------
+  
+  def discoverType[CT <: Any](implicit tag :ClassTag[CT]) = {
+    
+    List[Class[CT]]()
+    
+  }
+  
   // Reload
   //------------
 

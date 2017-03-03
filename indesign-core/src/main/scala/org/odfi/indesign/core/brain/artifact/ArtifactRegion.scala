@@ -6,6 +6,7 @@ import org.odfi.indesign.core.brain.Brain
 import org.odfi.indesign.core.harvest.Harvest
 import com.idyria.osi.tea.logging.TLogSource
 import org.odfi.indesign.core.brain.BrainRegion
+import org.eclipse.aether.graph.Dependency
 
 trait ArtifactRegion extends ClassDomainContainer with TLogSource with BrainRegion {
 

@@ -137,7 +137,7 @@ object Config extends IndesignModule {
           doc.staxFileWatcher = FSGlobalWatch.watcher
           doc.onFileReload(this) {
             f =>
-              println(s"File reload")
+              //println(s"File reload")
               doc.parentContainer.get.clearCached(documentName(target))
               target.__config = getConfigFor(target)
               target.triggerConfigUpdated

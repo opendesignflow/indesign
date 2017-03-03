@@ -19,6 +19,8 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
    * ID used for cleanup
    */
   def getId: String
+  
+ 
 
   /**
    * Display name for gui, should be not too long
@@ -123,7 +125,8 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   def cleanDerivedResources : Unit = {
 
-    println("Cleaning Derived Resources")
+    //println("Cleaning Derived Resources")
+    
     // Clean List 
     val toClean = this.derivedResources
     this.derivedResources = this.derivedResources.empty
@@ -131,6 +134,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Remove Parent reference from derived resources
     toClean.foreach {
       case dr if(dr!=this) => 
+        //println(s"Clean: "+dr)
         dr._2.clean
         dr._2.parentResource = None
       case other => 
@@ -141,12 +145,23 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
   }
   
   def cleanDerivedResource(r:HarvestedResource) = {
+    
+    //-- Remove rparent link if it is ithis
     r.parentResource match {
       case Some(p) if(p==this) =>
         r.parentResource = None
       case other => 
     }
-    this.derivedResources = this.derivedResources.filter(_!=r)
+    
+    //-- Remove
+    println(s"Removing: "+r+" -> "+this.derivedResources.size)
+    this.derivedResources = this.derivedResources.filter {
+      case (id,k) => k!=r
+    }
+    println(s"Removed: "+r+" -> "+this.derivedResources.size)
+    
+    //-- Clean 
+    r.clean
   }
   
    def cleanDerivedResourcesOfType[RT <: HarvestedResource](implicit tag: ClassTag[RT]) = {
@@ -327,12 +342,19 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
    * Clean recursively
    */
   def clean : Unit = {
-    this.@->("clean")
+    
+  println(s"Cleaning: "+this)
+    
     this.originalHarvester match {
       case Some(h) => 
        h.availableResources =  this.originalHarvester.get.availableResources - this 
+       this.originalHarvester = None
+       println(s"Removing "+this+" from original harvester: "+h)
       case None => 
     }
+      this.@->("clean")
+    
+    
     
     this.cleanDerivedResources
   }

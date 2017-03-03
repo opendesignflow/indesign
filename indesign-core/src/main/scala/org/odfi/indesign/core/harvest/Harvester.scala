@@ -34,14 +34,37 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   // Taint Check
   override def isTainted = this.getClass.getClassLoader.isInstanceOf[ClassDomain] && this.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted
 
+  // parent Stuff
+  //------------
+  def addParent(p:Harvester) = p match {
+    case same if(same==this) => 
+    case already if(parentHarvesters.contains(already)) => 
+    case other => 
+      this.parentHarvesters = this.parentHarvesters :+ other
+      other.addChildHarvester(this)
+  }
+  
+  def removeParent(p:Harvester) = this.parentHarvesters.contains(p) match {
+    case true => 
+    case false => 
+      this.parentHarvesters = this.parentHarvesters.filter(_!=p)
+      p.removeChildHarvester(this)
+  }
+  
   // Child Stuff
   //----------------------------
   var childHarvesters = List[Harvester]()
-  var parentHarvester: Option[Harvester] = None
+  var parentHarvesters = List[Harvester]()
 
   def addChildHarvester(h: Harvester): Harvester = {
-    this.childHarvesters = this.childHarvesters :+ h.asInstanceOf[Harvester]
-    h.parentHarvester = Some(this)
+    
+    this.childHarvesters.contains(h) match {
+      case true => 
+      case false =>
+        this.childHarvesters = this.childHarvesters :+ h.asInstanceOf[Harvester]
+        h.addParent(this)
+    }
+   
     h
   }
 
@@ -61,13 +84,19 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   def removeChildHarvester(child: Harvester): Harvester = {
 
     // Remove from list
-    this.childHarvesters = this.childHarvesters.filter(_ != child)
+    this.childHarvesters.contains(child) match {
+      case true => 
+        this.childHarvesters = this.childHarvesters.filter(_ != child)
+        child.removeParent(this)
+      case false => 
+    }
+    
 
     // If we are the parent, remove
-    child.parentHarvester match {
+    /*child.parentHarvester match {
       case Some(parent) if (parent == this) => child.parentHarvester = None
       case _ =>
-    }
+    }*/
     child
   }
 
@@ -86,7 +115,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   /**
    * Return Top Harvester
    */
-  def getTopHarvester = {
+  /*def getTopHarvester = {
 
     var current = this
     while (current.parentHarvester.isDefined) {
@@ -94,7 +123,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     }
     current
 
-  }
+  }*/
 
   /**
    * Process Depth first ordered
@@ -118,6 +147,9 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   }
 
+  /**
+   * This will go the first hierarchy line
+   */
   def hierarchyName(sep: String = ".", withoutSelf: Boolean = false) = {
 
     // Get Parent Line
@@ -125,10 +157,10 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case true => List[Harvester]()
       case false => List[Harvester](this)
     }
-    var currentParent: Option[Harvester] = this.parentHarvester
+    var currentParent: Option[Harvester] = this.parentHarvesters.headOption
     while (currentParent != None) {
       parents = parents :+ currentParent.get
-      currentParent = currentParent.get.parentHarvester
+      currentParent = currentParent.get.parentHarvesters.headOption
     }
 
     // Return String
@@ -143,10 +175,10 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case true => List[Harvester]()
       case false => List[Harvester](this)
     }
-    var currentParent: Option[Harvester] = this.parentHarvester
+    var currentParent: Option[Harvester] = this.parentHarvesters.headOption
     while (currentParent != None) {
       parents = parents :+ currentParent.get
-      currentParent = currentParent.get.parentHarvester
+      currentParent = currentParent.get.parentHarvesters.headOption
     }
 
     // Return String
@@ -319,16 +351,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.synchronized {
       logFine[Harvester](s"----------- Starting Harvest on " + this.getClass.getCanonicalName)
 
-      // Deliver current resources to childnre
-      //--------------------
-      this.childHarvesters.foreach {
-        ch =>
-          this.availableResources.foreach {
-            r =>
-            //ch.deliver(r)
-          }
-        //ch.finishHarvest(ch.autoCleanResources)
-      }
+   
 
       // Do harvest implementation for extra resources
       //-----------------
@@ -342,7 +365,9 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
           finishGather()
         } catch {
           case e: NothingGatheredException =>
-          case e: Throwable => throw e
+          case e: Throwable => 
+            e.printStackTrace()
+            throw e
         }
 
       } catch {
@@ -375,7 +400,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
    * To be overriden by implementations
    */
   def doHarvest: Unit = {
-    throw new NothingGatheredException
+    //throw new NothingGatheredException
   }
 
   /**
@@ -385,13 +410,15 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
     logFine[Harvester](s"----------- Starting finish Harvest on " + this.getClass.getCanonicalName + " with : " + this.harvestedResources.toList + " and " + this.availableResources.size + " available")
 
+   
+    
     // Clean Tainted resources
     //--------------
     this.availableResources.toList.foreach {
       case r if (r.isTainted) =>
         println(s"****** Resource $r is tainted; removing")
         this.availableResources -= r
-        r.@->("clean", this)
+        r.clean
       case _ =>
     }
 
@@ -421,7 +448,13 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
           // Remove from harvested, because already existing
           case size if (size > 0) =>
             logFine[Harvester](s"Resource ${r.getId} already present, remove from harvested")
+            //println(s"Resource ${r.getId} already present, remove from harvested")
             this.harvestedResources --= harvestedWithSameId
+            harvestedWithSameId.foreach {
+              rejected =>
+                //println(s"Rejecting because already present: "+r)
+               // rejected.clean
+            }
 
           // Otherwise, keep in harvested resources for adding
           case _ =>
@@ -430,6 +463,8 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
     }
 
+   
+    
     // Call kept on all kepts resources and children
     //-------------
     this.availableResources.foreach {
@@ -446,12 +481,10 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     //-------------
     this.harvestedResources.foreach {
       r =>
-        this.availableResources += r
-        r.originalHarvester match {
-          case None => r.originalHarvester = Some(this)
-          case _ =>
-        }
-        r.@->("added", this)
+      
+        saveToAvailableResources(r)
+        
+        keepErrorsOn(r, verbose = true)(r.@->("added", this))
     }
 
     // Clean old resources
@@ -460,8 +493,9 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     toclean.foreach {
       r =>
         // println(s"====== $r")
-        r.@->("clean", this)
+        keepErrorsOn(r, verbose = true)(r.@->("clean", this))
     }
+    this.@->("removedResources", toclean)
     logFine[Harvester](s"========= EOF CLEAN ==============")
 
     // Call Gathered
@@ -542,6 +576,25 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       case false => false
     }
 
+  }
+  
+  
+  override def clean = {
+    
+    // Remove from parent harvester or global Harvest
+    this.parentHarvesters.foreach {
+      ph => 
+        ph.removeChildHarvester(this)
+    }
+    /*
+    this.parentHarvester match {
+      case Some(p) =>
+        p.removeChildHarvester(this)
+      case None => 
+        Harvest.removeHarvester(this)
+    }*/
+    
+    super.clean
   }
 
   /**
@@ -683,9 +736,15 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   }
 
-  // Resource Process
+  // Resource Process, gathering and removing
   //----------------------
 
+  def onRemovedResources(cl: List[HarvestedResource] => Unit) = {
+     this.onWith("removedResources") {
+      rl: List[HarvestedResource] => cl(rl)
+    }
+  }
+  
   def onGatheredResources(cl: List[HarvestedResource] => Unit) = {
     this.onWith("gatheredResources") {
       rl: List[HarvestedResource] => cl(rl)
@@ -700,8 +759,9 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   def processResources = {
     this.getResources.foreach {
-      r =>
-        this.keepErrorsOn(r) {
+      case r  : Harvester =>
+      case r => 
+        this.keepErrorsOn(r,verbose=true) {
 
           HarvestedResource.moveToState(r, "processed")
         }

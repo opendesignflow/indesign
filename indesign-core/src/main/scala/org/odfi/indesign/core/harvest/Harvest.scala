@@ -48,15 +48,24 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
   var harvesters = List[Harvester]()
   def addHarvester(h: Harvester) = {
 
+    var addingHarvester = h
     this.harvesters.contains(h) match {
       case true =>
-      case false => this.harvesters = this.harvesters :+ h.getTopHarvester
+      case false =>
+        this.harvesters = this.harvesters :+ addingHarvester
+
     }
 
     h
   }
   def removeHarvester(h: Harvester): Harvester = {
-    this.harvesters = this.harvesters.filter(_ != h)
+    this.harvesters.contains(h) match {
+      case true =>
+        this.harvesters = this.harvesters.filter(_ != h)
+        //h.parentHarvester = None
+      case false =>
+
+    }
     h
   }
 
@@ -138,29 +147,48 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
   def onHarvesters[CT <: Harvester](cl: PartialFunction[CT, Unit])(implicit tag: ClassTag[CT]): Unit = {
 
-    var processList = new scala.collection.mutable.ListBuffer[Harvester]()
+    // Processing List
+    var processList = new scala.collection.mutable.LinkedHashSet[Harvester]()
     processList ++= this.harvesters
+
+    // Visited List
+    var visited = scala.collection.mutable.LinkedHashSet[Harvester]() 
 
     while (processList.nonEmpty) {
 
+      // Get Top From Process List
       var h = processList.head
       processList -= h
 
-      // Check type and PF definition
-      h match {
-        case h if (tag.runtimeClass.isInstance(h) && cl.isDefinedAt(h.asInstanceOf[CT])) =>
+      // If visited, pass
+      visited.contains(h) match {
+        case false =>
+          
+          // Add to visited
+          visited += h
 
-          cl(h.asInstanceOf[CT])
+          // Check type and PF definition
+          h match {
+            case h if (tag.runtimeClass.isInstance(h) && cl.isDefinedAt(h.asInstanceOf[CT])) =>
 
-        case _ =>
+              cl(h.asInstanceOf[CT])
+
+            case _ =>
+          }
+
+          processList ++= h.childHarvesters
+
+        case true =>
       }
-
-      processList ++= h.childHarvesters
 
     }
 
   }
 
+  /**
+   * This Method runs recursively on Harvesters
+   * It uses a stop list to not double collect
+   */
   def collectOnHarvesters[CT <: Harvester, B](cl: PartialFunction[CT, B])(implicit tag: ClassTag[CT]) = {
 
     var collected = List[B]()
@@ -176,7 +204,9 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
     var r = collectOnHarvesters[CT, List[B]] {
       case h =>
         var r = h.getResourcesOfType[RT].collect {
-          case hr if (cl.isDefinedAt(hr)) => cl(hr)
+          case hr if (cl.isDefinedAt(hr)) =>
+
+            cl(hr)
         }
         r
 
@@ -216,6 +246,9 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
           h.harvest
         }
     }
+    
+     //-- Done
+    this.@->("done")
 
     //-- Process
     //-------------------
@@ -224,21 +257,21 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
         keepErrorsOn(h) {
           h.resetErrors
           //println(s"********** harvest on ${h.getClass.getCanonicalName} **************");
-          // h.processResources
+           h.processResources
         }
     }
 
     //-- Done
     this.@->("done")
-    
+
   }
-  
+
   def onHarvestDone(cl: => Any) = {
-    
+
     this.on("done") {
       cl
     }
-    
+
   }
 
   /* harvesters.foreach {
@@ -328,13 +361,14 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
       case harvester if (harvester.getClass.getClassLoader.isInstanceOf[ClassDomain] && harvester.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted) =>
 
         // REmove from parent or top 
-        harvester.parentHarvester match {
+        harvester.clean
+        /*harvester.parentHarvester match {
           case Some(parent) =>
             parent.removeChildHarvester(harvester)
           case None =>
             Harvest.removeHarvester(harvester)
 
-        }
+        }*/
 
       // Keep
       case _ =>

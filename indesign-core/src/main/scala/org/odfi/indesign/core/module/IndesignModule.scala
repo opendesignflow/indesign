@@ -12,7 +12,9 @@ trait IndesignModule extends BrainRegion with ConfigSupport {
 
       // Add to parent region if is external, and both required and local share same classloader
       case Some(pr: ExternalBrainRegion) if (this.getClass.getClassLoader == obj.getClass.getClassLoader) =>
-        println(s"Requiring ${obj} , with parent region: ${pr}")
+        
+        //println(s"Requiring ${obj} , with parent region: ${pr}")
+        
         pr.addDerivedResource(obj)
         pr.currentState match {
           case Some(state) =>
@@ -29,4 +31,9 @@ trait IndesignModule extends BrainRegion with ConfigSupport {
 
   }
 
+  
+  this.onClean {
+    //println(s"Cleaning module: "+this+" of state: "+this.currentState)
+    this.moveToShutdown
+  }
 }

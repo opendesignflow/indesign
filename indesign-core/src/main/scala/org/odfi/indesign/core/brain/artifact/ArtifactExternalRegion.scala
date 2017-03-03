@@ -27,7 +27,7 @@ class ArtifactExternalRegion(val gid: String, val aid: String, val version: Stri
 
   def getRegionArtifact: Artifact = new DefaultArtifact(gid, aid, classifier, version)
 
-  def getRegionDependencies: List[Artifact] = AetherResolver.resolveArtifactAndDependencies(gid, aid, version, scope = "compile")
+  def getRegionDependencies = AetherResolver.resolveDependencies(gid, aid, version, scope = "compile").map ( r => r.getArtifact)
 
   //-- Create Class Domain
   // var classdomain = new ClassDomain

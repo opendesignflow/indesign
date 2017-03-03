@@ -15,6 +15,8 @@ import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.indesign.core.harvest.fs.FSGlobalWatch
 import org.odfi.indesign.core.harvest.Harvest
+import scala.reflect.ClassTag
+import scala.collection.convert.DecorateAsScala
 
 class FolderOutBuilder extends ExternalBrainRegionBuilder {
 
@@ -45,7 +47,7 @@ class FolderOutBuilder extends ExternalBrainRegionBuilder {
 
 }
 
-class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends ExternalBrainRegion with ClassDomainSupport {
+class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends ExternalBrainRegion with ClassDomainSupport with DecorateAsScala {
   // this.addPath(basePath.toPath())
 
   //tlogEnableFull[LFCDefinition]
@@ -62,7 +64,7 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
 
   // Auto Reload
   //---------------------
-  var beautyTime = 5000
+  var beautyTime = 10000
   var lastTime = 0L
   this.onAdded {
     case h if(h==Brain)=> 
@@ -72,9 +74,11 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
         println(s"######### Detected compilation on ${this.hashCode()}, reloading class ###########")
         if (lastTime < (System.currentTimeMillis() - beautyTime)) {
           lastTime = System.currentTimeMillis() 
+          Thread.sleep(beautyTime/2)
           this.reload
+          this.harvest
           Harvest.run
-          Harvest.run
+          //Harvest.run
         }
 
       case other =>
@@ -86,7 +90,7 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
   var classDomain: Option[ClassDomain] = None
 
   this.onSetup {
-    println(s"**** Setup folder")
+    logFine[FolderOutputBrainRegion](s"**** Setup folder: "+hashCode())
     classDomain = Some(new ClassDomain(getClass.getClassLoader))
     classDomain.get.addURL(outputPath.toURI.toURL)
 
@@ -101,14 +105,14 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
       case false =>
     }
   }
-
+ 
   this.onStop {
-    println(s"**** Stopping folder")
+    logFine[FolderOutputBrainRegion](s"**** Stopping folder "+hashCode())
 
   }
 
   this.onShutdown {
-    println(s"**** Shutting Down folder")
+    logFine[FolderOutputBrainRegion](s"**** Shutting Down folder "+hashCode())
     this.classDomain match {
       case Some(cd) =>
 
@@ -117,13 +121,12 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
       case _ =>
     }
 
-  }
+  } 
 
   this.onCleaned {
     case h =>
 
-      println(s"**** Cleaning folder")
-      logFine[Brain]("Cleaning: " + this)
+      logFine[FolderOutputBrainRegion](s"**** Cleaning folder")
       this.classDomain match {
         case Some(cd) =>
           cd.tainted = true
@@ -187,6 +190,49 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
 
     case None =>
       List[String]()
+
+  }
+  
+  override def discoverType[CT <: Any](implicit tag :ClassTag[CT]) = this.classDomain match {
+
+    case Some(cd) =>
+
+      var stream = Files.walk(outputPath.toPath())
+      var foundTypes = List[Class[CT]]()
+      stream.forEach {
+        f =>
+
+          /*f.getFileName.toString().endsWith("$.class") match {
+            // Don't Check objects
+            case true => 
+          }*/
+          
+          // var relativeF = f.resolve(outputPath.toPath())
+          //println("Lookin at: "+relativeF.toString())
+          //if (f.getFileName.toString().endsWith("$.class")) {
+
+            var className = f.toString().replace(outputPath.getCanonicalPath + File.separator, "").replace(File.separator.toString, ".").replace(".class", "")
+             println(s"Discover ${tag} Lookin at: "+className)
+             
+             try {
+               var cl = cd.loadClass(className)
+               tag.runtimeClass.isAssignableFrom(cl) match {
+                 case true => 
+                   foundTypes = foundTypes :+ cl.asInstanceOf[Class[CT]]
+                 case false => 
+               }
+             } catch {
+               case e : Throwable => 
+                 
+             }
+            
+ 
+      }
+
+      foundTypes
+
+    case None =>
+      List[Class[CT]]()
 
   }
 

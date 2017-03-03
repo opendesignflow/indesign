@@ -1,11 +1,22 @@
 package org.odfi.indesign.core.harvest.fs
 
 import java.io.File
-import org.odfi.indesign.core.harvest.Harvester
-import java.nio.file.Path
+import java.nio.file.FileVisitResult
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+
 import scala.language.implicitConversions
+
 import org.odfi.indesign.core.harvest.HarvestedResource
+import org.odfi.indesign.core.harvest.Harvester
+
+trait FileSystemIgnoreProvider extends HarvestedResource {
+
+  def fileIgnore(r: File): Boolean
+
+}
 
 trait FileSystemHarvester extends Harvester {
 
@@ -39,8 +50,7 @@ trait FileSystemHarvester extends Harvester {
       case None =>
     }
   }*/
-  
-  
+
   //def createResourceFromPath(p:Path) : RT
 
   /*this.onDeliver {
@@ -65,7 +75,7 @@ trait FileSystemHarvester extends Harvester {
           case key if (key.keyType === "file") =>
             key.values.foreach {
               v =>
-                 println("***** FS Found File: "+v)
+                logFine[FileSystemHarvester]("***** FS Found File: " + v)
                 this.addPath(new File(v).getCanonicalFile.toPath)
 
             }
@@ -90,6 +100,7 @@ trait FileSystemHarvester extends Harvester {
     }
 
     this.onResources[HarvestedFile] {
+
       case resource =>
 
         logFine[FileSystemHarvester](s"---- Starting on: ${resource}")
@@ -97,11 +108,11 @@ trait FileSystemHarvester extends Harvester {
         // Readd Resource to Gathered to make sure it won't dissapear
         // If rooted, don't readd
         resource.rooted match {
-          case true => 
-          case false => 
-           gather(resource)
+          case true =>
+          case false =>
+            gather(resource)
         }
-       
+
         // Walk Through the files, stop if a child harvester gathered a directory, and set current resource as parent to all created resources
 
         var basePath = resource.path
@@ -141,10 +152,41 @@ trait FileSystemHarvester extends Harvester {
 
           }
         }
-        
+
+        var visitor = new SimpleFileVisitor[Path] {
+
+          override def visitFile(f: Path, attr: BasicFileAttributes) = {
+
+            resource match {
+              
+              // Don't process base path (not a good idea to do that)
+              //case sameAsResource if (resource.sameAs(sameAsResource)) => 
+              //  FileVisitResult.CONTINUE
+              case filterProvider: FileSystemIgnoreProvider =>
+
+                attr.isDirectory() match {
+                  case true if (filterProvider.fileIgnore(f.toFile)) =>
+                    FileVisitResult.SKIP_SUBTREE
+                  case false if (filterProvider.fileIgnore(f.toFile)) => 
+                    FileVisitResult.CONTINUE
+                  case other =>
+                    doF(f)
+                    FileVisitResult.CONTINUE
+                }
+
+              case other =>
+                doF(f)
+                FileVisitResult.CONTINUE
+            }
+
+          }
+        }
+
+        Files.walkFileTree(basePath, visitor)
+
         //-- Deliver Base Path as doF
-        doF(basePath)
-        
+        /*doF(basePath)
+
         //-- Walk Base Path
         var stream = Files.walk(basePath)
         stream.forEach {
@@ -153,8 +195,10 @@ trait FileSystemHarvester extends Harvester {
             // println(s"---- Processing: $inputPath")
             doF(inputPath)
 
-        }
-        /*basePath.toFile().listFiles().foreach {
+        }*/
+        
+        
+      /*basePath.toFile().listFiles().foreach {
           f =>
             var stream = Files.walk(f.toPath())
             stream.forEach {
@@ -178,7 +222,5 @@ trait FileSystemHarvester extends Harvester {
 
 object FileSystemHarvester extends FileSystemHarvester {
 
-  
-  
   implicit def pathToResource(p: Path) = new HarvestedFile(p)
 }

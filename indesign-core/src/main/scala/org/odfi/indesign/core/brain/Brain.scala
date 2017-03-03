@@ -111,10 +111,12 @@ object Brain extends Brain {
 
                 var external = ExternalBrainRegion.build(new File(path).toURI().toURL)
                 println(s"Created $path with: " + external.regionBuilder.get.getClass.getClassLoader)
-                key.values.foreach {
+               
+                /*key.values.foreach {
                   v => 
                     println("Configu key has value: "+v)
-                }
+                }*/
+                
                 external.configKey = Some(key)
                 gather(external)
               }
