@@ -13,19 +13,13 @@
 	</parent>
 
 
-	<!-- Repositories to find OSI packages -->
+	<!-- Repositories to find ODFI packages -->
 	<!-- ############################################## -->
 	<pluginRepositories>
 		<pluginRepository>
 			<id>sonatype</id>
 			<name>Sonatype OSS Snapshots Repository</name>
 			<url>http://oss.sonatype.org/content/groups/public</url>
-		</pluginRepository>
-		<!-- For old snapshots, please use groupId `com.jnaerator` and the following 
-			repo -->
-		<pluginRepository>
-			<id>nativelibs4java-repo</id>
-			<url>http://nativelibs4java.sourceforge.net/maven</url>
 		</pluginRepository>
 		<pluginRepository>
 			<snapshots>
@@ -50,12 +44,6 @@
 			<name>Sonatype OSS Snapshots Repository</name>
 			<url>http://oss.sonatype.org/content/groups/public</url>
 		</repository>
-		<!-- For old snapshots, please use groupId `com.jnaerator` and the following 
-			repo -->
-		<repository>
-			<id>nativelibs4java-repo</id>
-			<url>http://nativelibs4java.sourceforge.net/maven</url>
-		</repository>
 		<repository>
 			<snapshots>
 				<enabled>false</enabled>
@@ -66,8 +54,8 @@
 		</repository>
 		<repository>
 			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
+                <enabled>true</enabled>
+            </snapshots>
 			<id>odfi.snapshots</id>
 			<name>odfi-snapshot</name>
 			<url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
