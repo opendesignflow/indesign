@@ -58,6 +58,12 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
     h
   }
+  
+  def -->[HT<:Harvester](h:HT) = {
+    addHarvester(h)
+    h
+  }
+  
   def removeHarvester(h: Harvester): Harvester = {
     this.harvesters.contains(h) match {
       case true =>
@@ -248,8 +254,10 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
     }
     
      //-- Done
-    this.@->("done")
+    //this.@->("done")
 
+    println(s"********** harvest Done, doing process **************");
+    
     //-- Process
     //-------------------
     this.onAllHarvesters {

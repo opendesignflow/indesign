@@ -9,6 +9,10 @@ import com.idyria.osi.tea.logging.TLogSource
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.indesign.core.brain.LFCSupport
 import com.idyria.osi.tea.compile.ClassDomain
+import org.odfi.indesign.core.heart.HeartTask
+import org.odfi.indesign.core.heart.ResourceTask
+import org.odfi.indesign.core.heart.Heart
+import org.odfi.indesign.core.heart.ResourceTask
 
 trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSupport with TLogSource {
 
@@ -415,6 +419,24 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Return Reversed to have top most parent first
     parents.reverse
 
+  }
+  
+  
+  // Tasking
+  //----------------
+ 
+  def runSingleTask(id:String)(cl: => Any) = {
+    
+    var task = new ResourceTask(id,this) {
+      def doTask = {
+        cl
+      }
+    }
+    
+    Heart.pump(task)
+    
+    task
+    
   }
 
 }

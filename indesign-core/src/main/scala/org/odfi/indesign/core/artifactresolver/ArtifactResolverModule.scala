@@ -9,8 +9,8 @@ object ArtifactResolverModule extends IndesignModule {
   this.onLoad {
 
     //-- Add Open design flow reps
-    AetherResolver.config.addDefaultRemoteRepository("odfi.central", new URL("https://www.opendesignflow.org/maven/internal/"))
-    AetherResolver.config.addDefaultRemoteRepository("odfi.snapshots", new URL("https://www.opendesignflow.org/maven/snapshots/"))
+    AetherResolver.config.addDefaultRemoteRepository("odfi.central", new URL("http://www.opendesignflow.org/maven/internal/"))
+    AetherResolver.config.addDefaultRemoteRepository("odfi.snapshots", new URL("http://www.opendesignflow.org/maven/snapshots/"))
   }
 
 }

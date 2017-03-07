@@ -11,6 +11,8 @@ import scala.language.implicitConversions
 
 import org.odfi.indesign.core.harvest.HarvestedResource
 import org.odfi.indesign.core.harvest.Harvester
+import java.nio.file.FileVisitOption
+import scala.collection.convert.DecorateAsJava
 
 trait FileSystemIgnoreProvider extends HarvestedResource {
 
@@ -18,7 +20,7 @@ trait FileSystemIgnoreProvider extends HarvestedResource {
 
 }
 
-trait FileSystemHarvester extends Harvester {
+trait FileSystemHarvester extends Harvester with DecorateAsJava {
 
   //var searchPaths = List[Path]()
 
@@ -103,7 +105,8 @@ trait FileSystemHarvester extends Harvester {
 
       case resource =>
 
-        logFine[FileSystemHarvester](s"---- Starting on: ${resource}")
+       
+        logFine[FileSystemHarvester](s"- Starting on: ${resource}")
 
         // Readd Resource to Gathered to make sure it won't dissapear
         // If rooted, don't readd
@@ -112,6 +115,17 @@ trait FileSystemHarvester extends Harvester {
           case false =>
             gather(resource)
         }
+        
+         // If resource is not derived, deliver locally
+        //  This is to make sure we can add a path that should be detected by the implementation
+        
+        // FIXME?
+        /*resource.parentResource match {
+          case Some(parent) => 
+          case None => 
+            deliver(resource)
+        }*/
+        
 
         // Walk Through the files, stop if a child harvester gathered a directory, and set current resource as parent to all created resources
 
@@ -127,9 +141,12 @@ trait FileSystemHarvester extends Harvester {
         // This is just the closure applyed to all paths, 
         // set as a def otherwise the scala compiler doesn'T work with Java8 Closure style
         def doF(inputPath: Path) = {
+
           var r = new HarvestedFile(inputPath)
           r.deriveFrom(resource)
           //r.parentResource = Some(resource)
+
+          logFine[FileSystemHarvester](s"---- Processing ${r}")
 
           // Retain only child harvesters for which the current path has no parent in stop list
           var validChildren = this.childHarvesters.filter {
@@ -139,6 +156,9 @@ trait FileSystemHarvester extends Harvester {
           // Deliver, if gathered with true, and it is a folder, then add path to stop path for child
           validChildren.foreach {
             ch =>
+
+              // logFine[FileSystemHarvester](s"---- Delivering to  ${ch}")
+
               ch.deliver(r) match {
                 // Add to stop list
                 case true if (inputPath.toFile().isDirectory()) =>
@@ -146,6 +166,7 @@ trait FileSystemHarvester extends Harvester {
                   stopList.keys.foreach {
                     ch => stopList(ch) += inputPath
                   }
+                  //FileVisitResult.SKIP_SUBTREE
 
                 case _ =>
               }
@@ -155,10 +176,9 @@ trait FileSystemHarvester extends Harvester {
 
         var visitor = new SimpleFileVisitor[Path] {
 
-          override def visitFile(f: Path, attr: BasicFileAttributes) = {
-
+          def dispatchFile(f: Path, attr: BasicFileAttributes) = {
             resource match {
-              
+
               // Don't process base path (not a good idea to do that)
               //case sameAsResource if (resource.sameAs(sameAsResource)) => 
               //  FileVisitResult.CONTINUE
@@ -167,7 +187,7 @@ trait FileSystemHarvester extends Harvester {
                 attr.isDirectory() match {
                   case true if (filterProvider.fileIgnore(f.toFile)) =>
                     FileVisitResult.SKIP_SUBTREE
-                  case false if (filterProvider.fileIgnore(f.toFile)) => 
+                  case false if (filterProvider.fileIgnore(f.toFile)) =>
                     FileVisitResult.CONTINUE
                   case other =>
                     doF(f)
@@ -178,14 +198,26 @@ trait FileSystemHarvester extends Harvester {
                 doF(f)
                 FileVisitResult.CONTINUE
             }
+          }
 
+          override def preVisitDirectory(f: Path, attr: BasicFileAttributes) = {
+
+            dispatchFile(f,attr)
+
+          }
+
+          override def visitFile(f: Path, attr: BasicFileAttributes) = {
+
+            dispatchFile(f,attr)
+            
+           
           }
         }
 
-        Files.walkFileTree(basePath, visitor)
+        Files.walkFileTree(basePath, Set(FileVisitOption.FOLLOW_LINKS).asJava, Integer.MAX_VALUE, visitor)
 
-        //-- Deliver Base Path as doF
-        /*doF(basePath)
+      //-- Deliver Base Path as doF
+      /*doF(basePath)
 
         //-- Walk Base Path
         var stream = Files.walk(basePath)
@@ -196,8 +228,7 @@ trait FileSystemHarvester extends Harvester {
             doF(inputPath)
 
         }*/
-        
-        
+
       /*basePath.toFile().listFiles().foreach {
           f =>
             var stream = Files.walk(f.toPath())

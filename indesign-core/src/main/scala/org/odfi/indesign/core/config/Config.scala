@@ -132,7 +132,7 @@ object Config extends IndesignModule {
       }
 
       //-- See if we can listen to changes
-      document match {
+      /*document match {
         case Some(doc: STAXSyncTrait) if(!FSGlobalWatch.watcher.isMonitoredBy(this, doc.staxPreviousFile.get)) =>
           doc.staxFileWatcher = FSGlobalWatch.watcher
           doc.onFileReload(this) {
@@ -140,13 +140,14 @@ object Config extends IndesignModule {
               //println(s"File reload")
               doc.parentContainer.get.clearCached(documentName(target))
               target.__config = getConfigFor(target)
+              target.__config.get.staxPreviousFile = doc.staxPreviousFile
               target.triggerConfigUpdated
 
               //println(s"**** Reloaded -> Harvest")
              // Harvest.run
           }
         case other =>
-      }
+      }*/
 
       document
     } catch {

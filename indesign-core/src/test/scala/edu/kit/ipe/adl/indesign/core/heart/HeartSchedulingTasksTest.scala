@@ -6,6 +6,36 @@ import com.idyria.osi.tea.logging.TLog
 
 class HeartSchedulingTasksTest extends FunSuite {
   
+  
+  test("Start Simple task and check cleanning") {
+    
+    
+    //-- Create semaphore
+    var receiveS = new Semaphore(0)
+    
+    //-- Task
+    var t = new DefaultHeartTask {
+      
+      def doTask = {
+        println(s"Task release")
+        receiveS.release()
+      }
+    }
+    //-- Start
+    Heart.pump(t)
+    
+    //-- Wait for running, do this after task has started to resolve sync issue
+    //Thread.sleep(1000)
+    t.waitForRunning
+    t.waitForDone
+    println(s"--> Finished")
+    
+    assertResult(0)(Heart.tasks.size)
+    
+    
+    
+  }
+  
   test("Start a repetitive task and stop it with Step synchronisation") {
     
     TLog.setLevel(classOf[HeartTask[_]], TLog.Level.FULL)

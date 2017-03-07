@@ -29,6 +29,7 @@ trait ConfigSupport extends ConfigHolder with HarvestedResource {
       case Some(_) => __config
       case None =>
         __config = Config.getConfigFor(this)
+        
         __config
     }
   }

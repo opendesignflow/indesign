@@ -159,8 +159,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
    */
   private def taskStopped = {
 
-    //-- Move to done state
-    HeartTask.moveToState(this, HeartTask.DONE.name)
+    
     
     //-- Call clean
     (scheduleAfter, scheduleEvery) match {
@@ -175,6 +174,12 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
     
     //-- Clean stop signal
     this.stopSignal.drainPermits()
+    
+    //-- Remove from Heart
+    Heart.removeTask(this)
+    
+    //-- Move to done state
+    HeartTask.moveToState(this, HeartTask.DONE.name)
   }
 
   def doTask: PT
