@@ -8,8 +8,21 @@ import javax.swing.MenuElement
 import javax.swing.JMenuItem
 import javax.swing.JMenu
 import javax.swing.JPopupMenu
+import javax.swing.JComponent
+import javax.swing.JButton
 
 trait SwingUtilsTrait {
+
+  def onSwingClick(c: JButton)(cl: => Unit) = {
+
+    c.addActionListener(new ActionListener {
+      def actionPerformed(ev: ActionEvent) = {
+        cl
+
+      }
+    })
+
+  }
 
   def addActionMenu(start: MenuElement)(path: String)(cl: => Unit) = {
 
