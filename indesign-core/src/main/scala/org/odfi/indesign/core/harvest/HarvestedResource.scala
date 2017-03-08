@@ -23,8 +23,6 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
    * ID used for cleanup
    */
   def getId: String
-  
- 
 
   /**
    * Display name for gui, should be not too long
@@ -96,7 +94,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Add to local list, but not if already there
     derivedResources.get(r.getId) match {
       case Some(res) =>
-        logWarn("Readding derived resource of ID: "+r.getId+s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
+        logWarn("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
         res.asInstanceOf[RT]
       case None =>
         derivedResources = derivedResources + (r.getId -> r)
@@ -127,94 +125,106 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   }
 
-  def cleanDerivedResources : Unit = {
+  def cleanDerivedResources: Unit = {
 
     //println("Cleaning Derived Resources")
-    
+
     // Clean List 
     val toClean = this.derivedResources
     this.derivedResources = this.derivedResources.empty
-    
+
     // Remove Parent reference from derived resources
     toClean.foreach {
-      case dr if(dr!=this) => 
+      case dr if (dr != this) =>
         //println(s"Clean: "+dr)
         dr._2.clean
         dr._2.parentResource = None
-      case other => 
-        
+      case other =>
+
     }
 
-    
   }
-  
-  def cleanDerivedResource(r:HarvestedResource) = {
-    
+
+  def cleanDerivedResource(r: HarvestedResource) = {
+
     //-- Remove rparent link if it is ithis
     r.parentResource match {
-      case Some(p) if(p==this) =>
+      case Some(p) if (p == this) =>
         r.parentResource = None
-      case other => 
+      case other =>
     }
-    
+
     //-- Remove
-    println(s"Removing: "+r+" -> "+this.derivedResources.size)
+    println(s"Removing: " + r + " -> " + this.derivedResources.size)
     this.derivedResources = this.derivedResources.filter {
-      case (id,k) => k!=r
+      case (id, k) => k != r
     }
-    println(s"Removed: "+r+" -> "+this.derivedResources.size)
-    
+    println(s"Removed: " + r + " -> " + this.derivedResources.size)
+
     //-- Clean 
     r.clean
   }
-  
-   def cleanDerivedResourcesOfType[RT <: HarvestedResource](implicit tag: ClassTag[RT]) = {
+
+  def cleanDerivedResourcesOfType[RT <: HarvestedResource](implicit tag: ClassTag[RT]) = {
 
     this.getDerivedResources[RT].foreach(cleanDerivedResource(_))
   }
 
   def findUpchainResource[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Option[CT] = {
 
-    var currentParent = this.parentResource
-    var stop = false
-    while (!stop && currentParent.isDefined) {
+    tag.runtimeClass.isInstance(this) match {
+      case true =>
+        Some(this.asInstanceOf[CT])
+      case false =>
+        var currentParent = this.parentResource
+        var stop = false
+        while (!stop && currentParent.isDefined) {
 
-      tag.runtimeClass.isInstance(currentParent.get) match {
-        case true =>
-          stop = true
-        case false =>
-          currentParent = currentParent.get.parentResource
-      }
+          tag.runtimeClass.isInstance(currentParent.get) match {
+            case true =>
+              stop = true
+            case false =>
+              currentParent = currentParent.get.parentResource
+          }
 
-    }
+        }
 
-    currentParent match {
-      case Some(res) => Some(res.asInstanceOf[CT])
-      case None => None
+        currentParent match {
+          case Some(res) => Some(res.asInstanceOf[CT])
+          case None => None
+        }
     }
 
   }
-  
+
   def findTopMostResource[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Option[CT] = {
-    
-    var currentParent = this.parentResource
-    var lastFound : Option[CT]  = None
-    while (currentParent.isDefined) {
 
-      tag.runtimeClass.isInstance(currentParent.get) match {
-        case true =>
-          lastFound = Some(currentParent.get.asInstanceOf[CT])
-          currentParent = currentParent.get.parentResource
-        case false =>
-          currentParent = currentParent.get.parentResource
-      }
+    tag.runtimeClass.isInstance(this) match {
+      case true =>
+        Some(this.asInstanceOf[CT])
+      case false =>
+        var currentParent = this.parentResource
+        var lastFound: Option[CT] = None
+        while (currentParent.isDefined) {
 
+          tag.runtimeClass.isInstance(currentParent.get) match {
+            case true =>
+              lastFound = Some(currentParent.get.asInstanceOf[CT])
+              currentParent = currentParent.get.parentResource
+            case false =>
+              currentParent = currentParent.get.parentResource
+          }
+
+        }
+
+        lastFound
     }
 
-    lastFound
-    
   }
 
+  /**
+   * Maps resources upchain
+   */
   def mapUpchainResources[T](cl: HarvestedResource => T): List[T] = {
 
     var res = scala.collection.mutable.ArrayBuffer[T]()
@@ -223,6 +233,28 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
       //-- Closure
       res += cl(currentParent.get)
+
+      //-- Next
+      currentParent = currentParent.get.parentResource
+
+    }
+
+    res.toList
+  }
+
+  def mapUpResources[RT <: HarvestedResource, T](cl: RT => T)(implicit tag: ClassTag[RT]): List[T] = {
+
+    var res = scala.collection.mutable.ArrayBuffer[T]()
+    var currentParent = this.parentResource
+    while (currentParent.isDefined) {
+
+      //-- Closure
+      tag.runtimeClass.isInstance(currentParent.get) match {
+        case true =>
+          res += cl(currentParent.get.asInstanceOf[RT])
+        case false =>
+
+      }
 
       //-- Next
       currentParent = currentParent.get.parentResource
@@ -245,7 +277,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
   }
 
   def getDerivedResources[CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
-    
+
     /*this.derivedResources.foreach {
       case (id,r) => 
         
@@ -297,15 +329,15 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
         r.findDerivedResourceOfType[CT].get
     }
   }
-  
+
   /**
    * Not Recursive!!
    */
-  def findDerivedResourceOfTypeAnd[CT <: HarvestedResource](cl : CT => Boolean)(implicit tag: ClassTag[CT]): Option[CT] = {
+  def findDerivedResourceOfTypeAnd[CT <: HarvestedResource](cl: CT => Boolean)(implicit tag: ClassTag[CT]): Option[CT] = {
     this.derivedResources.collectFirst {
       case (id, r) if (tag.runtimeClass.isInstance(r) && cl(r.asInstanceOf[CT])) =>
         r.asInstanceOf[CT]
-     
+
     }
   }
 
@@ -345,21 +377,19 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
   /**
    * Clean recursively
    */
-  def clean : Unit = {
-    
-  println(s"Cleaning: "+this)
-    
+  def clean: Unit = {
+
+    println(s"Cleaning: " + this)
+
     this.originalHarvester match {
-      case Some(h) => 
-       h.availableResources =  this.originalHarvester.get.availableResources - this 
-       this.originalHarvester = None
-       println(s"Removing "+this+" from original harvester: "+h)
-      case None => 
+      case Some(h) =>
+        h.availableResources = this.originalHarvester.get.availableResources - this
+        this.originalHarvester = None
+        println(s"Removing " + this + " from original harvester: " + h)
+      case None =>
     }
-      this.@->("clean")
-    
-    
-    
+    this.@->("clean")
+
     this.cleanDerivedResources
   }
 
@@ -420,23 +450,22 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     parents.reverse
 
   }
-  
-  
+
   // Tasking
   //----------------
- 
-  def runSingleTask(id:String)(cl: => Any) = {
-    
-    var task = new ResourceTask(id,this) {
+
+  def runSingleTask(id: String)(cl: => Any) = {
+
+    var task = new ResourceTask(id, this) {
       def doTask = {
         cl
       }
     }
-    
+
     Heart.pump(task)
-    
+
     task
-    
+
   }
 
 }
