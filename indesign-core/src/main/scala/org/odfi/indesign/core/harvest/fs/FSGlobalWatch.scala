@@ -7,12 +7,19 @@ object FSGlobalWatch extends IndesignModule {
   
   var watcher = new FileWatcherAdvanced
   
+  var idWatcher = new IDFileWatcher
+  
   this.onStart {
+    
+    println("Starting FS Global Watch")
+    
     watcher.start
+    idWatcher.start
   }
   
   this.onStop {
     watcher.stop
+    idWatcher.stop
   }
   
   
