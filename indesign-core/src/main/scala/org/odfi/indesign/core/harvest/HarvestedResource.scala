@@ -67,6 +67,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
     this.parentResource = Some(parentResource)
     parentResource.addDerivedResource(this)
+    triggerParentResourceAdded
 
     /*
     this.parentResource match {
@@ -82,6 +83,14 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }*/
 
     this
+  }
+  
+  def triggerParentResourceAdded = {
+    this.@->("parent.resource.added")
+  }
+  
+  def onParentResourceAdded(cl: => Unit) = {
+    this.on("parent.resource.added")(cl)
   }
 
   /**
@@ -423,6 +432,17 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     this.registerStateHandler("processed") {
       cl
     }
+  }
+
+  def runProcessResource = {
+
+    runSingleTask("process") {
+      this.keepErrorsOn(this, verbose = true) {
+
+        HarvestedResource.moveToState(this, "processed")
+      }
+    }
+
   }
 
   // Naming Utils

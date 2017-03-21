@@ -62,16 +62,16 @@ object Brain extends Brain {
     }
 
   }*/
-  
+
   // Config help
   //-------------------
-  def addExternalFolderRegion(file:File) = {
+  def addExternalFolderRegion(file: File) = {
     this.config match {
-      case Some(conf) if(!conf.isInConfig("external-region-folder", file.getCanonicalPath)) =>
+      case Some(conf) if (!conf.isInConfig("external-region-folder", file.getCanonicalPath)) =>
         var k = conf.addKey("region", "external-region-folder")
         k.values.add.set(file.getCanonicalPath)
         conf.resyncToFile
-      case other => 
+      case other =>
     }
   }
 
@@ -111,12 +111,12 @@ object Brain extends Brain {
 
                 var external = ExternalBrainRegion.build(new File(path).toURI().toURL)
                 println(s"Created $path with: " + external.regionBuilder.get.getClass.getClassLoader)
-               
+
                 /*key.values.foreach {
                   v => 
                     println("Configu key has value: "+v)
                 }*/
-                
+
                 external.configKey = Some(key)
                 gather(external)
               }
@@ -167,15 +167,26 @@ object Brain extends Brain {
 
   }
 
+  this.onGathered[BrainRegion] {
+    case region =>
+      println("Gathered Region " + region + ", moving to target state: " + this.currentState)
+      this.currentState match {
+        case Some(state) =>
+
+          region.keepErrorsOn(region)(this.moveToState(region, state))
+
+        case None =>
+      }
+  }
   this.onGatheredResources {
     resources =>
 
-      var regions = resources.collect { 
-        case e : ExternalBrainRegion => 
+      var regions = resources.collect {
+        case e: ExternalBrainRegion =>
           addChildHarvester(e)
           e
-      case e: BrainRegion => e 
-        
+        case e: BrainRegion => e
+
       }
 
       logFine[Brain](s"Regions gathered moving to latest state ${this.currentState}: $regions")
@@ -284,42 +295,5 @@ object Brain extends Brain {
   this.onResetState {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.resetLFCState(r)))
   }
-
-  /*def load = {
-
-    // Load
-    //-------------
-    Brain.moveToState(this, "load")
-
-  }
-
-  this.registerStateHandler("load") {
-
-    logFine[Brain](s"Loading Regions")
-
-    // Regions
-    //
-    this.regions.foreach {
-      r =>
-        //println(s"load region $r")
-        Brain.moveToState(r, "load")
-    }
-  }*/
-
-  /**
-   *
-   */
-  /*def init = {
-    Brain.moveToState(this, "init")
-
-  }
-
-  this.registerStateHandler("init") {
-    this.regions.foreach {
-      r =>
-        //println(s"init region $r")
-        Brain.moveToState(r, "init")
-    }
-  }*/
 
 }

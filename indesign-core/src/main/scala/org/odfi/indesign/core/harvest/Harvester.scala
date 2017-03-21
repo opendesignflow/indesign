@@ -517,12 +517,12 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
       r =>
         logFine[Harvester](s"Gathered on: " + r)
         r.@->("gathered", this)
-        this.@->("gathered", r)
+        this.@->("gathered.resource", r)
     }
 
     //-- Call GatheredResources on the Harvester itself
     //println("Gathered resources: "+this.harvestedResources)
-    this.@->("gatheredResources", this.harvestedResources.toList)
+    this.@->("gathered.resources", this.harvestedResources.toList)
 
     this.harvestedResources.clear()
 
@@ -687,8 +687,13 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
    */
   def gatherDirect(r: HarvestedResource) = {
     this.synchronized {
-      this.saveToAvailableResources(r)
-      // Make a dispatch??
+      var res = this.saveToAvailableResources(r)
+      
+      //-- Trigger Gathered
+      triggerGatheredResource(r)
+      
+      res
+      
     }
 
   }
@@ -696,9 +701,8 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   def gatherDirectAll(r: List[HarvestedResource]) = {
     this.synchronized {
       r.foreach(this.saveToAvailableResources(_))
-      //this.gatherAll(r)
-      //this.finishGather(true)
-      // Make a dispatch??
+      
+      r.foreach( triggerGatheredResource(_))
     }
 
   }
@@ -712,20 +716,16 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.synchronized {
       r.root
 
-      this.saveToAvailableResources(r)
-
-      // Make a dispatch??
-      //this.finishGather(true)
+      //-- Save to available
+      var res = this.saveToAvailableResources(r)
+      
+      //-- Trigger Gathered
+      triggerGatheredResource(r)
+      
+      res
     }
 
-    /*this.availableResources.contains(r) match {
-      case true => 
-        false
-      case false => 
-        r.root
-        this.availableResources += r
-        true
-    }*/
+ 
   }
   /**
    * Direct gather just adds a resource to the availableResources
@@ -733,14 +733,18 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
    */
   def saveToAvailableResources(r: HarvestedResource) = {
 
+    
     this.availableResources.contains(r) match {
       case true =>
         false
       case false if (this.availableResources.find(_.getId == r.getId).isDefined) => false
       case false =>
+        
+        // Save
         r.root
         r.originalHarvester = Some(this)
         this.availableResources += r
+        
         true
     }
 
@@ -756,15 +760,22 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   }
 
   def onGatheredResources(cl: List[HarvestedResource] => Unit) = {
-    this.onWith("gatheredResources") {
+    this.onWith("gathered.resources") {
       rl: List[HarvestedResource] => cl(rl)
     }
   }
 
+  /**
+   * When a Resource was gathered
+   */
   def onGathered[T <: HarvestedResource](cl: T => Unit)(implicit tag: ClassTag[T]) = {
-    this.onWith[T]("gathered") {
+    this.onWith[T]("gathered.resource") {
       rl: T => cl(rl)
     }
+  }
+  
+  def triggerGatheredResource[T <: HarvestedResource](r:T)  = {
+    this.@->("gathered.resource",r)
   }
 
   def processResources = {

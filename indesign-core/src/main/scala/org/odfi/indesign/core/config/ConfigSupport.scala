@@ -33,5 +33,9 @@ trait ConfigSupport extends ConfigHolder with HarvestedResource {
         __config
     }
   }
+  
+  // User Config
+  //-------------------
+  
 
 }
