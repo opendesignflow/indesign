@@ -256,7 +256,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
      //-- Done
     //this.@->("done")
 
-    println(s"********** harvest Done, doing process **************");
+    //println(s"********** harvest Done, doing process **************");
     
     //-- Process
     //-------------------

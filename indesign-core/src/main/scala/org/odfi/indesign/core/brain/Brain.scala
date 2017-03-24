@@ -169,7 +169,9 @@ object Brain extends Brain {
 
   this.onGathered[BrainRegion] {
     case region =>
-      println("Gathered Region " + region + ", moving to target state: " + this.currentState)
+      
+      logFine[Brain]("Gathered Region " + region + ", moving to target state: " + this.currentState)
+      
       this.currentState match {
         case Some(state) =>
 
