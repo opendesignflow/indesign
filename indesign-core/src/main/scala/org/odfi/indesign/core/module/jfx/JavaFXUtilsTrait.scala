@@ -19,6 +19,7 @@ import javafx.scene.control.Control
 import javafx.scene.layout.Pane
 import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.event.Event
+import javafx.beans.property.ReadOnlyDoubleProperty
 
 trait JavaFXUtilsTrait  {
 
@@ -131,6 +132,7 @@ trait JavaFXUtilsTrait  {
         cl(event)
       }
     })
+    
 
   }
 
@@ -167,6 +169,16 @@ trait JavaFXUtilsTrait  {
   def onJFXDoublePropertyChange(prop: ReadOnlyObjectProperty[Double])(cl: Double => Unit) = {
     prop.addListener(new ChangeListener[Double] {
       def changed(b: ObservableValue[_ <: Double], old: Double, n: Double) = {
+        cl(n)
+
+      }
+    })
+
+  }
+  
+  def onJFXReadonlyDoubleChange(prop: ReadOnlyDoubleProperty)(cl: Number => Unit) = {
+    prop.addListener(new ChangeListener[Number] {
+      def changed(b: ObservableValue[_ <: Number], old: Number, n: Number) = {
         cl(n)
 
       }

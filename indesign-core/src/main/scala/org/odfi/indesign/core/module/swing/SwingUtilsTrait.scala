@@ -10,9 +10,26 @@ import javax.swing.JMenu
 import javax.swing.JPopupMenu
 import javax.swing.JComponent
 import javax.swing.JButton
+import javax.swing.SwingUtilities
 
 trait SwingUtilsTrait {
 
+  def onSwingThreadAndWait(cl: => Unit) = {
+    SwingUtilities.invokeAndWait(new Runnable {
+      def run = {
+        cl
+      }
+    })
+  }
+  
+  def onSwingThreadLater(cl: => Unit) = {
+    SwingUtilities.invokeLater(new Runnable {
+      def run = {
+        cl
+      }
+    })
+  }
+  
   def onSwingClick(c: JButton)(cl: => Unit) = {
 
     c.addActionListener(new ActionListener {
