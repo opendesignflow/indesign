@@ -53,6 +53,22 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     }
   }
   
+  
+  def getString(name:String,default:String) = {
+    this.getKey(name,"string") match {
+      case Some(key) if (key.values.size>0) => 
+        try {
+          key.values(0).toString()
+        } catch {
+          case e : Throwable => 
+            default
+        }
+      case other => default
+    }
+  }
+  
+  def setString(name:String,v:String) = setKeyFirstValue(name,"string",v.toString)
+  
   def getBoolean(name:String,default:Boolean) = {
     this.getKey(name,"boolean") match {
       case Some(key) if (key.values.size>0) => 
