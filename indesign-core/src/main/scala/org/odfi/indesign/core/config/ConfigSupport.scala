@@ -37,5 +37,13 @@ trait ConfigSupport extends ConfigHolder with HarvestedResource {
   // User Config
   //-------------------
   
+  // Get Values
+  //-----------------
+  def configGetDouble(name:String,default:Double) = config match {
+    case Some(c) => c.getDouble(name, default)
+    case other => default
+  }
+  
+  
 
 }

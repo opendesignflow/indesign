@@ -128,7 +128,9 @@ object Config extends IndesignModule {
               var c = impl.getContainer("default")
               c.document(documentName(target), new DefaultConfig, true)
           }
-        case None => None
+        case None => 
+          println(s"No config impl defined")
+          None
       }
 
       //-- See if we can listen to changes

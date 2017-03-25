@@ -2,6 +2,9 @@ package org.odfi.indesign.core.config.model
 
 import com.idyria.osi.ooxoo.db.store.DocumentContainer
 import com.idyria.osi.ooxoo.db.traits.DBContainerReference
+import com.idyria.osi.ooxoo.core.buffers.datatypes.DoubleBuffer
+import com.idyria.osi.ooxoo.core.buffers.datatypes.BooleanBuffer
+import com.idyria.osi.ooxoo.core.buffers.datatypes.IntegerBuffer
 
 trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   
@@ -43,6 +46,15 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     
   }
   
+  def getKeyFirstValue(name:String,kType:String) = {
+    this.getKey(name,kType) match {
+      case Some(key) if (key.values.size>0) => 
+          Some(key.values(0).data)
+      case other => 
+        None
+    }
+  }
+  
   def setUniqueKeyFirstValue(keyType:String,v:String) = {
     this.values.keys.find { k => k.keyType!=null && k.keyType.toString()==keyType && k.values.size>0 && k.values(0).toString==v} match {
       case None => 
@@ -82,6 +94,23 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     }
   }
   
+  def getBooleanAsBuffer(name:String,default:Boolean) = {
+    
+    val value = this.getKeyFirstValue(name, "boolean") match {
+      case Some(v) => v.toBoolean
+      case other => default
+    }
+    
+     var b = new BooleanBuffer
+     b.set(value)
+     b.onDataUpdate {
+         setBoolean(name,b.data)
+     }
+     
+     b
+
+  }
+  
   def setBoolean(name:String,v:Boolean) = setKeyFirstValue(name,"boolean",v.toString)
     
      
@@ -96,6 +125,25 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
         }
       case other => default
     }
+  }
+  
+  def getIntAsBuffer(name:String,default:Int) = {
+    
+   
+   
+    val value = this.getInt(name, default) 
+    
+     var b = new IntegerBuffer
+     b.set(value)
+     b.onDataUpdate {
+       
+         //println("Value of config updated")
+         setInt(name,b.data)
+     }
+     
+     b
+     
+    
   }
   
   def setInt(name:String,v:Int) = setKeyFirstValue(name,"integer",v.toString)
@@ -114,6 +162,39 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   }
   
   def setLong(name:String,v:Long) = setKeyFirstValue(name,"long",v.toString)
+  
+  
+  def getDouble(name:String,default:Double) = {
+    
+    this.getKeyFirstValue(name, "double") match {
+      case Some(v) => v.toDouble
+      case other => default
+    }
+  }
+  
+  def setDouble(name:String,v:Double) = setKeyFirstValue(name,"double",v.toString)
+  
+  def getDoubleAsBuffer(name:String,default:Double) = {
+    
+   
+   
+    val value = this.getKeyFirstValue(name, "double") match {
+      case Some(v) => v.toDouble
+      case other => default
+    }
+    
+     var b = new DoubleBuffer
+     b.set(value)
+     b.onDataUpdate {
+       
+         //println("Value of config updated")
+         setDouble(name,b.data)
+     }
+     
+     b
+     
+    
+  }
   
   /**
    * Get All keys answering to name and type

@@ -185,7 +185,27 @@ trait JavaFXUtilsTrait  {
     })
 
   }
+  
+  def onJFXObjectPropertyChanged[OP](prop: ObjectProperty[OP])(cl: OP => Unit) = {
+    prop.addListener(new ChangeListener[OP] {
+      def changed(b: ObservableValue[_ <: OP], old: OP, n: OP) = {
+        cl(n)
 
+      }
+    })
+
+  }
+
+  implicit def convertClosureToEventHandler[ET <: Event](cl : ET => Unit) = {
+    var eh = new EventHandler[ET] {
+      
+      def handle(event: ET) = {
+        cl(event)
+      }
+    }
+    eh
+  }
+  
   def jfxImageLabel(u: URL, text: String = ""): Label = {
     new Label(text, new ImageView(new Image(u.toExternalForm())))
   }
