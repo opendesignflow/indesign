@@ -66,7 +66,7 @@ object JFXRun {
   }
   def onJavaFX[T](cl: => T, block: Boolean = false): Option[T] = {
 
-    println(s"Running JFX: " + started)
+    //println(s"Running JFX: " + started)
     started match {
       case true =>
 
@@ -84,7 +84,7 @@ object JFXRun {
         if (block) {
           currentSem.acquire()
         }
-        println(s"finished on javafx with block: " + block)
+        //println(s"finished on javafx with block: " + block)
         //semaphore.acquire()
         r
 
@@ -106,7 +106,7 @@ object JFXRun {
         if (block) {
           currentSem.acquire()
         }
-        println(s"finished on javafx with block: " + block)
+        //println(s"finished on javafx with block: " + block)
 
         // Acquire a semaphore to wait for the end of execution
         //semaphore.acquire()
