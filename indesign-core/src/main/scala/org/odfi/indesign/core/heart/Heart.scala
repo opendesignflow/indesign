@@ -21,6 +21,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   //-- Thread group
   var threadGroup = new ThreadGroup("heart")
 
+  
   def newThread(r: Runnable) = {
 
     var th = new Thread(threadGroup, r)
@@ -166,6 +167,14 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
         // t.scheduleFuture.get.
         case false =>
+          
+          t.scheduleEvery = None
+          t.scheduleFuture match {
+            case Some(future) =>
+              future.cancel(true)
+            case None => 
+              
+          }
 
       }
     } catch {
@@ -191,13 +200,26 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   // Lifecycles
   //-----------------
-
+  this.onLoad {
+    this.threadGroup  = new ThreadGroup("heart")
+    this.threadGroup.setDaemon(true)
+    this.threadGroup.allowThreadSuspension(true)
+  }
   this.onStop {
+    
     var all = this.tasks
     all.foreach {
       case (id, t) =>
         killTask(t)
     }
+    
+    try {
+      threadGroup.interrupt()
+    } catch {
+      case e: Throwable => 
+        e.printStackTrace()
+    }
+    
   }
 
 }
