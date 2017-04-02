@@ -9,12 +9,13 @@ import org.eclipse.aether.impl.ArtifactResolver
 import org.odfi.indesign.core.artifactresolver.AetherResolver
 import org.odfi.indesign.core.brain.artifact.ArtifactExternalRegion
 import org.odfi.indesign.core.harvest.Harvest
+import com.idyria.osi.tea.compile.ClassDomainSupport
 
 trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource with Harvester {
 
 }
 
-object Brain extends Brain {
+object Brain extends Brain with ClassDomainSupport {
 
   // Defaults
   //------------
@@ -169,9 +170,9 @@ object Brain extends Brain {
 
   this.onGathered[BrainRegion] {
     case region =>
-      
+
       logFine[Brain]("Gathered Region " + region + ", moving to target state: " + this.currentState)
-      
+
       this.currentState match {
         case Some(state) =>
 
@@ -250,26 +251,34 @@ object Brain extends Brain {
     }
   }
 
+  /**
+   * Creating Region base on name and class loader
+   * The Current Thread classloader is changed to the CL
+   */
   def createRegion(cl: ClassLoader, name: String) = {
 
-    //-- Get Class
-    var regionClass = cl.loadClass(name)
+    withClassLoader(cl) {
 
-    //-- Object/Class
-    name match {
-      // Object
-      case name if (name.endsWith("$")) =>
-        regionClass.getFields.find { f => f.getName == "MODULE$" } match {
-          case Some(objectField) =>
-            objectField.setAccessible(true)
-            objectField.get(null).asInstanceOf[BrainRegion]
-          case None =>
-            throw new RuntimeException(s"Cannot Create Region $name from Classloader $cl, detected object but no field MODULE$$ defined..maybe not an object")
-        }
+      //-- Get Class
+      var regionClass = cl.loadClass(name)
 
-      // Class
-      case name =>
-        regionClass.newInstance().asInstanceOf[BrainRegion]
+      //-- Object/Class
+      name match {
+        // Object
+        case name if (name.endsWith("$")) =>
+          regionClass.getFields.find { f => f.getName == "MODULE$" } match {
+            case Some(objectField) =>
+              objectField.setAccessible(true)
+              objectField.get(null).asInstanceOf[BrainRegion]
+            case None =>
+              throw new RuntimeException(s"Cannot Create Region $name from Classloader $cl, detected object but no field MODULE$$ defined..maybe not an object")
+          }
+
+        // Class
+        case name =>
+          regionClass.newInstance().asInstanceOf[BrainRegion]
+      }
+
     }
 
   }
