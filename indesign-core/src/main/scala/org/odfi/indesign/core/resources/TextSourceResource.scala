@@ -8,7 +8,26 @@ import java.nio.file.Files
 
 trait TextSourceResource extends HarvestedResource {
 
+  /**
+   * Retrieve Text Content
+   */
   def getTextContent: String
+
+  /**
+   * Set the Text Content
+   */
+  def setTextContent(input: String)
+  
+  /**
+   * 
+   */
+  def flushTextContent : Unit
+  
+  // Lines Interface
+  //-----------
+  
+  def getTextLines  =  getTextContent.split('\n')
+  
 
 }
 
@@ -19,6 +38,7 @@ class FileTextSourceResource(p: Path) extends HarvestedFile(p) with TextSourceRe
 
   //- Content Cache
   var textContentCache: java.lang.ref.WeakReference[String] = null
+  var lastModification = 0L 
 
   def getTextContent: String = {
     path.toFile().isDirectory() match {
@@ -35,6 +55,35 @@ class FileTextSourceResource(p: Path) extends HarvestedFile(p) with TextSourceRe
         }
     }
 
+  }
+
+  def setTextContent(input:String) = textContentCache match {
+    
+    //-- Something, clear and reset
+    case tc if (tc != null && tc.get != null) =>
+      lastModification = System.currentTimeMillis()
+      tc.clear()
+      textContentCache = new java.lang.ref.WeakReference[String](input)
+      textContentCache.get
+     //-- NOthing, then just set
+    case lc =>
+      lastModification = System.currentTimeMillis()
+      textContentCache = new java.lang.ref.WeakReference[String](input)
+      textContentCache.get
+    
+  }
+  
+  
+  def flushTextContent = if(lastModification>0) {
+    
+    try {
+      TeaIOUtils.writeToFile(p.toFile(), this.getTextContent)
+     
+    } finally {
+       lastModification = 0
+    }
+    
+    
   }
   /*var linesCache: java.lang.ref.WeakReference[List[String]] = null
 
@@ -56,9 +105,21 @@ class FileTextSourceResource(p: Path) extends HarvestedFile(p) with TextSourceRe
 
 }
 
-class StringTextSourceResource(val content: String) extends TextSourceResource {
+class StringTextSourceResource(var content: String) extends TextSourceResource {
 
   def getId = getClass.getSimpleName + ":" + hashCode()
 
-  def getTextContent: String = content
+  def getTextContent: String = this.synchronized(content)
+  
+  def setTextContent(input:String) = this.synchronized {
+    this.content = input
+    input
+  }
+  
+  /**
+   * Not Doing anything
+   */
+  def flushTextContent = {
+    
+  }
 }

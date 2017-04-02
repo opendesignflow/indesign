@@ -44,6 +44,11 @@ trait ConfigSupport extends ConfigHolder with HarvestedResource {
     case other => default
   }
   
+  def configGetString(name:String,default:String) = config match {
+    case Some(c) => c.getString(name, default)
+    case other => default
+  }
+  
   
 
 }
