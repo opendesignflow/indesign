@@ -34,6 +34,13 @@ trait ConfigSupport extends ConfigHolder with HarvestedResource {
     }
   }
   
+  def saveConfig = {
+    this.config match {
+      case Some(c) => c.resyncToFile
+      case other => 
+    }
+  }
+  
   // User Config
   //-------------------
   

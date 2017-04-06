@@ -490,6 +490,10 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
 }
 
+trait HarvestedResourceDefaultId extends HarvestedResource {
+  def getId = getClass.getCanonicalName+":"+getClass.hashCode()
+}
+
 object HarvestedResource extends LFCDefinition {
 
   this.defineState("new")
