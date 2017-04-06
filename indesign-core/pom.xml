@@ -132,10 +132,17 @@
 			<artifactId>lucene-queryparser</artifactId>
 			<version>6.0.0</version>
 		</dependency>
-		<dependency>   
+		<!-- https://mvnrepository.com/artifact/javax.mail/mail -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.odfi.ooxoo</groupId>
 			<artifactId>ooxoo-db</artifactId>
-			<version>3.2.3-SNAPSHOT</version> 
+			<version>3.2.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
