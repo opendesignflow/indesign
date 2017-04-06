@@ -88,6 +88,13 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
   def kill = {
     Heart.killTask(this)
   }
+  
+  def reschedule = {
+    
+    kill 
+    Heart.pump(this)
+    
+  }
 
   // Timings
   //----------------
