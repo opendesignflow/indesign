@@ -4,7 +4,6 @@ import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.harvest.Harvest
 import org.odfi.indesign.core.harvest.fs.FileSystemHarvester
 import org.odfi.indesign.core.module.ui.www.WWWViewHarvester
-import org.odfi.indesign.module.maven.MavenProjectHarvester
 
 object GitModule extends IndesignModule {
 
