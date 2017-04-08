@@ -54,8 +54,8 @@
 		</repository>
 		<repository>
 			<snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 			<id>odfi.snapshots</id>
 			<name>odfi-snapshot</name>
 			<url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
@@ -64,13 +64,46 @@
 
 	<dependencyManagement>
 		<dependencies>
-<!-- 			<dependency> -->
-<!-- 				<groupId>org.odfi</groupId> -->
-<!-- 				<artifactId>tea</artifactId> -->
-<!-- 				<version>3.2.2</version> -->
-<!-- 			</dependency> -->
+			<dependency>
+				<groupId>org.odfi.ooxoo</groupId>
+				<artifactId>ooxoo-core</artifactId>
+				<version>3.2.3-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.odfi.ooxoo</groupId>
+				<artifactId>ooxoo-db</artifactId>
+				<version>3.2.3-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ooxoo-plugin</artifactId>
+				<version>3.2.3-SNAPSHOT</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	
+
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ooxoo-plugin</artifactId>
+				<version>3.2.3-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-sources</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
 
 
 	<modules>
