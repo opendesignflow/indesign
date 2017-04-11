@@ -26,6 +26,7 @@ object ConfigModel extends ModelBuilder {
         attribute("name")
         attribute("keyType") default "string"
         "Value" multiple {
+          attribute("hint")
           ofType("string")
         }
       }

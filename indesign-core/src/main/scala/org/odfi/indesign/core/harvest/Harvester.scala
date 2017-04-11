@@ -516,8 +516,9 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.harvestedResources.foreach {
       r =>
         logFine[Harvester](s"Gathered on: " + r)
+        println(s"Gathered ${r} on: " + r)
         r.@->("gathered", this)
-        this.@->("gathered.resource", r)
+        triggerGatheredResource(r)
     }
 
     //-- Call GatheredResources on the Harvester itself
@@ -769,13 +770,15 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
    * When a Resource was gathered
    */
   def onGathered[T <: HarvestedResource](cl: T => Unit)(implicit tag: ClassTag[T]) = {
-    this.onWith[T]("gathered.resource") {
-      rl: T => cl(rl)
+    this.onWith[HarvestedResource]("gathered.resource") {
+      rl: HarvestedResource => 
+        if (tag.runtimeClass.isInstance(rl))
+          cl(rl.asInstanceOf[T])
     }
   }
   
-  def triggerGatheredResource[T <: HarvestedResource](r:T)  = {
-    this.@->("gathered.resource",r)
+  def triggerGatheredResource[T <: HarvestedResource : ClassTag](r:T)  = {
+    this.@->[T]("gathered.resource",r)
   }
 
   def processResources = {

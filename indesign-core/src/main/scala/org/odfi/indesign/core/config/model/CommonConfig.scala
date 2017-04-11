@@ -33,6 +33,18 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     this.values.keys.find(k => k.name.toString()==name && k.keyType.toString()==kType && k.values.size>0)
   }
   
+  
+  def getKeyCreate(name:String,ktype:String) = getKey(name,ktype) match {
+    case None => 
+      addKey(name, ktype)
+    case Some(k) => k
+  }
+  
+  def getKeyValues(name:String,ktype:String) = getKey(name,ktype) match {
+    case Some(k) => k.values.toList
+    case None => List()
+  }
+  
   def setKeyFirstValue(name:String,kType:String,v:String) = {
     this.getKey(name,kType) match {
       case Some(key) if (key.values.size>0) => 
@@ -207,6 +219,8 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
       case _ => false
     }
   }
+  
+  //def getKeysValues(name:String,t:String)
   
    def removeFromConfig(keyType:String,value:String) : Boolean = {
      this.values.keys.find {

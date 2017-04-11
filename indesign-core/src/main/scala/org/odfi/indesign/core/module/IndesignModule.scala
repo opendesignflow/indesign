@@ -5,9 +5,15 @@ import org.odfi.indesign.core.brain.Brain
 import org.odfi.indesign.core.config.ConfigSupport
 import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.harvest.HarvestedResource
+import org.odfi.indesign.core.harvest.Harvester
+import org.odfi.indesign.core.harvest.Harvest
 
 trait IndesignModule extends BrainRegion with ConfigSupport {
 
+  def requireHarvester(obj:Harvester) = {
+    Harvest.addHarvester(obj)
+  }
+  
   def requireModule(obj: IndesignModule) = {
     //println("Requiring " + obj)
     //println(s"Parent of ${getDisplayName} is ${parentResource}")

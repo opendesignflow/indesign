@@ -80,5 +80,6 @@ object HarvestedFile {
   def apply (f:Path) = new HarvestedFile(f)
   
   implicit def harvestedFileToJavaFile(hf:HarvestedFile) = hf.path.toFile().getCanonicalFile
+  implicit def fileToHFile(f:File) = new HarvestedFile(f.getCanonicalFile.toPath())
   
 }
