@@ -35,6 +35,12 @@ class HarvestedFile(val path: Path) extends HarvestedResource {
     }
   }
   
+  def createSubFile(filePath:String*) = {
+    var sub  = new File(path.toFile,filePath.mkString(File.separator)).getCanonicalFile
+    sub.mkdirs
+    HarvestedFile(sub)
+  }
+  
   def getExtension = path.toFile.getName.split("\\.").last
   
   // Check rights
