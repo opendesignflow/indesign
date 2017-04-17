@@ -127,6 +127,8 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   
   def setBoolean(name:String,v:Boolean) = setKeyFirstValue(name,"boolean",v.toString)
     
+  
+  def hasInt(name:String) =  this.getKey(name,"integer").isDefined
      
   def getInt(name:String,default:Int) = {
     this.getKey(name,"integer") match {
@@ -143,15 +145,18 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   
   def getIntAsBuffer(name:String,default:Int) = {
     
-   
-   
+ /*val int =  this.hasInt(name) match {
+     case true => 
+       this.getInt(name, default)
+     case false => 
+   }
+   */
     val value = this.getInt(name, default) 
     
      var b = new IntegerBuffer
      b.set(value)
      b.onDataUpdate {
        
-         //println("Value of config updated")
          setInt(name,b.data)
      }
      
