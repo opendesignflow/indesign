@@ -93,6 +93,10 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     this.on("parent.resource.added")(cl)
   }
 
+  def addDerivedResources[RT <: HarvestedResource](r: Iterable[RT]): Unit = {
+    r.foreach(addDerivedResource(_))
+  }
+  
   /**
    * Add a Resource as derived
    * If same type and same id already exist; don't add an return the existing resource
