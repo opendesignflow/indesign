@@ -516,7 +516,6 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.harvestedResources.foreach {
       r =>
         logFine[Harvester](s"Gathered on: " + r)
-        println(s"Gathered ${r} on: " + r)
         r.@->("gathered", this)
         triggerGatheredResource(r)
     }
