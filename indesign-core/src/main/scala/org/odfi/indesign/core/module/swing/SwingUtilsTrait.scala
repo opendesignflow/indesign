@@ -11,6 +11,8 @@ import javax.swing.JPopupMenu
 import javax.swing.JComponent
 import javax.swing.JButton
 import javax.swing.SwingUtilities
+import javax.swing.JFrame
+import java.awt.GraphicsEnvironment
 
 trait SwingUtilsTrait {
 
@@ -21,7 +23,7 @@ trait SwingUtilsTrait {
       }
     })
   }
-  
+
   def onSwingThreadLater(cl: => Unit) = {
     SwingUtilities.invokeLater(new Runnable {
       def run = {
@@ -29,7 +31,7 @@ trait SwingUtilsTrait {
       }
     })
   }
-  
+
   def onSwingClick(c: JButton)(cl: => Unit) = {
 
     c.addActionListener(new ActionListener {
@@ -102,6 +104,15 @@ trait SwingUtilsTrait {
 
     resultItem
 
+  }
+
+  // Frame util
+  //----------------
+  def centerOnScreen(f: JFrame) = {
+
+    var point = GraphicsEnvironment.getLocalGraphicsEnvironment.getCenterPoint
+    
+    f.setLocation((point.getX-f.getWidth/2).toInt,(point.getY-f.getHeight/2).toInt)
   }
 
 }
