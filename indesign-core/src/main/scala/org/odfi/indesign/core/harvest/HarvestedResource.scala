@@ -210,12 +210,15 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   }
 
+  /**
+   * Find the top most resource of type in chain, not returning the actual resource
+   */
   def findTopMostResource[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Option[CT] = {
 
-    tag.runtimeClass.isInstance(this) match {
+   /* tag.runtimeClass.isInstance(this) match {
       case true =>
         Some(this.asInstanceOf[CT])
-      case false =>
+      case false =>*/
         var currentParent = this.parentResource
         var lastFound: Option[CT] = None
         while (currentParent.isDefined) {
@@ -231,7 +234,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
         }
 
         lastFound
-    }
+    //}
 
   }
 
@@ -255,6 +258,9 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     res.toList
   }
 
+  /**
+   * Maps parent resources matching Type
+   */
   def mapUpResources[RT <: HarvestedResource, T](cl: RT => T)(implicit tag: ClassTag[RT]): List[T] = {
 
     var res = scala.collection.mutable.ArrayBuffer[T]()
