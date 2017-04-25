@@ -172,7 +172,7 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
 
 
   def touchFile(str: String) = {
-
+     println("Touching file: "+str)
     var file = new File(baseFolder, str.replace("/", File.separator)).getCanonicalFile
     file.getParentFile.exists() match {
       case true =>
@@ -245,12 +245,17 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
     val topWatcher = IDWatcher.onRecursiveDirectoryChange(this, baseFolder) {
 
       case other =>
+        println("Signal got for: "+other)
         signalProgress
     }
 
     //-- Add file: 2 events: create/modify for file
     touchFile("subfolder/test1")
     waitForProgress
+    waitForProgress
+    
+    //-- Touch file: 1 event: modify for file
+    touchFile("subfolder/test1")
     waitForProgress
 
     //Thread.sleep(2000)
@@ -264,7 +269,7 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
 
 
      //-- One event on subfolder parent for remove
-     assertResult(6)(progressTotal)
+     assertResult(7)(progressTotal)
 
     //-- Check subfolder watching key was removed
     assertResult(1)(IDWatcher.watchedDirectories.size)

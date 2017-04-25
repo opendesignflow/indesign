@@ -194,7 +194,11 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
    */
   def running(id: String): Option[HeartTask[_]] = {
     this.tasks.synchronized {
-      tasks.get(id)
+      tasks.get(id) match {
+        case Some(t) if(t.isRunning) => 
+         Some(t)
+        case other =>  None
+      }
     }
   }
 

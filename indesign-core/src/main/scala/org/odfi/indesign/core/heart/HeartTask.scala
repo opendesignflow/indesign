@@ -48,7 +48,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
     case None if (lastRun==0) => false
     case _ => true
   }*/
-  
+
   // Period managing
   //------------
   def isPeriodical = (scheduleAfter.isDefined || scheduleEvery.isDefined)
@@ -71,14 +71,14 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
 
   def isDone = currentState match {
     case Some(HeartTask.DONE.name) => true
-    case _ => false
+    case _                         => false
   }
 
   def waitForDone = this.waitForState(HeartTask.DONE.name)
 
   def isRunning = currentState match {
-    case Some(HeartTask.RUNNING.name) => true
-    case _ => false
+    case Some(s) if (s == HeartTask.RUNNING.name) => true
+    case _                                        => false
   }
 
   def waitForRunning = this.waitForState(HeartTask.RUNNING.name)
@@ -88,12 +88,12 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
   def kill = {
     Heart.killTask(this)
   }
-  
+
   def reschedule = {
-    
-    kill 
+
+    kill
     Heart.pump(this)
-    
+
   }
 
   // Timings
@@ -110,7 +110,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
         try {
 
           // Run Task
-          logFine[HeartTask[_]]("Running Task: "+getId)
+          logFine[HeartTask[_]]("Running Task: " + getId)
           this.stopSignal.tryAcquire() match {
             case false =>
               logFine[HeartTask[_]]("No Stop")
@@ -129,14 +129,14 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
 
           // If Future is still present, and task is not periodical, clean
           this.scheduleFuture match {
-           
-            case Some(f) if (!isPeriodical) => 
-               taskStopped
-            case other => 
+
+            case Some(f) if (!isPeriodical) =>
+              taskStopped
+            case other =>
           }
-          
+
           None
-          
+
           // Close Task: Either clean or let got if it is periodical
           /*this.scheduleFuture match {
             case None =>
@@ -146,8 +146,8 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
             case Some(f) => 
               //-- Closre
           }*/
-          
-         /* (scheduleAfter, scheduleEvery) match {
+
+          /* (scheduleAfter, scheduleEvery) match {
             case (None, None) =>
               taskStopped
             case _ =>
@@ -156,9 +156,9 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
       }
     } match {
       case Some(rt) => rt.asInstanceOf[PT]
-      case None => null.asInstanceOf[PT]
+      case None     => null.asInstanceOf[PT]
     }
-   
+
   }
 
   /**
@@ -166,27 +166,34 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
    */
   private def taskStopped = {
 
-    
-    
-    //-- Call clean
-    (scheduleAfter, scheduleEvery) match {
-      case (None, None) =>
-        this.@->("clean", this.originalHarvester)
-      case _ =>
-    }
+    //println("*** TASK STOP: " + getId)
+    try {
+      //-- Call clean
+      (scheduleAfter, scheduleEvery) match {
+        case (None, None) =>
+          this.@->("clean", this.originalHarvester)
+        case _ =>
+      }
 
-    //-- Cancel to make sure task gets removed from executor
-    this.scheduleFuture.get.cancel(true)
-    this.scheduleFuture = None
-    
-    //-- Clean stop signal
-    this.stopSignal.drainPermits()
-    
-    //-- Remove from Heart
-    Heart.removeTask(this)
-    
-    //-- Move to done state
-    HeartTask.moveToState(this, HeartTask.DONE.name)
+      //-- Cancel to make sure task gets removed from executor
+      this.scheduleFuture.get.cancel(true)
+      this.scheduleFuture = None
+
+      //-- Clean stop signal
+      this.stopSignal.drainPermits()
+
+    } catch {
+      case e: Throwable =>
+        e.printStackTrace()
+    } finally {
+
+      //-- Move to done state
+      HeartTask.moveToState(this, HeartTask.DONE.name)
+
+      //-- Remove from Heart
+      Heart.removeTask(this)
+
+    }
   }
 
   def doTask: PT
