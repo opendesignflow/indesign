@@ -5,6 +5,7 @@ import com.idyria.osi.ooxoo.db.traits.DBContainerReference
 import com.idyria.osi.ooxoo.core.buffers.datatypes.DoubleBuffer
 import com.idyria.osi.ooxoo.core.buffers.datatypes.BooleanBuffer
 import com.idyria.osi.ooxoo.core.buffers.datatypes.IntegerBuffer
+import com.idyria.osi.ooxoo.core.buffers.datatypes.XSDStringBuffer
 
 trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   
@@ -80,6 +81,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   def hasString(name:String) =  this.getKey(name,"string").isDefined
   
   def getString(name:String) : Option[String] = getKeyFirstValue(name,"string") 
+  
   def getString(name:String,default:String) : String = {
     this.getKey(name,"string") match {
       case Some(key) if (key.values.size>0) => 
@@ -92,6 +94,22 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
       case other => default
     }
   }
+  
+  
+  def getStringAsBuffer(name:String,default:String) = {
+    
+    val value = this.getString(name,default)
+
+     var b = new XSDStringBuffer
+     b.set(value)
+     b.onDataUpdate {
+         setString(name,b.data)
+     }
+     
+     b
+
+  }
+  
   
   def setString(name:String,v:String) = setKeyFirstValue(name,"string",v.toString)
   
