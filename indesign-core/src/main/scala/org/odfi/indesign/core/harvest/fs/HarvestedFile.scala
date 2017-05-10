@@ -27,6 +27,17 @@ class HarvestedFile(val path: Path) extends HarvestedResource with DecorateAsSca
   
   override def toString = getClass.getSimpleName.replace("$", "") + ": " + getId
 
+  // Conversion
+  //-----------------
+  
+  def newFileWithExtension(ext:String) = {
+    
+    var newname = getNameNoExtension+ext
+    
+    HarvestedFile(new File(path.toFile.getParentFile,newname))
+    
+  }
+  
   // Utils
   //---------------
 
@@ -40,14 +51,28 @@ class HarvestedFile(val path: Path) extends HarvestedResource with DecorateAsSca
 
   def isDirectory = path.toFile().isDirectory()
 
-  def hasSubFile(filePath: String*): Option[File] = {
+  /**
+   * Same as get sub file
+   */
+  def hasSubFile(filePath: String*): Option[HarvestedFile] = {
     var f = new File(path.toFile, filePath.mkString(File.separator))
     f.exists() match {
-      case true  => Some(f)
+      case true  => Some(HarvestedFile(f))
       case false => None
     }
   }
 
+  def getSubFile(filePath: String*): Option[HarvestedFile] = {
+    var f = new File(path.toFile, filePath.mkString(File.separator))
+    f.exists() match {
+      case true  => Some( HarvestedFile(f))
+      case false => None
+    }
+   
+  }
+
+  
+  
   /**
    * Creates Sub Folder
    */
