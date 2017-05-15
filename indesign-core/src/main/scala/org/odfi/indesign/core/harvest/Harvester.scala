@@ -401,7 +401,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
                   r =>
                     c.deliver(r)
                 }
-                c.finishGather()
+                c.finishGather(dispatchResources = true)
               }
 
           }
