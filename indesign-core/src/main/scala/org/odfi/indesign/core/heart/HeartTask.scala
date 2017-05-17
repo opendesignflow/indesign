@@ -176,8 +176,13 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
       }
 
       //-- Cancel to make sure task gets removed from executor
-      this.scheduleFuture.get.cancel(true)
-      this.scheduleFuture = None
+      this.scheduleFuture match {
+        case Some(f) => 
+          f.cancel(true)
+          this.scheduleFuture = None
+        case other => 
+      }
+      
 
       //-- Clean stop signal
       this.stopSignal.drainPermits()

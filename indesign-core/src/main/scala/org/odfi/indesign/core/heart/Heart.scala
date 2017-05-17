@@ -105,6 +105,23 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
     pump(t)
   }
 
+  def getTaskById(id:String) = {
+    this.tasks.get(id)
+  }
+  
+  /**
+   * Kill a task by ID if defined
+   */
+  def killTask(id:String) : Unit = {
+  
+    this.tasks.get(id) match {
+      case Some(t) =>
+       killTask(t)
+      case None => 
+    }
+   
+  }
+  
   def killTask(t: HeartTask[_]): Unit = {
 
     try {
