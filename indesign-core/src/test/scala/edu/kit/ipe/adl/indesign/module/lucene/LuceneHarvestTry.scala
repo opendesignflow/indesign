@@ -1,19 +1,19 @@
-package edu.kit.ipe.adl.indesign.module.lucene
+package org.odfi.indesign.module.lucene
 /*
 import java.io.File
 
 import com.idyria.osi.tea.logging.TLog
 
-import edu.kit.ipe.adl.indesign.core.brain.Brain
-import edu.kit.ipe.adl.indesign.core.harvest.Harvest
-import edu.kit.ipe.adl.indesign.core.harvest.Harvester
-import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
-import edu.kit.ipe.adl.indesign.core.module.eclipse.EclipseModule
-import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneIndexableHarvester
-import edu.kit.ipe.adl.indesign.core.module.lucene.LuceneModule
-import edu.kit.ipe.adl.indesign.module.maven.MavenModule
-import edu.kit.ipe.adl.indesign.module.maven.MavenProjectHarvester
-import edu.kit.ipe.adl.indesign.module.scala.ScalaModule
+import org.odfi.indesign.core.brain.Brain
+import org.odfi.indesign.core.harvest.Harvest
+import org.odfi.indesign.core.harvest.Harvester
+import org.odfi.indesign.core.harvest.fs.FileSystemHarvester
+import org.odfi.indesign.core.module.eclipse.EclipseModule
+import org.odfi.indesign.core.module.lucene.LuceneIndexableHarvester
+import org.odfi.indesign.core.module.lucene.LuceneModule
+import org.odfi.indesign.module.maven.MavenModule
+import org.odfi.indesign.module.maven.MavenProjectHarvester
+import org.odfi.indesign.module.scala.ScalaModule
 
 object LuceneHarvestTry extends App {
 

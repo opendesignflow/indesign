@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.core.tests
+package org.odfi.indesign.core.tests
 
 import scala.sys.process._
 import com.idyria.osi.tea.logging.TLog

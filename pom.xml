@@ -3,82 +3,120 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.odfi.indesign</groupId>
 	<artifactId>indesign-parent</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>InDesign Parent</name>
 	<packaging>pom</packaging>
 	<parent>
 		<groupId>org.odfi</groupId>
 		<artifactId>superpom-scala</artifactId>
-		<version>2.12.1.r2</version>
+		<version>2.12.2.r1</version>
 	</parent>
-	
 
-	<!-- Repositories to find OSI packages -->
-    <!-- ############################################## -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
-        </pluginRepository>
-        <!-- For old snapshots, please use groupId `com.jnaerator` and the following 
-            repo -->
-        <pluginRepository>
-            <id>nativelibs4java-repo</id>
-            <url>http://nativelibs4java.sourceforge.net/maven</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>odfi.central</id>
-            <name>plugins-release</name>
-            <url>https://www.opendesignflow.org/maven/repository/internal/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>odfi.snapshots</id>
-            <name>plugins-snapshot</name>
-            <url>https://www.opendesignflow.org/maven/repository/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
-        </repository>
-        <!-- For old snapshots, please use groupId `com.jnaerator` and the following 
-            repo -->
-        <repository>
-            <id>nativelibs4java-repo</id>
-            <url>http://nativelibs4java.sourceforge.net/maven</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>odfi.central</id>
-            <name>odfi-release</name>
-            <url>https://www.opendesignflow.org/maven/repository/internal/</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>odfi.snapshots</id>
-            <name>odfi-snapshot</name>
-            <url>https://www.opendesignflow.org/maven/repository/snapshots/</url>
-        </repository>
-    </repositories>
+
+	<!-- Repositories to find ODFI packages -->
+	<!-- ############################################## -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>sonatype</id>
+			<name>Sonatype OSS Snapshots Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>odfi.central</id>
+			<name>plugins-release</name>
+			<url>http://www.opendesignflow.org/maven/repository/internal/</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>odfi.snapshots</id>
+			<name>plugins-snapshot</name>
+			<url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
+		</pluginRepository>
+	</pluginRepositories>
+	<repositories>
+		<repository>
+			<id>sonatype</id>
+			<name>Sonatype OSS Snapshots Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>odfi.central</id>
+			<name>odfi-release</name>
+			<url>http://www.opendesignflow.org/maven/repository/internal/</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>odfi.snapshots</id>
+			<name>odfi-snapshot</name>
+			<url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<ooxoo.version>3.2.3</ooxoo.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.odfi.ooxoo</groupId>
+				<artifactId>ooxoo-core</artifactId>
+				<version>${ooxoo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.odfi.ooxoo</groupId>
+				<artifactId>ooxoo-db</artifactId>
+				<version>${ooxoo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ooxoo-plugin</artifactId>
+				<version>${ooxoo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.odfi.wsb</groupId>
+				<artifactId>wsb-webapp</artifactId>
+				<version>2.1.2</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ooxoo-plugin</artifactId>
+				<version>${ooxoo.version}</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-sources</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 
 
 
 	<modules>
 		<module>indesign-core</module>
-		<module>indesign-maven</module>
 		<module>indesign-git</module>
 		<module>indesign-native</module>
 		<module>indesign-webdraw</module>

@@ -1,10 +1,40 @@
-package edu.kit.ipe.adl.indesign.core.heart
+package org.odfi.indesign.core.heart
 
 import org.scalatest.FunSuite
 import java.util.concurrent.Semaphore
 import com.idyria.osi.tea.logging.TLog
 
 class HeartSchedulingTasksTest extends FunSuite {
+  
+  
+  test("Start Simple task and check cleanning") {
+    
+    
+    //-- Create semaphore
+    var receiveS = new Semaphore(0)
+    
+    //-- Task
+    var t = new DefaultHeartTask {
+      
+      def doTask = {
+        println(s"Task release")
+        receiveS.release()
+      }
+    }
+    //-- Start
+    Heart.pump(t)
+    
+    //-- Wait for running, do this after task has started to resolve sync issue
+    //Thread.sleep(1000)
+    t.waitForRunning
+    t.waitForDone
+    println(s"--> Finished")
+    
+    assertResult(0)(Heart.tasks.size)
+    
+    
+    
+  }
   
   test("Start a repetitive task and stop it with Step synchronisation") {
     
@@ -70,8 +100,11 @@ class HeartSchedulingTasksTest extends FunSuite {
     //-- Task
     var t = new DefaultHeartTask {
       
+      override def getId = "Test Task"
+      
       this.scheduleEvery = Some(1000)
       def doTask = {
+        println(s"Run Task, acquire advance")
         advanceS.acquire()
         receiveS.release()
       }
@@ -88,7 +121,9 @@ class HeartSchedulingTasksTest extends FunSuite {
     
     //-- Repump
     Heart.killTask(t)
+    println(s"Waiting for done")
     t.waitForDone
+     println(s"Task done")
     Heart.pump(t)
     
     //-- Release 5 credits and acquire 5

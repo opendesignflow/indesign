@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.core.harvest
+package org.odfi.indesign.core.harvest
 
 import org.scalatest.FunSuite
 import org.scalatest.GivenWhenThen

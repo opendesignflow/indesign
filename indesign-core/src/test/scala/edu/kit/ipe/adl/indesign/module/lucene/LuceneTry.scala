@@ -1,4 +1,4 @@
-package edu.kit.ipe.adl.indesign.module.lucene
+package org.odfi.indesign.module.lucene
 
 import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.search.IndexSearcher
@@ -17,9 +17,9 @@ import com.idyria.osi.tea.timing.TimingSupport
 import org.apache.lucene.store.FSDirectory
 import java.io.File
 import com.idyria.osi.tea.file.DirectoryUtilities
-import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
-import edu.kit.ipe.adl.indesign.core.harvest.Harvester
-import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
+import org.odfi.indesign.core.harvest.fs.FileSystemHarvester
+import org.odfi.indesign.core.harvest.Harvester
+import org.odfi.indesign.core.harvest.fs.HarvestedFile
 
 object LuceneTry extends App with TimingSupport {
 
@@ -49,7 +49,9 @@ object LuceneTry extends App with TimingSupport {
 
   val keywords = List("javadoc","sources")
   
-  var fsh = new FileSystemHarvester
+  var fsh = new FileSystemHarvester {
+    
+  }
   fsh.addPath(new File("""C:\Users\leysr_000\.m2\repository""").toPath)
   var h = fsh.addChildHarvester(new Harvester {
     

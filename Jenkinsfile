@@ -1,3 +1,10 @@
+// Take the string and echo it.
+def transformIntoStep(jobFullName) {
+    return {
+       build job: jobFullName , wait: false, propagate: false
+    }
+}
+
 // Indesign
 node {
  
@@ -20,9 +27,9 @@ node {
   stage('Test') {
 
     if (env.BRANCH_NAME == 'master') {
-      sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore test"
+      sh "${mvnHome}/bin/mvn -B  test"
     } else {
-      sh "${mvnHome}/bin/mvn -B test"
+      sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore test"
     }
     junit '**/target/surefire-reports/TEST-*.xml'
   }
@@ -32,6 +39,25 @@ node {
         sh "${mvnHome}/bin/mvn -B -DskipTests=true -Dmaven.test.failure.ignore deploy"
         step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
     }
+
+    // Trigger sub builds on dev
+    if (env.BRANCH_NAME == 'dev') {
+
+      stage('Downstream') {
+
+        def downstreams = ['../indesign-ide/dev']
+        def stepsForParallel = [:]
+        for (x in downstreams) {
+          def ds = x 
+          stepsForParallel[ds] = transformIntoStep(ds) 
+        }
+
+        parallel stepsForParallel
+
+      }
+      
+    }
+
 
   } else {
     stage('Package') {

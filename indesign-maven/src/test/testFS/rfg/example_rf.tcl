@@ -1,7 +1,0 @@
-
-
-
-odfi::rfg::registerFile test {
-
-
-}
