@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.odfi.indesign</groupId>
 	<artifactId>indesign-parent</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<name>InDesign Parent</name>
 	<packaging>pom</packaging>
 	<parent>
@@ -62,26 +62,35 @@
 		</repository>
 	</repositories>
 
+	<properties>
+		<ooxoo.version>3.2.3</ooxoo.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.odfi.ooxoo</groupId>
 				<artifactId>ooxoo-core</artifactId>
-				<version>3.2.3-SNAPSHOT</version>
+				<version>${ooxoo.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.odfi.ooxoo</groupId>
 				<artifactId>ooxoo-db</artifactId>
-				<version>3.2.3-SNAPSHOT</version>
+				<version>${ooxoo.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>3.2.3-SNAPSHOT</version>
+				<version>${ooxoo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.odfi.wsb</groupId>
+				<artifactId>wsb-webapp</artifactId>
+				<version>2.1.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
+
 
 
 
@@ -90,7 +99,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>3.2.3-SNAPSHOT</version>
+				<version>${ooxoo.version}</version>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
