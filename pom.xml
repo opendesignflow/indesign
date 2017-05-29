@@ -13,6 +13,11 @@
 	</parent>
 
 
+	
+	<properties>
+		<ooxoo.version>3.3.0-SNAPSHOT</ooxoo.version>
+	</properties>
+
 	<!-- Repositories to find ODFI packages -->
 	<!-- ############################################## -->
 	<pluginRepositories>
@@ -62,9 +67,6 @@
 		</repository>
 	</repositories>
 
-	<properties>
-		<ooxoo.version>3.2.3</ooxoo.version>
-	</properties>
 
 	<dependencyManagement>
 		<dependencies>

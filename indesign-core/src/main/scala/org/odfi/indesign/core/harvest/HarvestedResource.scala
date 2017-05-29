@@ -308,6 +308,19 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
     }.toList
   }
+  
+  /**
+   * If no resourced of type, use closure to build and save
+   */
+  def getDerivedResourcesOrElseSave[CT <: HarvestedResource](b: => Iterable[CT])(implicit tag: ClassTag[CT]) = {
+    getDerivedResources[CT] match {
+      case r if (r.size==0) => 
+        val res = b
+        this.addDerivedResources(res)
+        res.toList
+      case other => other.toList
+    }
+  }
 
   /**
    * Get Derived Resources Recursively
