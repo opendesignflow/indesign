@@ -8,8 +8,9 @@ import java.util.PropertyResourceBundle
 import java.io.FileReader
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import com.idyria.osi.tea.logging.TLogSource
 
-class OOXOOFSConfigImplementation(var baseFile: File) extends ConfigImplementation {
+class OOXOOFSConfigImplementation(var baseFile: File) extends ConfigImplementation with TLogSource {
 
   // Create FSStore
   baseFile = baseFile.getCanonicalFile

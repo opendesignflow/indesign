@@ -1,6 +1,5 @@
 package org.odfi.indesign.core.config.model
 
-
 import com.idyria.osi.ooxoo.model.ModelBuilder
 import com.idyria.osi.ooxoo.model.producer
 import com.idyria.osi.ooxoo.model.producers
@@ -18,7 +17,28 @@ object ConfigModel extends ModelBuilder {
   val commonConfig = "CommonConfig" is {
     elementsStack.head.makeTraitAndUseCustomImplementation
     withTrait(classOf[STAXSyncTrait])
-    
+
+    // Configuration Support
+    //--------------
+    "SupportedConfig" is {
+
+      "ConfigValue" multiple {
+        makeTraitAndUseCustomImplementation
+        attribute("name")
+        attribute("keyType")
+        attribute("hint")
+        attribute("default")
+        attribute("softwareSet") ofType("boolean") default("false")
+        "Description" ofType "string"
+
+        "Parameter" multiple {
+          attribute("name")
+          ofType("string")
+        }
+      }
+
+    }
+
     // Values
     //------------
     "Values" is {
@@ -31,13 +51,13 @@ object ConfigModel extends ModelBuilder {
         }
       }
     }
-    
+
     // Other Content
     //-----------
     "Custom" is {
       any
     }
-    
+
   }
   // Module Config
   //-------------------
@@ -50,12 +70,11 @@ object ConfigModel extends ModelBuilder {
   "HarvesterConfig" is {
     withTrait(commonConfig)
   }
-  
+
   // Default
   //--------------
   "DefaultConfig" is {
     withTrait(commonConfig)
   }
-  
-  
+
 }

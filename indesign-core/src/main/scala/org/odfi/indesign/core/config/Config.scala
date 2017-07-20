@@ -99,15 +99,29 @@ object Config extends IndesignModule {
 
   }
 
+  /**
+   * For config in external model than target, autosave is disabled if the target model is not a main file
+   */
   def getConfigFor[CS <: ConfigSupport](target: ConfigSupport): Option[CommonConfig] = {
 
     try {
 
       // Get Document
       var document = implementation match {
+ 
         case Some(impl) =>
           target.getClass match {
 
+            // Config is in external model
+            case cl if (classOf[ConfigInModel[_]].isAssignableFrom(cl)) => 
+              
+              val configInModel = target.asInstanceOf[ConfigInModel[CommonConfig]]
+              if (configInModel.configModel.isDefined && configInModel.configModel.get.staxPreviousFile.isEmpty) {
+                configInModel.configModel.get.autosave = false
+              }
+              configInModel.configModel
+              
+            
             // Harvester
             //---------------
             case cl if (classOf[Harvester].isAssignableFrom(cl)) =>

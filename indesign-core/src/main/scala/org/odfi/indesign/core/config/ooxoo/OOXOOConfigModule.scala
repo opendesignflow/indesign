@@ -6,7 +6,13 @@ import java.io.File
 
 object OOXOOConfigModule extends IndesignModule {
   
-  var configFolder = new File("indesign-config")
+  private var configFolder = new File("indesign-config")
+  
+//  println("Init configu module: "+configFolder)
+  def setConfigFolder(f:File) = {
+   // println("Setting Config Folder:"+f)
+    this.configFolder = f
+  }
   
   this.onSetup {
     requireModule(Config)
@@ -16,6 +22,7 @@ object OOXOOConfigModule extends IndesignModule {
   }
   
   this.onLoad {
+   // println("Setting up implementation to "+configFolder)
     Config.setImplementation(new OOXOOFSConfigImplementation(configFolder))
   }
   
