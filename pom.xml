@@ -120,9 +120,9 @@
 	<modules>
 		<module>indesign-core</module>
 		<module>indesign-git</module>
-		<module>indesign-native</module>
-		<module>indesign-webdraw</module>
-		<module>indesign-wwwui</module>
+<!-- 		<module>indesign-native</module> -->
+<!-- 		<module>indesign-webdraw</module> -->
+<!-- 		<module>indesign-wwwui</module> -->
 	</modules>
 
 </project>
