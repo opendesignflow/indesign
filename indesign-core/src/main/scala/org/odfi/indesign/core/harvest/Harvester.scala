@@ -246,6 +246,30 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
     this.getResources.collect { case r if (cl.runtimeClass.isInstance(r)) => r.asInstanceOf[CT] }
   }
+  
+  /**
+   * Find Resources of a certain type in the whole harvester tree
+   */
+  def findResourcesOfType[CT <: HarvestedResource](implicit cl: ClassTag[CT]): List[CT] = {
+    
+    val nextHarvesters = scala.collection.mutable.Stack[Harvester]()
+    nextHarvesters.push(this)
+    
+     val result = scala.collection.mutable.LinkedHashSet[CT]()
+     
+     while(!nextHarvesters.isEmpty) {
+       
+       val current = nextHarvesters.pop()
+       result ++= current.getResourcesOfType[CT]
+       current.childHarvesters.foreach(nextHarvesters.push(_))
+       
+     }
+    
+    result.toList
+    
+    
+    
+  }
 
   /**
    *  @see getResourcesOfType
