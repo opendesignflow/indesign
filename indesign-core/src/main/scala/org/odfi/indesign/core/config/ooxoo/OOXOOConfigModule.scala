@@ -30,4 +30,8 @@ object OOXOOConfigModule extends IndesignModule {
   this.onStart {
     
   }
+  
+  // Utils
+  //-------------
+
 }

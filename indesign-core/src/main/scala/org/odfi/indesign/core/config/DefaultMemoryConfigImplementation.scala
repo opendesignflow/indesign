@@ -23,6 +23,10 @@ class DefaultMemoryConfigImplementation extends ConfigImplementation {
     realmString = str
   }
   
+  def cleanRealm = {
+    
+  }
+  
   
   def getContainer(str: String)  = realmString match {
     case "" => new MemContainer(str)

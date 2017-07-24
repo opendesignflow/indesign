@@ -33,21 +33,36 @@ object Config extends IndesignModule {
   def setImplementation(i: ConfigImplementation) = {
 
     implementation = Some(i)
-   // println(s"Starting from last realm with impl: "+i)
+    triggerImplementationSet
+    
+    // println(s"Starting from last realm with impl: "+i)
     i.detectLatestRealm match {
       case Some(realm) =>
         currentRealm = realm
       //  println("Found previous realm detected: "+realm)
       case None =>
-     //   println("Not previous realm detected")
+      //   println("Not previous realm detected")
     }
-  //  println(s"******************* OPENING ${currentRealm} *********************")
+    //  println(s"******************* OPENING ${currentRealm} *********************")
     implementation.get.openConfigRealm(this.currentRealm)
   }
 
   def listAvailableRealms = implementation match {
     case Some(i) => i.listAllRealms
-    case None => List()
+    case None    => List()
+  }
+  
+  /**
+   * Triggered just when the implementation is set, before opening the default realm
+   */
+  def triggerImplementationSet = {
+    this.@->("implementation.set",implementation.get)
+  }
+  
+  def onImplementationSet(cl: ConfigImplementation => Any) = {
+    this.onWith("implementation.set") {
+      c : ConfigImplementation => cl(c)
+    }
   }
 
   // Config realm
@@ -60,7 +75,7 @@ object Config extends IndesignModule {
     case other =>
       this.__currentRealm = str
       implementation match {
-        case Some(impl) => 
+        case Some(impl) =>
           impl.openConfigRealm(str)
           this.@->("realm.changed")
         case None =>
@@ -69,18 +84,27 @@ object Config extends IndesignModule {
 
   def currentRealm = __currentRealm
 
-  def addRealm(name:String) = implementation match {
+  def swithToCleanRealm(name: String) = {
+    implementation match {
+      case Some(i) =>
+        i.swithToCleanRealm(name)
+        currentRealm = name
+      case None =>
+    }
+  }
+
+  def addRealm(name: String) = implementation match {
     case Some(i) =>
       i.addRealm(name)
-    case None => 
+    case None =>
   }
-  
+
   def onRealmChanged(cl: => Any) = {
     this.on("realm.changed") {
       cl
     }
   }
-  
+
   /*def getImplementation = implementation match {
     case Some(i) => i 
     case None => th
@@ -108,20 +132,19 @@ object Config extends IndesignModule {
 
       // Get Document
       var document = implementation match {
- 
+
         case Some(impl) =>
           target.getClass match {
 
             // Config is in external model
-            case cl if (classOf[ConfigInModel[_]].isAssignableFrom(cl)) => 
-              
+            case cl if (classOf[ConfigInModel[_]].isAssignableFrom(cl)) =>
+
               val configInModel = target.asInstanceOf[ConfigInModel[CommonConfig]]
               if (configInModel.configModel.isDefined && configInModel.configModel.get.staxPreviousFile.isEmpty) {
                 configInModel.configModel.get.autosave = false
               }
               configInModel.configModel
-              
-            
+
             // Harvester
             //---------------
             case cl if (classOf[Harvester].isAssignableFrom(cl)) =>
@@ -142,7 +165,7 @@ object Config extends IndesignModule {
               var c = impl.getContainer("default")
               c.document(documentName(target), new DefaultConfig, true)
           }
-        case None => 
+        case None =>
           println(s"No config impl defined")
           None
       }

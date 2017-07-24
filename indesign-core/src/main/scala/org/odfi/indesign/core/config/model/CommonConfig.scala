@@ -23,7 +23,12 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
    */
   override def resyncToFile = {
     if (autosave) {
-      super.resyncToFile
+      try {
+        super.resyncToFile
+      } catch {
+        case e: Throwable =>
+          this
+      }
     } else {
       this
     }
@@ -37,16 +42,16 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
    */
   override def postStreamIn = {
     val values = this.supportedConfig.configValues.toList
-    
+
     values.foreach {
-      
-      case v if (v.softwareSet.toBool) => 
+
+      case v if (v.softwareSet.toBool) =>
         this.supportedConfig.configValues -= v
-      case other => 
-        /*if (v.softwareSet.toBool) {
+      case other =>
+      /*if (v.softwareSet.toBool) {
            this.supportedConfig.configValues -= v
         }*/
-       
+
     }
     /*this.supportedConfig.configValues = this.supportedConfig.configValues.filter {
       case v if (v.softwareSet.toBool) =>
@@ -84,7 +89,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
   }
   def supportIntKey(name: String, default: Int, description: String) = {
-    supportConfigKey("int", name, default.toString, description)
+    supportConfigKey("integer", name, default.toString, description)
 
   }
   def supportDoubleKey(name: String, default: Double, description: String) = {
@@ -103,6 +108,64 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     maxp.data = mininum.toString
     // supportedKey.par
 
+  }
+
+  /**
+   * Get Support config definition from supported config
+   */
+  def supportGetKey(name: String) = {
+    this.supportedConfig.configValues.find {
+      supported =>
+        supported.name.toString == name
+    }
+  }
+
+  /**
+   * Get Cnfigured value or defined default
+   */
+  def supportGetValue(name: String) = {
+    supportGetKey(name) match {
+      case None => None
+      case Some(supportedKey) =>
+
+        Some(this.getString(name, supportedKey.getStringDefault))
+    }
+  }
+
+  def supportGetInt(name: String) = {
+    supportGetKey(name) match {
+      case None => None
+      case Some(supportedKey) =>
+
+        Some(this.getInt(name, supportedKey.getIntDefault))
+    }
+  }
+
+  def supportGetDouble(name: String) = {
+    supportGetKey(name) match {
+      case None => None
+      case Some(supportedKey) =>
+
+        Some(this.getDouble(name, supportedKey.getDoubleDefault))
+    }
+  }
+
+  def supportGetBoolean(name: String) = {
+    supportGetKey(name) match {
+      case None => None
+      case Some(supportedKey) =>
+
+        Some(this.getBoolean(name, supportedKey.getBooleanDefault))
+    }
+  }
+
+  def supportGetLong(name: String) = {
+    supportGetKey(name) match {
+      case None => None
+      case Some(supportedKey) =>
+
+        Some(this.getLong(name, supportedKey.getLongDefault))
+    }
   }
 
   // Values management 
@@ -277,7 +340,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
   def setInt(name: String, v: Int) = setKeyFirstValue(name, "integer", v.toString)
 
-  def getLong(name: String, default: Boolean) = {
+  def getLong(name: String, default: Long) = {
     this.getKey(name, "long") match {
       case Some(key) if (key.values.size > 0) =>
         try {

@@ -57,6 +57,16 @@ class OOXOOFSConfigImplementation(var baseFile: File) extends ConfigImplementati
     baseFile.listFiles().filter(_.isDirectory()).map { _.getName }.toList
   }
 
+  def cleanRealm : Unit = {
+    this.realmFSStore match {
+      case Some(store) =>
+        
+        store.wipe
+        
+      case None => 
+    }
+  }
+  
   def openConfigRealm(str: String) = {
     this.realmFSStore = Some(new FSStore(new File(baseFile, str)))
 
