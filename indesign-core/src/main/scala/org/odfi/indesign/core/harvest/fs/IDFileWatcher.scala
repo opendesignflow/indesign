@@ -405,7 +405,7 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
 
   // Watcher Thread
   //--------------------
-  val watcherThread = createThread {
+  val watcherThread = createDaemonThread {
 
     var stop = false
     while (!stop) {
