@@ -23,7 +23,7 @@ object Brain extends Brain with ClassDomainSupport {
   // Graceful Shutdown
   sys.addShutdownHook {
 
-    //Brain.moveToShutdown
+    Brain.moveToShutdown
   }
 
   // Heart is always a region
