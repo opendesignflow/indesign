@@ -35,15 +35,14 @@ object Config extends IndesignModule {
     implementation = Some(i)
     triggerImplementationSet
     
-    // println(s"Starting from last realm with impl: "+i)
-    i.detectLatestRealm match {
+    // Reopen latest realm?
+    /*i.detectLatestRealm match {
       case Some(realm) =>
         currentRealm = realm
-      //  println("Found previous realm detected: "+realm)
       case None =>
-      //   println("Not previous realm detected")
-    }
-    //  println(s"******************* OPENING ${currentRealm} *********************")
+ 
+    }*/
+
     implementation.get.openConfigRealm(this.currentRealm)
   }
 

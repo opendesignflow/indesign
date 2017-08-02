@@ -3,6 +3,7 @@ package org.odfi.indesign.core.config.ooxoo
 import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.config.Config
 import java.io.File
+import com.idyria.osi.tea.file.DirectoryUtilities
 
 object OOXOOConfigModule extends IndesignModule {
   
@@ -12,6 +13,12 @@ object OOXOOConfigModule extends IndesignModule {
   def setConfigFolder(f:File) = {
    // println("Setting Config Folder:"+f)
     this.configFolder = f
+  }
+  
+  def setCleanConfigFolder(f:File) = {
+    f.mkdirs()
+    DirectoryUtilities.deleteDirectoryContent(f)
+    setConfigFolder(f)
   }
   
   this.onSetup {

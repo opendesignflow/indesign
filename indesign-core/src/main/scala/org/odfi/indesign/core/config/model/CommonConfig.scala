@@ -141,6 +141,16 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     }
   }
 
+  /**
+   * Get Ints from keys, error if not found
+   */
+  def supportGetIntsOrError(names: Tuple2[String, String]): Tuple2[Int, Int] = {
+
+    (supportGetInt(names._1).getOrElse(sys.error(s"Key ${names._1} not in supported list")),
+      supportGetInt(names._2).getOrElse(sys.error(s"Key ${names._2} not in supported list")))
+
+  }
+
   def supportGetDouble(name: String) = {
     supportGetKey(name) match {
       case None => None
