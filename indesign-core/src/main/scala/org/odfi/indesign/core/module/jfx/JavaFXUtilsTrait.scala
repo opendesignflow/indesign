@@ -51,7 +51,7 @@ trait JavaFXUtilsTrait  {
       case false =>
         var res: Any = null
         var err: Throwable = null
-        var s = new Semaphore(0)
+        var s = new Semaphore(0,true)
         Platform.runLater(new Runnable() {
           def run = {
             try {
@@ -69,7 +69,9 @@ trait JavaFXUtilsTrait  {
         //-- Return result or propagate error
         (res, err) match {
           case (r, null) => r
-          case _ => throw err
+          case _ => 
+            err.printStackTrace()
+            throw err
         }
     }
 
