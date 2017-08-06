@@ -40,7 +40,7 @@ trait ConfigModelWithImpl[IT <: ConfigInModel[ _ <: CommonConfig]] extends Commo
    */
   def getImplementation = implementationInstance match {
     case Some(instance) => instance
-    case _ => sys.error("Implementation not created use ensureInstance to ensure generic creation")
+    case _ => sys.error(s"Implementation for ${this.implementationType} not created use ensureInstance to ensure generic creation")
   }
   
   def deleteImplementation = implementationInstance match {
