@@ -39,6 +39,9 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   var tasks = scala.collection.mutable.Map[String, HeartTask[_]]()
 
+  /**
+   * Task is reset if saved
+   */
   def saveTask(t: HeartTask[_]) = {
     tasks.synchronized {
       tasks.contains(t.getId) match {
@@ -46,6 +49,9 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
           throw new RuntimeException(s"Cannot submit task ${t.getId}, another or same task with same id is already running")
         case false =>
 
+          // Reset
+          t.applyResetState
+          
           // Save Task and remove on clean
           t.onCleaned {
             case h if (h == this) =>
@@ -78,9 +84,12 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   /**
    * Execute a Task
+   * 
+   * Task is reset before pumping
    */
   def pump[RT](t: HeartTask[RT]): HeartTask[RT] = {
 
+    
     saveTask(t)
     (t.scheduleAfter, t.scheduleEvery) match {
       case (Some(after), _) =>
@@ -94,6 +103,10 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
       case (None, None) =>
 
         t.scheduleFuture = Some(timedExecutor.schedule(t, t.scheduleDelay, t.timeUnit))
+    }
+    
+    t.onClean {
+      this.removeTask(t)
     }
 
     t
@@ -126,6 +139,10 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
     try {
       t.isRunning match {
+        case true if (t.scheduleFuture.isEmpty) =>
+          
+          t.applyResetState
+          
         case true =>
 
           var taskFuture = t.scheduleFuture.get
@@ -198,6 +215,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
       case e: InterruptedException =>
         throw new InterruptedException("Current Thread interrupted while trying to stop another task")
     } finally {
+      t.taskStopped
       removeTask(t)
     }
   }

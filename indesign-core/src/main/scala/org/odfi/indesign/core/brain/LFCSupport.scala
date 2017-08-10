@@ -27,6 +27,7 @@ trait LFCSupport extends ListeningSupport with TLogSource {
     }
     
     this.currentState = None
+    lfcSemaphore.release(lfcSemaphore.getQueueLength)
     this.@->("state.updated")
     
   }
@@ -113,6 +114,7 @@ trait LFCSupport extends ListeningSupport with TLogSource {
     }
 
     stateVal match {
+      case None => 
       case Some(st) if (st == expectedState) =>
       case _ =>
         var wait = true

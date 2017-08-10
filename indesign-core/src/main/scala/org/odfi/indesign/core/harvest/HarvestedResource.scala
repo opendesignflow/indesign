@@ -457,6 +457,16 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }
   }
 
+  /**
+   * Run the Direct process
+   */
+  def runDirectProcess = {
+     this.keepErrorsOn(this, verbose = true) {
+
+        HarvestedResource.moveToState(this, "processed")
+      }
+  }
+  
   def runProcessResource = {
 
     runSingleTask("process") {

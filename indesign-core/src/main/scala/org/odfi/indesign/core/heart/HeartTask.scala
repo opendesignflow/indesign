@@ -164,7 +164,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
   /**
    * Used to cleanup state and make sure task is in stop state
    */
-  private def taskStopped = {
+   def taskStopped = {
 
     //println("*** TASK STOP: " + getId)
     try {
@@ -172,6 +172,8 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
       (scheduleAfter, scheduleEvery) match {
         case (None, None) =>
           this.@->("clean", this.originalHarvester)
+          this.clean
+          
         case _ =>
       }
 
@@ -197,7 +199,9 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
 
       //-- Remove from Heart
       Heart.removeTask(this)
+      
 
+     
     }
   }
 
