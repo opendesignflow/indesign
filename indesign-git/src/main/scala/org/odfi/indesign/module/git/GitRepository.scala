@@ -27,4 +27,12 @@ class GitRepository(f: HarvestedFile) extends HarvestedFile(f.path) {
       git = Some(new Git(gitRepository.get))
   }
 
+  def getGitOrNone[T](cl: Git => T) = {
+    git match {
+      case None => None
+      case Some(g) => Some(cl(g))
+    }
+  }
+  
+  def getCurrentBranch = getGitOrNone(_.getRepository.getBranch)
 }

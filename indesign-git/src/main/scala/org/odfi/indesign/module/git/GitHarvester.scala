@@ -5,7 +5,7 @@ import org.odfi.indesign.core.harvest.fs.HarvestedFile
 import java.io.File
 import org.odfi.indesign.core.harvest.fs.FileSystemHarvester
 
-class GitHarvester extends FileSystemHarvester {
+object GitHarvester extends FileSystemHarvester {
   
   
   this.onDeliverFor[HarvestedFile] {
