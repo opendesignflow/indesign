@@ -320,6 +320,10 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.getResourcesOfType[CT].find(_.getId == id)
   }
 
+  def getResourceContainingDisplayName[CT <: HarvestedResource](namePart: String)(implicit cl: ClassTag[CT]) = {
+    this.getResourcesOfType[CT].find(_.getDisplayName.contains(namePart))
+  }
+  
   def hasResources = this.availableResources.size match {
     case 0 => false
     case _ => true

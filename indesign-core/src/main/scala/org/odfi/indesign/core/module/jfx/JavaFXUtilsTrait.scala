@@ -168,10 +168,10 @@ trait JavaFXUtilsTrait  {
 
   }
 
-  def onJFXDoublePropertyChange(prop: ReadOnlyObjectProperty[Double])(cl: Double => Unit) = {
-    prop.addListener(new ChangeListener[Double] {
-      def changed(b: ObservableValue[_ <: Double], old: Double, n: Double) = {
-        cl(n)
+  def onJFXDoublePropertyChange(prop: ReadOnlyDoubleProperty)(cl: Double => Unit) = {
+    prop.addListener(new ChangeListener[Number] {
+      def changed(b: ObservableValue[_ <: Number], old: Number, n: Number) = {
+        cl(n.doubleValue())
 
       }
     })

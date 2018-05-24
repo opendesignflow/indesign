@@ -296,15 +296,36 @@ object Brain extends Brain with ClassDomainSupport {
   }
   this.onStart {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.moveToState(r, "start")))
+    this.triggerStarted
   }
   this.onStop {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.moveToState(r, "stop")))
   }
   this.onShutdown {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.moveToState(r, "shutdown")))
+    this.triggerShutdownDone
   }
   this.onResetState {
     this.onResources[BrainRegion](r => r.keepErrorsOn(r)(Brain.resetLFCState(r)))
   }
 
+  def onStarted(cl: => Any) = {
+    this.on("started") {
+      cl
+    }
+  }
+  
+  def triggerStarted = {
+    this.@->("started")
+  }
+  
+  def onShutdownDone(cl: =>Any) = {
+    this.on("shutdown.done") {
+      cl
+    }
+  }
+  def triggerShutdownDone = {
+     this.@->("shutdown.done")
+  }
+  
 }

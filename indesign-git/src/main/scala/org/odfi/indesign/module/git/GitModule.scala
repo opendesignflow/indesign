@@ -3,7 +3,6 @@ package org.odfi.indesign.module.git
 import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.harvest.Harvest
 import org.odfi.indesign.core.harvest.fs.FileSystemHarvester
-import org.odfi.indesign.core.module.ui.www.WWWViewHarvester
 
 object GitModule extends IndesignModule {
 

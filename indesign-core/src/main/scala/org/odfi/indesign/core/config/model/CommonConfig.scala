@@ -6,6 +6,8 @@ import com.idyria.osi.ooxoo.core.buffers.datatypes.DoubleBuffer
 import com.idyria.osi.ooxoo.core.buffers.datatypes.BooleanBuffer
 import com.idyria.osi.ooxoo.core.buffers.datatypes.IntegerBuffer
 import com.idyria.osi.ooxoo.core.buffers.datatypes.XSDStringBuffer
+import com.idyria.osi.ooxoo.core.buffers.structural.AbstractDataBuffer
+import scala.reflect.ClassTag
 
 trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
@@ -110,6 +112,14 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
   }
 
+  def supportGetKeysOfType(t: String) = {
+    this.supportedConfig.configValues.filter {
+      case configKey if (configKey.keyType != null) =>
+        configKey.keyType.toString == t
+      case other => false
+    }
+  }
+
   /**
    * Get Support config definition from supported config
    */
@@ -123,7 +133,25 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   /**
    * Get Cnfigured value or defined default
    */
-  def supportGetValue(name: String) = {
+  def supportGetValue(name: String, keyType: String) = {
+
+    supportGetKey(name) match {
+      case None => None
+      case Some(supportedKey) =>
+
+        this.getKey(name, keyType) match {
+          case Some(foundDefinedKey) =>
+            Some(foundDefinedKey.values(0).toString)
+          case None =>
+            Some(supportedKey.default.toString())
+        }
+    }
+  }
+
+  /**
+   * Get Cnfigured value or defined default
+   */
+  def supportGetString(name: String) = {
     supportGetKey(name) match {
       case None => None
       case Some(supportedKey) =>
@@ -146,7 +174,8 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
    */
   def supportGetIntsOrError(names: Tuple2[String, String]): Tuple2[Int, Int] = {
 
-    (supportGetInt(names._1).getOrElse(sys.error(s"Key ${names._1} not in supported list")),
+    (
+      supportGetInt(names._1).getOrElse(sys.error(s"Key ${names._1} not in supported list")),
       supportGetInt(names._2).getOrElse(sys.error(s"Key ${names._2} not in supported list")))
 
   }
@@ -178,8 +207,22 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     }
   }
 
-  // Values management 
+  // Values management
   //-------------------
+
+  var valuesBufferCache = Map[String, AbstractDataBuffer[_]]()
+
+  def getValueBufferFromCache[T <: AbstractDataBuffer[_]](str: String)(implicit tag: ClassTag[T]) = {
+    this.valuesBufferCache.get(str) match {
+      case Some(c: T) =>
+        c
+      case other =>
+        var newBuffer = tag.runtimeClass.newInstance().asInstanceOf[T]
+        this.valuesBufferCache = this.valuesBufferCache + (str -> newBuffer)
+        newBuffer
+    }
+
+  }
 
   def isInConfig(keyType: String, value: String) = {
     this.values.keys.find {
@@ -211,7 +254,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
   def getKeyValues(name: String, ktype: String) = getKey(name, ktype) match {
     case Some(k) => k.values.toList
-    case None    => List()
+    case None => List()
   }
 
   def setKeyFirstValue(name: String, kType: String, v: String) = {
@@ -297,7 +340,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
     val value = this.getKeyFirstValue(name, "boolean") match {
       case Some(v) => v.toBoolean
-      case other   => default
+      case other => default
     }
 
     var b = new BooleanBuffer
@@ -314,7 +357,12 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
   def hasInt(name: String) = this.getKey(name, "integer").isDefined
 
-  def getInt(name: String, default: Int) = {
+  def getInt(name: String): Option[Int] = getKeyFirstValue(name, "integer") match {
+    case Some(is) => Some(is.toInt)
+    case None => None
+  }
+
+  def getInt(name: String, default: Int): Int = {
     this.getKey(name, "integer") match {
       case Some(key) if (key.values.size > 0) =>
         try {
@@ -327,27 +375,37 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     }
   }
 
-  def getIntAsBuffer(name: String, default: Int) = {
-
+  def getIntAsBuffer(name: String, default: Int, updateConfig: Boolean = false) = {
+ 
     /*val int =  this.hasInt(name) match {
-     case true => 
+     case true =>
        this.getInt(name, default)
-     case false => 
+     case false =>
    }
    */
     val value = this.getInt(name, default)
 
-    var b = new IntegerBuffer
+    var b = getValueBufferFromCache[IntegerBuffer](name)
     b.set(value)
-    b.onDataUpdate {
+    if (updateConfig) {
+      b.onDataUpdate {
 
-      setInt(name, b.data)
+        setInt(name, b.data)
+      }
     }
+    /**/
 
     b
 
   }
 
+  def setIntWatched(name: String, v: IntegerBuffer) = {
+    this.setInt(name, v.data)
+    v.onDataUpdate {
+      println("Updating COnfig int")
+      this.setInt(name, v.data)
+    }
+  }
   def setInt(name: String, v: Int) = setKeyFirstValue(name, "integer", v.toString)
 
   def getLong(name: String, default: Long) = {
@@ -369,7 +427,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
     this.getKeyFirstValue(name, "double") match {
       case Some(v) => v.toDouble
-      case other   => default
+      case other => default
     }
   }
 
@@ -379,7 +437,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
     val value = this.getKeyFirstValue(name, "double") match {
       case Some(v) => v.toDouble
-      case other   => default
+      case other => default
     }
 
     var b = new DoubleBuffer
@@ -408,6 +466,14 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     }
   }
 
+  def getKeysByType(t: String) = {
+
+    this.values.keys.filter {
+      k => k.keyType != null && k.keyType.toString() == t
+    }
+
+  }
+
   //def getKeysValues(name:String,t:String)
 
   def removeFromConfig(keyType: String, value: String): Boolean = {
@@ -432,6 +498,31 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
     key.keyType = t
     key.name = name
     key
+
+  }
+
+  /**
+   * Replace key
+   */
+  def setKeyAndValues(name: String, keyType: String, values: String*) = {
+
+    //-- Create key or clean
+    val key = this.values.keys.find(_.name.toString() == name) match {
+      case Some(k) =>
+        k.keyType = keyType
+        k.values.clear()
+        k
+      case None =>
+        this.addKey(name, keyType)
+    }
+
+    //-- Add values
+    values.foreach {
+      v =>
+
+        val keyValue = key.values.add
+        keyValue.data = v
+    }
 
   }
 }

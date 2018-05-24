@@ -107,7 +107,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Add to local list, but not if already there
     derivedResources.get(r.getId) match {
       case Some(res) =>
-        logWarn("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
+        //logWarn("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
         res.asInstanceOf[RT]
       case None =>
         derivedResources = derivedResources + (r.getId -> r)
