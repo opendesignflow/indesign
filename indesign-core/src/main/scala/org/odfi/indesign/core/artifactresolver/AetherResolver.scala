@@ -26,7 +26,6 @@ import com.idyria.osi.tea.logging.TLogSource
 
 import scala.collection.JavaConversions._
 import com.idyria.osi.tea.listeners.ListeningSupport
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction
 import org.eclipse.aether.resolution.ArtifactRequest
 import org.eclipse.aether.resolution.ArtifactResolutionException
 import com.idyria.osi.tea.logging.TLog

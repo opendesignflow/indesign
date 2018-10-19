@@ -387,6 +387,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
 
     var b = getValueBufferFromCache[IntegerBuffer](name)
     b.set(value)
+    b.deregisterAllListenersFor("data.update")
     if (updateConfig) {
       b.onDataUpdate {
 

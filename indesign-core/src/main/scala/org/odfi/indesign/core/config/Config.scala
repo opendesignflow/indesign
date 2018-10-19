@@ -190,7 +190,7 @@ object Config extends IndesignModule {
       document
     } catch {
       case e: Throwable =>
-        //e.printStackTrace()
+        e.printStackTrace()
         None
     }
 

@@ -15,6 +15,13 @@ trait LFCSupport extends ListeningSupport with TLogSource {
   var currentState: Option[String] = None
   val lfcSemaphore = new Semaphore(0)
 
+  def isCurrentState(str:String) = {
+      currentState match {
+          case Some(s) if (s==str) => true
+          case other => false
+      }
+  }
+  
   def applyResetState = {
     
     statesHandlers.get("##reset##") match {
@@ -146,6 +153,7 @@ trait LFCDefinition extends ClassDomainSupport with TLogSource {
 
   var states = List[String]()
 
+  
   
   def resetLFCState(lifecyclable: LFCSupport) = {
     logFine[LFCDefinition](s"Resetting state of "+lifecyclable)

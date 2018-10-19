@@ -20,6 +20,7 @@ import javafx.scene.layout.Pane
 import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.event.Event
 import javafx.beans.property.ReadOnlyDoubleProperty
+import javafx.scene.input.KeyEvent
 
 trait JavaFXUtilsTrait  {
 
@@ -109,6 +110,16 @@ trait JavaFXUtilsTrait  {
 
   }
 
+  def onJFXKeyTyped(h: ObjectProperty[EventHandler[KeyEvent]])(cl: (KeyEvent => Unit)) = {
+
+    h.setValue(new EventHandler[KeyEvent] {
+      def handle(event: KeyEvent) = {
+        cl(event)
+      }
+    })
+
+  }
+  
   def onJFXMouseEvent(h: ObjectProperty[EventHandler[MouseEvent]])(cl: (MouseEvent => Unit)) = {
 
     h.setValue(new EventHandler[MouseEvent] {

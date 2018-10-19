@@ -14,6 +14,7 @@ class JFXRun extends Application {
     //Platform.setImplicitExit(false)
     JFXRun.application = this
     stage.close()
+    Platform.setImplicitExit(false)
     // cl()
 
     // Select VUI implementation for JFX thread
@@ -33,7 +34,7 @@ object JFXRun {
   var semaphore = new Semaphore(0)
   var started = false
   var applicationThread: Option[Thread] = None
-  Platform.setImplicitExit(false)
+  
 
   def stopAll = {
     Platform.setImplicitExit(true)
