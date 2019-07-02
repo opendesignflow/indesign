@@ -107,7 +107,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Add to local list, but not if already there
     derivedResources.get(r.getId) match {
       case Some(res) =>
-        //logWarn("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
+        logWarn("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
         res.asInstanceOf[RT]
       case None =>
         derivedResources = derivedResources + (r.getId -> r)
@@ -168,11 +168,11 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     }
 
     //-- Remove
-    println(s"Removing: " + r + " -> " + this.derivedResources.size)
+   // println(s"Removing: " + r + " -> " + this.derivedResources.size)
     this.derivedResources = this.derivedResources.filter {
       case (id, k) => k != r
     }
-    println(s"Removed: " + r + " -> " + this.derivedResources.size)
+   // println(s"Removed: " + r + " -> " + this.derivedResources.size)
 
     //-- Clean 
     r.clean
@@ -207,6 +207,33 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
           case None => None
         }
     }
+
+  }
+  
+  /**
+   * Finds first up chain resource of type and matching criteria, not including current resource
+   */
+  def findUpchainResourceAnd[CT <: HarvestedResource](cl: CT => Boolean)(implicit tag: ClassTag[CT]): Option[CT] = {
+
+    
+        var currentParent = this.parentResource
+        var stop = false
+        while (!stop && currentParent.isDefined) {
+
+          tag.runtimeClass.isInstance(currentParent.get) match {
+            case true if (cl(currentParent.get.asInstanceOf[CT]))=>
+              stop = true
+            case other =>
+              currentParent = currentParent.get.parentResource
+          }
+
+        }
+
+        currentParent match {
+          case Some(res) => Some(res.asInstanceOf[CT])
+          case None => None
+        }
+    
 
   }
 
@@ -411,13 +438,13 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
    */
   def clean: Unit = {
 
-    println(s"Cleaning: " + this)
+    //println(s"Cleaning: " + this)
 
     this.originalHarvester match {
       case Some(h) =>
         h.availableResources = this.originalHarvester.get.availableResources - this
         this.originalHarvester = None
-        println(s"Removing " + this + " from original harvester: " + h)
+      //  println(s"Removing " + this + " from original harvester: " + h)
       case None =>
     }
     this.@->("clean")

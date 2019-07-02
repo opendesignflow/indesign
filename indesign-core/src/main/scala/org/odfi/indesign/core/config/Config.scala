@@ -165,7 +165,7 @@ object Config extends IndesignModule {
               c.document(documentName(target), new DefaultConfig, true)
           }
         case None =>
-          println(s"No config impl defined")
+          //println(s"No config impl defined")
           None
       }
 
