@@ -113,6 +113,9 @@ public class Boot extends Application {
 			public void run() {
 
 				try {
+					
+					// Load From Local DEV
+					//--------------------------------
 					URLClassLoader stage2CL = null;
 					File stage2POM = new File("stage2/pom.xml");
 					LinkedList<URL> stage2Classpath = new LinkedList<URL>();
@@ -222,6 +225,8 @@ public class Boot extends Application {
 						// -- Init Boot resolver
 						BootResolver.getInstance().config.addRemoteRepositories();
 						BootResolver.getInstance().init();
+						
+						//-- Remote Resolve Stage 2 Classpath
 
 					}
 
