@@ -3,3 +3,5 @@ target/*
 **/target/*
 **/workspace-*/
 *.iml
+indesign-boot/libs/
+indesign-boot/indesign-config/
