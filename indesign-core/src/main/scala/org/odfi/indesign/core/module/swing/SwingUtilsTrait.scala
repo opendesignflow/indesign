@@ -17,11 +17,17 @@ import java.awt.GraphicsEnvironment
 trait SwingUtilsTrait {
 
   def onSwingThreadAndWait(cl: => Unit) = {
-    SwingUtilities.invokeAndWait(new Runnable {
-      def run = {
+    SwingUtilities.isEventDispatchThread() match {
+      case true =>
         cl
-      }
-    })
+      case false =>
+        SwingUtilities.invokeAndWait(new Runnable {
+          def run = {
+            cl
+          }
+        })
+    }
+
   }
 
   def onSwingThreadLater(cl: => Unit) = {
@@ -111,8 +117,8 @@ trait SwingUtilsTrait {
   def centerOnScreen(f: JFrame) = {
 
     var point = GraphicsEnvironment.getLocalGraphicsEnvironment.getCenterPoint
-    
-    f.setLocation((point.getX-f.getWidth/2).toInt,(point.getY-f.getHeight/2).toInt)
+
+    f.setLocation((point.getX - f.getWidth / 2).toInt, (point.getY - f.getHeight / 2).toInt)
   }
 
 }

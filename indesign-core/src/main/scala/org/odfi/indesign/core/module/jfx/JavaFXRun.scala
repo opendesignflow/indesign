@@ -41,6 +41,7 @@ object JFXRun {
     Platform.exit()
   }
   def noImplicitExit = Platform.setImplicitExit(false)
+  def setImplicitExit = Platform.setImplicitExit(true)
 
   def waitStarted = started match {
     case true =>
