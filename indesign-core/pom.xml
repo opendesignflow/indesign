@@ -55,11 +55,7 @@
 
 	<dependencies>
 
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.maven</groupId> -->
-		<!-- <artifactId>maven-embedder</artifactId> -->
-		<!-- <version>3.3.9</version> -->
-		<!-- </dependency> -->
+
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-util</artifactId>
@@ -112,5 +108,22 @@
 			<groupId>org.odfi.ooxoo</groupId>
 			<artifactId>ooxoo-db</artifactId>
 		</dependency>
+         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>12.0.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-base -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>12.0.1</version>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>12.0.1</version>
+        </dependency>
 	</dependencies>
 </project>
