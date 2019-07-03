@@ -269,6 +269,16 @@ trait JavaFXUtilsTrait {
         })
 
     }
+    
+    def onJFXReadOnlyObjectPropertyChanged[OP](prop: ReadOnlyObjectProperty[OP])(cl: OP => Unit) = {
+        prop.addListener(new ChangeListener[OP] {
+            def changed(b: ObservableValue[_ <: OP], old: OP, n: OP) = {
+                cl(n)
+
+            }
+        })
+
+    }
 
     implicit def convertClosureToEventHandler[ET <: Event](cl: ET => Unit) = {
         var eh = new EventHandler[ET] {
