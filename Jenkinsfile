@@ -8,20 +8,26 @@ def transformIntoStep(jobFullName) {
 // Indesign
 node {
  
-  properties([pipelineTriggers([[$class: 'GitHubPushTrigger']])])
-  def mvnHome = tool 'maven3'
+   //-- Github trigger
+    properties([pipelineTriggers([[$class: 'GitHubPushTrigger']])])
 
-  // Use JDK8 oracle
-  env.JAVA_HOME="${tool 'oracle-jdk8'}"
-  env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+    //-- JDK
+    jdk = tool name: 'adopt-jdk11'
+    env.JAVA_HOME = "${jdk}"
+
+    //-- Maven
+    def mvnHome = tool 'maven3'
+    mavenOptions="-B -U -up"
+
 
   stage('Clean') {
     checkout scm
-    sh "${mvnHome}/bin/mvn -B clean"
+    sh "${mvnHome}/bin/mvn ${mavenOptions} clean"
   }
 
   stage('Build') {
-    sh "${mvnHome}/bin/mvn -B  compile test-compile"
+    sh "${mvnHome}/bin/mvn ${mavenOptions}  -DskipTests=true install"
+    //junit '**/target/surefire-reports/TEST-*.xml'
   }
 
   stage('Test') {
@@ -35,8 +41,9 @@ node {
   }
 
   if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master') {
+
     stage('Deploy') {
-        sh "${mvnHome}/bin/mvn -B -DskipTests=true -Dmaven.test.failure.ignore deploy"
+        sh "${mvnHome}/bin/mvn ${mavenOptions} -DskipTests=true deploy"
         step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
     }
 
@@ -45,7 +52,7 @@ node {
 
       stage('Downstream') {
 
-        def downstreams = ['../indesign-ide/dev']
+        def downstreams = ['../instruments/dev' , '../ioda-core/dev']
         def stepsForParallel = [:]
         for (x in downstreams) {
           def ds = x 
