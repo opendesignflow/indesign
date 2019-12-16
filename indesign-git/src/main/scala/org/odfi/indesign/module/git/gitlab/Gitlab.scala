@@ -3,7 +3,7 @@ package org.odfi.indesign.module.git.gitlab
 import com.idyria.osi.ooxoo.core.buffers.structural.xelement
 import java.net.URL
 import java.net.HttpURLConnection
-import com.idyria.osi.tea.io.TeaIOUtils
+import org.odfi.tea.io.TeaIOUtils
 
 
 @xelement(name="Gitlab")

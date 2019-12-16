@@ -1,16 +1,18 @@
 package org.odfi.indesign.core.brain.artifact
 
-import com.idyria.osi.tea.compile.ClassDomain
+import org.odfi.tea.compile.ClassDomain
 import org.odfi.indesign.core.artifactresolver.AetherResolver
 import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.brain.Brain
 import java.io.File
 import java.util.jar.JarFile
 import java.util.jar.JarEntry
-import scala.collection.JavaConversions._
+
 import org.odfi.indesign.core.module.IndesignModule
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.artifact.Artifact
+
+import scala.jdk.CollectionConverters._
 
 class ArtifactExternalRegion(val gid: String, val aid: String, val version: String, val classifier: String = "jar") extends ExternalBrainRegion with ArtifactRegion {
 
@@ -73,7 +75,7 @@ class ArtifactExternalRegion(val gid: String, val aid: String, val version: Stri
 
         // Open Jar File
         var jar = new JarFile(jf)
-        jar.entries().collect {
+        jar.entries().asScala.collect {
           case entry if (entry.getName.endsWith("$.class")) =>
             //println("Entry: "+entry)
             Brain.getObject(this.classdomain.get, entry.getName.replace("/", ".").replace(".class", "")) match {

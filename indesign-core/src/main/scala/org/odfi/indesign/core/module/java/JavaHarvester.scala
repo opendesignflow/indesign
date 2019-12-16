@@ -3,7 +3,7 @@ package org.odfi.indesign.core.module.java
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.harvest.fs.HarvestedFile
 import java.io.File
-import com.idyria.osi.tea.os.OSDetector
+import org.odfi.tea.os.OSDetector
 import org.odfi.indesign.core.module.windows.WinRegistryKey
 
 object JavaHarvester extends Harvester {

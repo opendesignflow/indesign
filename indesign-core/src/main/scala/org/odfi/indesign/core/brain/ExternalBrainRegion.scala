@@ -2,11 +2,11 @@ package org.odfi.indesign.core.brain
 
 import java.net.URL
 
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.logging.TLogSource
 
 import org.odfi.indesign.core.brain.external.FolderOutBuilder
 import org.odfi.indesign.core.config.model.CommonConfigTraitValuesKey
-import com.idyria.osi.tea.compile.ClassDomain
+import org.odfi.tea.compile.ClassDomain
 import scala.reflect.ClassTag
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.harvest.HarvestedResource
@@ -285,7 +285,7 @@ object ExternalBrainRegion extends TLogSource {
       case Some(existing) =>
         logWarn[Brain](s"Cannot add external region builder $b, it already exists or another instance of same type exists")
       case None =>
-        this.builders = this.builders :+ b
+        this.builders = b :: this.builders
     }
   }
 

@@ -5,8 +5,8 @@ import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedFile
 import java.io.File
 import edu.kit.ipe.adl.indesign.core.harvest.fs.HarvestedTextFile
 import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
-import com.idyria.osi.tea.compile.IDCompiler
-import com.idyria.osi.tea.compile.FileCompileError
+import org.odfi.tea.compile.IDCompiler
+import org.odfi.tea.compile.FileCompileError
 
 class FBProject(bf: HarvestedFile) extends HarvestedFile(bf.path) {
   deriveFrom(bf)

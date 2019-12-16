@@ -3,16 +3,14 @@ package org.odfi.indesign.core.module.archiva
 import org.odfi.indesign.core.harvest.HarvestedResource
 import java.net.URL
 import java.net.HttpURLConnection
-import com.idyria.osi.tea.io.TeaIOUtils
+import org.odfi.tea.io.TeaIOUtils
 import org.odfi.indesign.core.artifactresolver.AetherResolver
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.resolution.MetadataRequest
-import scala.collection.convert.DecorateAsJava
-import scala.collection.convert.DecorateAsScala
 import org.eclipse.aether.metadata.DefaultMetadata
 import org.eclipse.aether.metadata.Metadata
 
-class ArchivaRestInterface(var baseUrl: String) extends HarvestedResource with DecorateAsScala with DecorateAsJava {
+class ArchivaRestInterface(var baseUrl: String) extends HarvestedResource   {
 
   def getId = getClass.getCanonicalName + ":" + baseUrl
 

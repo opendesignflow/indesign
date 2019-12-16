@@ -21,7 +21,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   //-- Thread group
   var threadGroup = new ThreadGroup("heart")
 
-  
+
   def newThread(r: Runnable) = {
 
     var th = new Thread(threadGroup, r)
@@ -51,7 +51,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
           // Reset
           t.applyResetState
-          
+
           // Save Task and remove on clean
           t.onCleaned {
             case h if (h == this) =>
@@ -67,6 +67,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   def removeTask(t: HeartTask[_]) = {
 
+
     //-- Make sure executor has no task
     t.scheduleFuture = None
     //t.scheduleEvery = None
@@ -75,7 +76,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
     tasks.synchronized {
       tasks.contains(t.getId) match {
         case true =>
-          tasks -= t.getId
+          tasks.remove(t.getId)
         case false =>
 
       }
@@ -84,12 +85,12 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
   /**
    * Execute a Task
-   * 
+   *
    * Task is reset before pumping
    */
   def pump[RT](t: HeartTask[RT]): HeartTask[RT] = {
 
-    
+
     saveTask(t)
     (t.scheduleAfter, t.scheduleEvery) match {
       case (Some(after), _) =>
@@ -104,7 +105,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
         t.scheduleFuture = Some(timedExecutor.schedule(t, t.scheduleDelay, t.timeUnit))
     }
-    
+
     t.onClean {
       this.removeTask(t)
     }
@@ -118,31 +119,31 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
     pump(t)
   }
 
-  def getTaskById(id:String) = {
+  def getTaskById(id: String) = {
     this.tasks.get(id)
   }
-  
+
   /**
    * Kill a task by ID if defined
    */
-  def killTask(id:String) : Unit = {
-  
+  def killTask(id: String): Unit = {
+
     this.tasks.get(id) match {
       case Some(t) =>
-       killTask(t)
-      case None => 
+        killTask(t)
+      case None =>
     }
-   
+
   }
-  
+
   def killTask(t: HeartTask[_]): Unit = {
 
     try {
       t.isRunning match {
         case true if (t.scheduleFuture.isEmpty) =>
-          
+
           t.applyResetState
-          
+
         case true =>
 
           var taskFuture = t.scheduleFuture.get
@@ -158,6 +159,12 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
               try {
                 taskFuture.get(scheduleRate, TimeUnit.MILLISECONDS)
               } catch {
+
+                // Periodic task cancelled
+                case e: CancellationException =>
+                  logFine[HeartTask[_]]("Task is cancelled")
+                  //t.taskStopped
+                  //removeTask(t)
                 case e: TimeoutException =>
                   try {
                     logFine[HeartTask[_]]("Task stop timed out, cancelling")
@@ -201,13 +208,13 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
 
         // t.scheduleFuture.get.
         case false =>
-          
+
           t.scheduleEvery = None
           t.scheduleFuture match {
             case Some(future) =>
               future.cancel(true)
-            case None => 
-              
+            case None =>
+
           }
 
       }
@@ -215,6 +222,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
       case e: InterruptedException =>
         throw new InterruptedException("Current Thread interrupted while trying to stop another task")
     } finally {
+      logFine[HeartTask[_]]("Remove Task now")
       t.taskStopped
       removeTask(t)
     }
@@ -230,9 +238,9 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   def running(id: String): Option[HeartTask[_]] = {
     this.tasks.synchronized {
       tasks.get(id) match {
-        case Some(t)  => 
-         Some(t)
-        case other =>  None
+        case Some(t) =>
+          Some(t)
+        case other => None
       }
     }
   }
@@ -240,25 +248,25 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   // Lifecycles
   //-----------------
   this.onLoad {
-    this.threadGroup  = new ThreadGroup("heart")
+    this.threadGroup = new ThreadGroup("heart")
     this.threadGroup.setDaemon(true)
     this.threadGroup.allowThreadSuspension(true)
   }
   this.onStop {
-    
+
     var all = this.tasks
     all.foreach {
       case (id, t) =>
         killTask(t)
     }
-    
+
     try {
       threadGroup.interrupt()
     } catch {
-      case e: Throwable => 
+      case e: Throwable =>
         e.printStackTrace()
     }
-    
+
   }
 
 }

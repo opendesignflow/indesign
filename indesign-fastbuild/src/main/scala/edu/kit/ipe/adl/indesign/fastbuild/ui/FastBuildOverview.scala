@@ -5,7 +5,7 @@ import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.fastbuild.FBProjectHarvester
 import edu.kit.ipe.adl.indesign.fastbuild.FBProject
 import edu.kit.ipe.adl.indesign.module.scala.ScalaSourceFile
-import com.idyria.osi.tea.compile.FileCompileError
+import org.odfi.tea.compile.FileCompileError
 import edu.kit.ipe.adl.indesign.core.module.ui.www.edit.ace.ACEEditorBuilder
 
 class FastBuildOverview extends IndesignUIView with ACEEditorBuilder {

@@ -1,6 +1,6 @@
 package org.odfi.indesign.core.harvest.fs
 
-import com.idyria.osi.tea.files.FileWatcherAdvanced
+import org.odfi.tea.files.FileWatcherAdvanced
 import org.odfi.indesign.core.module.IndesignModule
 
 object FSGlobalWatch extends IndesignModule {

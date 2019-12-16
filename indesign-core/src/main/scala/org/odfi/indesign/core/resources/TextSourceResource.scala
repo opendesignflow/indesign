@@ -3,7 +3,7 @@ package org.odfi.indesign.core.resources
 import org.odfi.indesign.core.harvest.fs.HarvestedFile
 import java.nio.file.Path
 import org.odfi.indesign.core.harvest.HarvestedResource
-import com.idyria.osi.tea.io.TeaIOUtils
+import org.odfi.tea.io.TeaIOUtils
 import java.nio.file.Files
 
 trait TextSourceResource extends HarvestedResource {

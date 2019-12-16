@@ -1,9 +1,9 @@
 package org.odfi.indesign.core.brain
 
-import com.idyria.osi.tea.errors.ErrorSupport
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.errors.ErrorSupport
+import org.odfi.tea.logging.TLogSource
 import org.odfi.indesign.core.harvest.HarvestedResource
-import com.idyria.osi.tea.compile.ClassDomain
+import org.odfi.tea.compile.ClassDomain
 import org.odfi.indesign.core.config.ConfigSupport
 
 trait BrainRegion extends BrainLifecycle  with ErrorSupport with TLogSource with HarvestedResource  {

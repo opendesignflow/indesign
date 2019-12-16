@@ -22,13 +22,13 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory
 import org.eclipse.aether.util.artifact.JavaScopes
 import org.eclipse.aether.util.filter.DependencyFilterUtils
 import org.eclipse.aether.graph.Dependency
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.logging.TLogSource
 
-import scala.collection.JavaConversions._
-import com.idyria.osi.tea.listeners.ListeningSupport
+
+import org.odfi.tea.listeners.ListeningSupport
 import org.eclipse.aether.resolution.ArtifactRequest
 import org.eclipse.aether.resolution.ArtifactResolutionException
-import com.idyria.osi.tea.logging.TLog
+import org.odfi.tea.logging.TLog
 import org.eclipse.aether.impl.MetadataGeneratorFactory
 import org.apache.maven.repository.internal.DefaultVersionRangeResolver
 import org.apache.maven.repository.internal.DefaultVersionResolver
@@ -39,6 +39,8 @@ import org.eclipse.aether.impl.VersionRangeResolver
 import org.eclipse.aether.impl.ArtifactDescriptorReader
 import org.eclipse.aether.impl.VersionResolver
 import org.apache.maven.repository.internal.SnapshotMetadataGeneratorFactory
+
+import scala.jdk.CollectionConverters._
 
 class AetherConfiguration extends ListeningSupport {
 
@@ -82,7 +84,7 @@ class AetherConfiguration extends ListeningSupport {
 
     var rb = new RemoteRepository.Builder(id, "default", url.toExternalForm())
     var rep =  rb.build()
-    this.repositories = this.repositories :+ rep
+    this.repositories = rep ::  this.repositories
 
   }
 
@@ -196,7 +198,7 @@ class AetherResolver extends TLogSource {
     //----------------------
     var descriptorRequest = new ArtifactRequest();
     descriptorRequest.setArtifact(artifact);
-    descriptorRequest.setRepositories(config.getRepositories);
+    descriptorRequest.setRepositories(config.getRepositories.asJava);
 
     // Process Result
     //--------------------------
@@ -245,11 +247,12 @@ class AetherResolver extends TLogSource {
 
     var descriptorRequest = new ArtifactDescriptorRequest();
     descriptorRequest.setArtifact(artifact);
-    descriptorRequest.setRepositories(config.getRepositories);
+    descriptorRequest.setRepositories(config.getRepositories.asJava);
 
     var descriptorResult = system.readArtifactDescriptor(session, descriptorRequest);
 
-    descriptorResult.getDependencies().toList
+    descriptorResult.getDependencies().asScala.toList
+
   }
 
   // Transistive Resolution
@@ -275,7 +278,7 @@ class AetherResolver extends TLogSource {
     //-- Use Collect Request to collect everything about this artifact
     var collectRequest = new CollectRequest();
     collectRequest.setRoot(new Dependency(artifact, scope));
-    collectRequest.setRepositories(config.getRepositories);
+    collectRequest.setRepositories(config.getRepositories.asJava);
 
     //-- Dependency Request will do the actual collection and filter the scope
     var dependencyRequest = new DependencyRequest(collectRequest, classpathFilter);
@@ -285,7 +288,7 @@ class AetherResolver extends TLogSource {
     try {
       var artifactResults =
         system.resolveDependencies(session, dependencyRequest).getArtifactResults();
-      artifactResults.toList
+      artifactResults.asScala.toList
     } catch {
       case e: Throwable =>
         println("Error exception while resolving dependencies: " + e)
@@ -336,7 +339,7 @@ class AetherResolver extends TLogSource {
                 a.getArtifact
 
             }
-            List(art) ++ deps
+            art :: deps
         }
 
       case None =>
@@ -350,11 +353,11 @@ class AetherResolver extends TLogSource {
    */
   def resolveArtifactAndDependenciesClasspath(artifact: Artifact, scope: String): List[URL] = {
 
-    this.resolveArtifactAndDependencies(artifact, scope).distinct.map {
+    this.resolveArtifactAndDependencies(artifact, scope).distinct.toList.map {
       a =>
         resolveArtifactsFile(a).get.toURI().toURL()
        
-    }
+    }.toList
 
   }
 

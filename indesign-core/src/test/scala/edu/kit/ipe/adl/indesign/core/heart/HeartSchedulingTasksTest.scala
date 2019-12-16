@@ -2,7 +2,9 @@ package org.odfi.indesign.core.heart
 
 import org.scalatest.FunSuite
 import java.util.concurrent.Semaphore
-import com.idyria.osi.tea.logging.TLog
+
+import org.odfi.indesign.core.brain.LFCDefinition
+import org.odfi.tea.logging.TLog
 
 class HeartSchedulingTasksTest extends FunSuite {
   
@@ -29,9 +31,11 @@ class HeartSchedulingTasksTest extends FunSuite {
     t.waitForRunning
     t.waitForDone
     println(s"--> Finished")
-    
+
+    //-- this check will be done before the Heart Thread had time to cleanup, so wait a bit
+    Thread.sleep(500)
     assertResult(0)(Heart.tasks.size)
-    
+    assertResult(1)(receiveS.availablePermits())
     
     
   }
@@ -39,6 +43,7 @@ class HeartSchedulingTasksTest extends FunSuite {
   test("Start a repetitive task and stop it with Step synchronisation") {
     
     TLog.setLevel(classOf[HeartTask[_]], TLog.Level.FULL)
+    TLog.setLevel(classOf[LFCDefinition], TLog.Level.FULL)
     
     //-- Create semaphore
     var receiveS = new Semaphore(0)
@@ -82,7 +87,9 @@ class HeartSchedulingTasksTest extends FunSuite {
     Heart.killTask(t)
     
     //-- Wait for done
+    println(s"Waiting for task to be marked done")
     t.waitForDone
+    println(s"Task killed and marked as done")
     
     //-- Should be no pending credits in receive semaphore
     assertResult(0, "No Remaning releases in task")(receiveS.availablePermits())

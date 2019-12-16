@@ -1,19 +1,15 @@
 package org.odfi.indesign.core.harvest.fs
 
 import java.nio.file._
-
-import com.idyria.osi.tea.files.FileWatcherAdvanced
-import com.idyria.osi.tea.logging.TLogSource
-import com.idyria.osi.tea.thread.ThreadLanguage
+import org.odfi.tea.logging.TLogSource
+import org.odfi.tea.thread.ThreadLanguage
 import java.io.File
 import java.lang.ref.WeakReference
-
 import org.odfi.indesign.core.heart.HeartTask
-
-import scala.collection.convert.DecorateAsScala
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister
 import org.odfi.indesign.core.harvest.HarvestedResource
 import org.odfi.indesign.core.heart.Heart
+
+import scala.jdk.CollectionConverters._
 
 trait IDFileEvent {
 
@@ -21,15 +17,15 @@ trait IDFileEvent {
   val k: IDWatchKey
 }
 
-class IDAddedEvent(val f: File,val k:IDWatchKey) extends IDFileEvent {
+class IDAddedEvent(val f: File, val k: IDWatchKey) extends IDFileEvent {
 
 }
 
-class IDDeletedEvent(val f: File,val k:IDWatchKey) extends IDFileEvent {
+class IDDeletedEvent(val f: File, val k: IDWatchKey) extends IDFileEvent {
 
 }
 
-class IDModifiedEvent(val f: File,val k:IDWatchKey) extends IDFileEvent {
+class IDModifiedEvent(val f: File, val k: IDWatchKey) extends IDFileEvent {
 
 }
 
@@ -84,8 +80,8 @@ class IDWatcher(val fileAccept: String, val listener: WeakReference[Any], var cl
   }
 
   /**
-    * Clean if the listener is not available anymore
-    */
+   * Clean if the listener is not available anymore
+   */
   def check = {
     listener.get match {
       case null =>
@@ -128,7 +124,10 @@ class IDWatcher(val fileAccept: String, val listener: WeakReference[Any], var cl
 
 class IDWatchKey(val directory: File, val key: WatchKey) extends HarvestedResource {
 
+  var fileLastModify = -1L
+
   def getId = s"WatchKey:${hashCode()}:directory:$key"
+
 
   override def clean = {
     super.clean
@@ -142,7 +141,7 @@ class IDWatchKey(val directory: File, val key: WatchKey) extends HarvestedResour
   def addWatcher(w: IDWatcher) = {
     watchers.contains(w) match {
       case false =>
-        watchers = watchers :+ w
+        watchers = w :: watchers
         w.watchKey = Some(this)
       case true =>
     }
@@ -166,9 +165,9 @@ class IDWatchKey(val directory: File, val key: WatchKey) extends HarvestedResour
   }
 
   /**
-    * Returns file instance resolved from this event
-    * Don't return canonical path because file may have been deleted
-    */
+   * Returns file instance resolved from this event
+   * Don't return canonical path because file may have been deleted
+   */
   def resolveFile(e: WatchEvent[Path]) = {
     directory.toPath().resolve(e.context()).toFile()
   }
@@ -177,10 +176,22 @@ class IDWatchKey(val directory: File, val key: WatchKey) extends HarvestedResour
 
   def isKey(k: WatchKey) = key.equals(k)
 
+  /**
+   * Save the last modification date of a file to filter out double events send
+   */
+  def filterDuplicateModifies(e: WatchEvent[Path]) = {
+    val targetFile = resolveFile(e)
+    if (fileLastModify != targetFile.lastModified()) {
+      fileLastModify = targetFile.lastModified()
+      true
+    } else {
+      false
+    }
+  }
+
 }
 
-class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala {
-
+class IDFileWatcher extends ThreadLanguage with TLogSource {
 
 
   // Lifecycle
@@ -196,11 +207,12 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
   }
 
   /**
-    * Deregister everyting
-    */
+   * Deregister everyting
+   */
   def clean = {
     this.watchedDirectories.foreach {
-      idKey => idKey.clean
+      idKey =>
+        idKey.clean
     }
     this.watchedDirectories = this.watchedDirectories.filter(k => false)
   }
@@ -210,23 +222,23 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
   val watcher = FileSystems.getDefault().newWatchService();
 
   /**
-    * Watching Keys are only defined for folders
-    * Watching a file is thus required to watch the folder above
-    */
+   * Watching Keys are only defined for folders
+   * Watching a file is thus required to watch the folder above
+   */
   var watchedDirectories = List[IDWatchKey]()
 
 
-  def deleteWatchingKey(k:IDWatchKey) = watchedDirectories.contains(k) match {
+  def deleteWatchingKey(k: IDWatchKey) = watchedDirectories.contains(k) match {
     case true =>
-      watchedDirectories = watchedDirectories.filter(_!=k)
+      watchedDirectories = watchedDirectories.filter(_ != k)
       k.clean
     case false =>
   }
 
   /**
-    * Register provided directory to watch for events inside
-    * If the file is not a directory, then use parent
-    */
+   * Register provided directory to watch for events inside
+   * If the file is not a directory, then use parent
+   */
   def registerDirectoryForWatching(directory: File) = {
 
     var targetFile = directory.exists() match {
@@ -251,7 +263,7 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
 
         //-- Create IDkey
         var IDKey = new IDWatchKey(targetFile, key)
-        watchedDirectories = watchedDirectories :+ IDKey
+        watchedDirectories = IDKey :: watchedDirectories
 
         IDKey
     }
@@ -262,12 +274,12 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
   //--------------------
 
   /**
-    *
-    *
-    * @param listener
-    * @param file
-    * @param closure
-    */
+   *
+   *
+   * @param listener
+   * @param file
+   * @param closure
+   */
   def onFileChange(listener: Any, file: File)(closure: IDFileEvent => Unit) = {
 
     //-- Register for watching
@@ -285,11 +297,11 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
   //-------------------
 
   /**
-    *
-    * @param listener
-    * @param file
-    * @param closure
-    */
+   *
+   * @param listener
+   * @param file
+   * @param closure
+   */
   def onDirectoryChange(listener: Any, file: File, modifyOnParent: Boolean = false)(closure: IDFileEvent => Unit) = {
 
     //-- Register for watching
@@ -365,7 +377,7 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
         //-- Ignore events on directories, already handled
         case other if (other.f.isDirectory) =>
 
-          logFine[IDFileWatcher]("Ignoring directory modify..."+other.f)
+          logFine[IDFileWatcher]("Ignoring directory modify..." + other.f)
 
         case other =>
           closure(other)
@@ -381,14 +393,14 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
 
           //-- Only listen to directories
           file.toFile.isDirectory match {
-            case true if(file.toFile.getCanonicalPath!=directory.getCanonicalPath) =>
+            case true if (file.toFile.getCanonicalPath != directory.getCanonicalPath) =>
 
               /**
-                * When a change happens on a directory, call the same closure
-                * Link with top watcher to that top watcher cleans everything
-                * When new resources are added, listen to them too
-                */
-              var dirWatcher = onDirectoryChange(listener,file.toFile)(listeningClosure)
+               * When a change happens on a directory, call the same closure
+               * Link with top watcher to that top watcher cleans everything
+               * When new resources are added, listen to them too
+               */
+              var dirWatcher = onDirectoryChange(listener, file.toFile)(listeningClosure)
               dirWatcher.deriveFrom(topWatcher)
 
             case other =>
@@ -423,39 +435,50 @@ class IDFileWatcher extends ThreadLanguage with TLogSource with DecorateAsScala 
           case Some(idKey) =>
 
             // Try and always reset the key
+            logFine[IDFileWatcher](s"Watcher triggered on Key: " + key)
+
             try {
 
               //-- get events
-              key.pollEvents().asScala.filter { ev => ev.kind() != StandardWatchEventKinds.OVERFLOW } foreach {
+              val polledEvents = key.pollEvents().asScala
+              polledEvents.filter { ev => ev.kind() != StandardWatchEventKinds.OVERFLOW }.foreach {
 
                 case be: WatchEvent[Path] if (be.count() <= 1) =>
 
-                  logFine[IDFileWatcher](s"Change detected on key ${idKey}: " + be.kind() + " -> " + be.context())
+                  logFine[IDFileWatcher](s"Change detected on key ${idKey}: " + be.kind() + " -> " + be.context() + " -> " + be.count())
+
 
                   //-- Create event
                   var event = be.kind() match {
                     case StandardWatchEventKinds.ENTRY_DELETE =>
-                      new IDDeletedEvent(idKey.resolveFile(be),idKey)
+                      Some(new IDDeletedEvent(idKey.resolveFile(be), idKey))
                     case StandardWatchEventKinds.ENTRY_CREATE =>
-                      new IDAddedEvent(idKey.resolveFile(be),idKey)
-                    case StandardWatchEventKinds.ENTRY_MODIFY =>
-                      new IDModifiedEvent(idKey.resolveFile(be),idKey)
+                      Some(new IDAddedEvent(idKey.resolveFile(be), idKey))
+                    case StandardWatchEventKinds.ENTRY_MODIFY if (idKey.filterDuplicateModifies(be)) =>
+                      logFine[IDFileWatcher](s"File modified: " + idKey.resolveFile(be).lastModified())
+
+                      Some(new IDModifiedEvent(idKey.resolveFile(be), idKey))
+                    case other =>
+                      None
                   }
 
                   // Dispatch
                   //---------------
-                  idKey.watchers.filter { w => w.accept(be.context().toString) } foreach {
-                    watcher =>
-                      watcher.check match {
-                        case true =>
-                          logFine[IDFileWatcher]("Watcher acccepted request: " + watcher.fileAccept)
-                          watcher.dispatch(event)
-                        case false =>
+                  if (event.isDefined) {
+                    idKey.watchers.filter { w => w.accept(be.context().toString) } foreach {
+                      watcher =>
+                        watcher.check match {
+                          case true =>
+                            logFine[IDFileWatcher]("Watcher acccepted request: " + watcher.fileAccept)
+                            watcher.dispatch(event.get)
+                          case false =>
 
-                      }
+                        }
 
 
+                    }
                   }
+
 
                 case other =>
               }
