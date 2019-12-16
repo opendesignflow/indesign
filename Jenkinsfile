@@ -17,7 +17,7 @@ node {
 
     //-- Maven
     def mvnHome = tool 'maven3'
-    mavenOptions="-B -U -up"
+    mavenOptions="-B -U"
 
 
   stage('Clean') {
