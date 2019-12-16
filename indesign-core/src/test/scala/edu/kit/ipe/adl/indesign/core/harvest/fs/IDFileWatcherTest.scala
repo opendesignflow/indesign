@@ -1,7 +1,6 @@
 package edu.kit.ipe.adl.indesign.core.harvest.fs
 
-import org.scalatest.FunSuite
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, GivenWhenThen, Suite}
 import org.odfi.tea.file.DirectoryUtilities
 import java.io.File
 import java.util.concurrent.{Semaphore, TimeUnit}
@@ -9,11 +8,9 @@ import java.util.concurrent.{Semaphore, TimeUnit}
 import org.odfi.tea.io.TeaIOUtils
 import org.odfi.tea.logging.{TLog, TeaLogging}
 import org.odfi.indesign.core.harvest.fs.{IDAdded, IDDeleted, IDFileWatcher, IDModified}
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.Suite
 
 
-class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll {
+class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll with GivenWhenThen {
 
   val baseFolder = new File("target/test-data/idfilewatcher")
   baseFolder.mkdirs
@@ -39,6 +36,10 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
     progressSemaphore.drainPermits()
     progressTotal = 0
     DirectoryUtilities.deleteDirectoryContent(baseFolder)
+  }
+
+  override def afterEach = {
+    cleanupAndCheck
   }
 
   def cleanupAndCheck = {
@@ -123,12 +124,15 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
 
   test("Folder - Folder Remove") {
 
+    Given("A new Subfolder called subfolder")
+
     //-- Create Folder
     var folder = new File(baseFolder, "subfolder")
     folder.mkdirs()
 
     //-- Watch
-    IDWatcher.onDirectoryChange(this, folder) {
+    Then("Start Watching a folder")
+    IDWatcher.onDirectoryChange(this, folder, true) {
       case IDDeleted(_) =>
         signalProgress
       case other =>
@@ -136,6 +140,7 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
     }
 
     //-- Remove
+    Then("Remvoe the directory and wait for a progress Signal")
     DirectoryUtilities.deleteDirectory(folder)
     waitForProgress
 
@@ -150,12 +155,15 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
 
   test("File - File Change") {
 
+    Given("A File to be changed")
+
     //-- Write file
     var written = TeaIOUtils.writeToFile(new File(baseFolder, "text.txt"), "test")
 
     //-- Watch
     IDWatcher.onFileChange(this, written) {
-      case IDModified(_) =>
+      case IDModified(ev) =>
+        println("Got Modified: "+ev)
         signalProgress
       case other =>
         println(s"Got other")
@@ -165,8 +173,11 @@ class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndA
     println(s"Writing...")
     TeaIOUtils.writeToFile(written, "test" + System.currentTimeMillis())
     waitForProgress
-    Thread.sleep(1000)
+    Thread.sleep(2000)
     assertResult(1)(progressTotal)
+
+    //-- Check watcher
+    cleanupAndCheck
 
   }
 

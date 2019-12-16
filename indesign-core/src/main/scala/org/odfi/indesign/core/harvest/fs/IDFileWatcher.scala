@@ -124,7 +124,10 @@ class IDWatcher(val fileAccept: String, val listener: WeakReference[Any], var cl
 
 class IDWatchKey(val directory: File, val key: WatchKey) extends HarvestedResource {
 
+  var fileLastModify = -1L
+
   def getId = s"WatchKey:${hashCode()}:directory:$key"
+
 
   override def clean = {
     super.clean
@@ -173,6 +176,19 @@ class IDWatchKey(val directory: File, val key: WatchKey) extends HarvestedResour
 
   def isKey(k: WatchKey) = key.equals(k)
 
+  /**
+   * Save the last modification date of a file to filter out double events send
+   */
+  def filterDuplicateModifies(e: WatchEvent[Path]) = {
+    val targetFile = resolveFile(e)
+    if (fileLastModify != targetFile.lastModified()) {
+      fileLastModify = targetFile.lastModified()
+      true
+    } else {
+      false
+    }
+  }
+
 }
 
 class IDFileWatcher extends ThreadLanguage with TLogSource {
@@ -195,7 +211,8 @@ class IDFileWatcher extends ThreadLanguage with TLogSource {
    */
   def clean = {
     this.watchedDirectories.foreach {
-      idKey => idKey.clean
+      idKey =>
+        idKey.clean
     }
     this.watchedDirectories = this.watchedDirectories.filter(k => false)
   }
@@ -418,39 +435,50 @@ class IDFileWatcher extends ThreadLanguage with TLogSource {
           case Some(idKey) =>
 
             // Try and always reset the key
+            logFine[IDFileWatcher](s"Watcher triggered on Key: " + key)
+
             try {
 
               //-- get events
-              key.pollEvents().asScala.filter { ev => ev.kind() != StandardWatchEventKinds.OVERFLOW } foreach {
+              val polledEvents = key.pollEvents().asScala
+              polledEvents.filter { ev => ev.kind() != StandardWatchEventKinds.OVERFLOW }.foreach {
 
                 case be: WatchEvent[Path] if (be.count() <= 1) =>
 
-                  logFine[IDFileWatcher](s"Change detected on key ${idKey}: " + be.kind() + " -> " + be.context())
+                  logFine[IDFileWatcher](s"Change detected on key ${idKey}: " + be.kind() + " -> " + be.context() + " -> " + be.count())
+
 
                   //-- Create event
                   var event = be.kind() match {
                     case StandardWatchEventKinds.ENTRY_DELETE =>
-                      new IDDeletedEvent(idKey.resolveFile(be), idKey)
+                      Some(new IDDeletedEvent(idKey.resolveFile(be), idKey))
                     case StandardWatchEventKinds.ENTRY_CREATE =>
-                      new IDAddedEvent(idKey.resolveFile(be), idKey)
-                    case StandardWatchEventKinds.ENTRY_MODIFY =>
-                      new IDModifiedEvent(idKey.resolveFile(be), idKey)
+                      Some(new IDAddedEvent(idKey.resolveFile(be), idKey))
+                    case StandardWatchEventKinds.ENTRY_MODIFY if (idKey.filterDuplicateModifies(be)) =>
+                      logFine[IDFileWatcher](s"File modified: " + idKey.resolveFile(be).lastModified())
+
+                      Some(new IDModifiedEvent(idKey.resolveFile(be), idKey))
+                    case other =>
+                      None
                   }
 
                   // Dispatch
                   //---------------
-                  idKey.watchers.filter { w => w.accept(be.context().toString) } foreach {
-                    watcher =>
-                      watcher.check match {
-                        case true =>
-                          logFine[IDFileWatcher]("Watcher acccepted request: " + watcher.fileAccept)
-                          watcher.dispatch(event)
-                        case false =>
+                  if (event.isDefined) {
+                    idKey.watchers.filter { w => w.accept(be.context().toString) } foreach {
+                      watcher =>
+                        watcher.check match {
+                          case true =>
+                            logFine[IDFileWatcher]("Watcher acccepted request: " + watcher.fileAccept)
+                            watcher.dispatch(event.get)
+                          case false =>
 
-                      }
+                        }
 
 
+                    }
                   }
+
 
                 case other =>
               }

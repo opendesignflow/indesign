@@ -166,7 +166,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
    */
    def taskStopped = {
 
-    //println("*** TASK STOP: " + getId)
+   // println("*** TASK STOP: " + getId)
     try {
       //-- Call clean
       (scheduleAfter, scheduleEvery) match {
@@ -195,6 +195,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
     } finally {
 
       //-- Move to done state
+      logFine[HeartTask[_]]("Maving Task to DONE State")
       HeartTask.moveToState(this, HeartTask.DONE.name)
 
       //-- Remove from Heart
