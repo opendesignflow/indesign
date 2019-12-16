@@ -3,12 +3,12 @@ package org.odfi.indesign.core.harvest
 import java.nio.file.Path
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.indesign.core.brain.LFCSupport
-import com.idyria.osi.tea.errors.ErrorSupport
+import org.odfi.tea.errors.ErrorSupport
 import scala.reflect.ClassTag
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.logging.TLogSource
 import org.odfi.indesign.core.config.Config
 import org.odfi.indesign.core.config.ConfigSupport
-import com.idyria.osi.tea.compile.ClassDomain
+import org.odfi.tea.compile.ClassDomain
 import java.util.concurrent.Semaphore
 import org.odfi.indesign.core.brain.BrainRegion
 
@@ -43,7 +43,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     case same if (same == this) =>
     case already if (parentHarvesters.contains(already)) =>
     case other =>
-      this.parentHarvesters = this.parentHarvesters :+ other
+      this.parentHarvesters = other :: this.parentHarvesters
       other.addChildHarvester(this)
   }
 
@@ -64,7 +64,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     this.childHarvesters.contains(h) match {
       case true =>
       case false =>
-        this.childHarvesters = this.childHarvesters :+ h.asInstanceOf[Harvester]
+        this.childHarvesters = h.asInstanceOf[Harvester] ::  this.childHarvesters
         h.addParent(this)
     }
 
@@ -161,7 +161,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     }
     var currentParent: Option[Harvester] = this.parentHarvesters.headOption
     while (currentParent != None) {
-      parents = parents :+ currentParent.get
+      parents = currentParent.get :: parents
       currentParent = currentParent.get.parentHarvesters.headOption
     }
 
@@ -179,7 +179,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     }
     var currentParent: Option[Harvester] = this.parentHarvesters.headOption
     while (currentParent != None) {
-      parents = parents :+ currentParent.get
+      parents = currentParent.get :: parents
       currentParent = currentParent.get.parentHarvesters.headOption
     }
 
@@ -206,7 +206,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
     r
   }
   def gatherAll[CT <: HarvestedResource](r: List[CT]) = {
-    this.harvestedResources ++= (r)
+    this.harvestedResources.addAll(r)
     r
   }
 
@@ -260,7 +260,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
      while(!nextHarvesters.isEmpty) {
        
        val current = nextHarvesters.pop()
-       result ++= current.getResourcesOfType[CT]
+       result.addAll(current.getResourcesOfType[CT])
        current.childHarvesters.foreach(nextHarvesters.push(_))
        
      }
@@ -484,13 +484,13 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
           case 0 if (!r.rooted && r.parentResource.isEmpty) =>
             logFine[Harvester](s"Resource ${r.getId} not rooted and not in harvested, removing")
             this.availableResources -= r
-            toclean = toclean :+ r
+            toclean = r :: toclean
 
           // Remove from harvested, because already existing
           case size if (size > 0) =>
             logFine[Harvester](s"Resource ${r.getId} already present, remove from harvested")
             //println(s"Resource ${r.getId} already present, remove from harvested")
-            this.harvestedResources --= harvestedWithSameId
+            harvestedWithSameId.foreach( this.harvestedResources.remove(_))
             harvestedWithSameId.foreach {
               rejected =>
               //println(s"Rejecting because already present: "+r)
@@ -692,7 +692,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   var deliverClosures: List[PartialFunction[HarvestedResource, Boolean]] = List({ case _ => false })
 
   def onDeliver(pf: PartialFunction[HarvestedResource, Boolean]): Unit = {
-    this.deliverClosures = deliverClosures :+ pf
+    this.deliverClosures = pf :: deliverClosures
   }
 
   def onDeliverFor[CT <: HarvestedResource](pf: PartialFunction[CT, Boolean])(implicit cl: ClassTag[CT]): Unit = {
@@ -706,7 +706,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
         }
 
     }
-    this.deliverClosures = deliverClosures :+ realClosure
+    this.deliverClosures = realClosure :: deliverClosures
   }
 
   /**

@@ -5,7 +5,7 @@ import com.idyria.osi.vui.html.basic.DefaultBasicHTMLBuilder._
 import java.net.URI
 import org.odfi.indesign.core.module.ui.www.IndesignUIView
 import com.idyria.osi.vui.html.HTMLNode
-import com.idyria.osi.tea.compile.ClassDomainSupport
+import org.odfi.tea.compile.ClassDomainSupport
 import com.idyria.osi.wsb.webapp.localweb.LocalWebHTMLVIew
 import org.odfi.indesign.core.module.ui.www.external.ExternalBuilder
 import org.w3c.dom.html.HTMLElement

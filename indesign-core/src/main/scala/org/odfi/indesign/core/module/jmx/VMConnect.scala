@@ -1,8 +1,8 @@
 package org.odfi.indesign.core.module.jmx
 
 import java.io.File
-import com.idyria.osi.tea.os.OSDetector
-import com.idyria.osi.tea.compile.ClassDomainSupport
+import org.odfi.tea.os.OSDetector
+import org.odfi.tea.compile.ClassDomainSupport
 import scala.sys.process._
 import scala.io.Source
 import javax.management.remote.JMXServiceURL

@@ -3,7 +3,7 @@ package org.odfi.indesign.core.module.filestash
 import org.odfi.indesign.core.module.IndesignModule
 import java.io.File
 import java.nio.ByteBuffer
-import com.idyria.osi.tea.io.TeaIOUtils
+import org.odfi.tea.io.TeaIOUtils
 import java.io.ByteArrayInputStream
 import org.odfi.indesign.core.harvest.fs.HarvestedFile
 import com.idyria.osi.ooxoo.core.buffers.structural.AnyXList

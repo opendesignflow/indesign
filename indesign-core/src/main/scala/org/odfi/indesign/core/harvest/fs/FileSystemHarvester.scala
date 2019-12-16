@@ -12,7 +12,7 @@ import scala.language.implicitConversions
 import org.odfi.indesign.core.harvest.HarvestedResource
 import org.odfi.indesign.core.harvest.Harvester
 import java.nio.file.FileVisitOption
-import scala.collection.convert.DecorateAsJava
+import scala.jdk.CollectionConverters._
 
 trait FileSystemIgnoreProvider extends HarvestedResource {
 
@@ -20,7 +20,7 @@ trait FileSystemIgnoreProvider extends HarvestedResource {
 
 }
 
-trait FileSystemHarvester extends Harvester with DecorateAsJava {
+trait FileSystemHarvester extends Harvester  {
 
   //var searchPaths = List[Path]()
 

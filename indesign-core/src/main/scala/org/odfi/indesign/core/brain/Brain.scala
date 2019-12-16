@@ -2,14 +2,14 @@ package org.odfi.indesign.core.brain
 
 import org.odfi.indesign.core.config.ConfigSupport
 import java.io.File
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.logging.TLogSource
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.heart.Heart
 import org.eclipse.aether.impl.ArtifactResolver
 import org.odfi.indesign.core.artifactresolver.AetherResolver
 import org.odfi.indesign.core.brain.artifact.ArtifactExternalRegion
 import org.odfi.indesign.core.harvest.Harvest
-import com.idyria.osi.tea.compile.ClassDomainSupport
+import org.odfi.tea.compile.ClassDomainSupport
 
 trait Brain extends BrainLifecyleDefinition with BrainLifecycle with ConfigSupport with TLogSource with Harvester {
 

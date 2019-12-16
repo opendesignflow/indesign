@@ -12,11 +12,11 @@ import org.apache.lucene.document.Field
 import org.apache.lucene.queryparser.classic.QueryParser
 import java.util.jar.JarFile
 import java.util.jar.JarInputStream
-import com.idyria.osi.tea.compile.ClassDomain
-import com.idyria.osi.tea.timing.TimingSupport
+import org.odfi.tea.compile.ClassDomain
+import org.odfi.tea.timing.TimingSupport
 import org.apache.lucene.store.FSDirectory
 import java.io.File
-import com.idyria.osi.tea.file.DirectoryUtilities
+import org.odfi.tea.file.DirectoryUtilities
 import org.odfi.indesign.core.harvest.fs.FileSystemHarvester
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.harvest.fs.HarvestedFile

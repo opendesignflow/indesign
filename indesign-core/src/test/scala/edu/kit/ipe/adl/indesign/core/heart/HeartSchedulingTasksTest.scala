@@ -2,7 +2,7 @@ package org.odfi.indesign.core.heart
 
 import org.scalatest.FunSuite
 import java.util.concurrent.Semaphore
-import com.idyria.osi.tea.logging.TLog
+import org.odfi.tea.logging.TLog
 
 class HeartSchedulingTasksTest extends FunSuite {
   

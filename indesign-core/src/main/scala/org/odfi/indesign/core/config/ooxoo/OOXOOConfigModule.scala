@@ -3,7 +3,7 @@ package org.odfi.indesign.core.config.ooxoo
 import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.config.Config
 import java.io.File
-import com.idyria.osi.tea.file.DirectoryUtilities
+import org.odfi.tea.file.DirectoryUtilities
 
 object OOXOOConfigModule extends IndesignModule {
   

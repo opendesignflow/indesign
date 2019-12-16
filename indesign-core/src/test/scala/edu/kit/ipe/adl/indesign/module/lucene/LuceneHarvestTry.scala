@@ -2,7 +2,7 @@ package org.odfi.indesign.module.lucene
 /*
 import java.io.File
 
-import com.idyria.osi.tea.logging.TLog
+import org.odfi.tea.logging.TLog
 
 import org.odfi.indesign.core.brain.Brain
 import org.odfi.indesign.core.harvest.Harvest

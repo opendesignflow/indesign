@@ -2,13 +2,13 @@ package org.odfi.indesign.core.harvest
 
 import scala.reflect.ClassTag
 
-import com.idyria.osi.tea.compile.ClassDomain
-import com.idyria.osi.tea.errors.ErrorSupport
+import org.odfi.tea.compile.ClassDomain
+import org.odfi.tea.errors.ErrorSupport
 
 import org.odfi.indesign.core.brain.BrainRegion
 import org.odfi.indesign.core.heart.HeartTask
 import org.odfi.indesign.core.heart.Heart
-import com.idyria.osi.tea.listeners.ListeningSupport
+import org.odfi.tea.listeners.ListeningSupport
 import org.odfi.indesign.core.config.ConfigSupport
 
 object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
@@ -46,29 +46,30 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
   //------------------
 
   var harvesters = List[Harvester]()
+
   def addHarvester(h: Harvester) = {
 
     var addingHarvester = h
     this.harvesters.contains(h) match {
       case true =>
       case false =>
-        this.harvesters = this.harvesters :+ addingHarvester
+        this.harvesters = addingHarvester :: this.harvesters
 
     }
 
     h
   }
-  
-  def -->[HT<:Harvester](h:HT) = {
+
+  def -->[HT <: Harvester](h: HT) = {
     addHarvester(h)
     h
   }
-  
+
   def removeHarvester(h: Harvester): Harvester = {
     this.harvesters.contains(h) match {
       case true =>
         this.harvesters = this.harvesters.filter(_ != h)
-        //h.parentHarvester = None
+      //h.parentHarvester = None
       case false =>
 
     }
@@ -77,6 +78,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
   /**
    * Type Check is done but no class casting will be involed
+   *
    * @warning: Useful to find objects matching a type whose definition may be outdated due to classloading reload
    */
   def getHarvesters[CT <: Harvester](implicit cl: ClassTag[CT]): Option[List[CT]] = {
@@ -155,10 +157,10 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
     // Processing List
     var processList = new scala.collection.mutable.LinkedHashSet[Harvester]()
-    processList ++= this.harvesters
+    processList.addAll(this.harvesters)
 
     // Visited List
-    var visited = scala.collection.mutable.LinkedHashSet[Harvester]() 
+    var visited = scala.collection.mutable.LinkedHashSet[Harvester]()
 
     while (processList.nonEmpty) {
 
@@ -169,7 +171,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
       // If visited, pass
       visited.contains(h) match {
         case false =>
-          
+
           // Add to visited
           visited += h
 
@@ -182,7 +184,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
             case _ =>
           }
 
-          processList ++= h.childHarvesters
+          processList.addAll(h.childHarvesters)
 
         case true =>
       }
@@ -200,12 +202,12 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
     var collected = List[B]()
     onHarvesters[CT] {
       case h if (cl.isDefinedAt(h)) =>
-        collected = collected :+ cl(h)
+        collected = cl(h) :: collected
     }
     collected
   }
 
-  def collectResourcesOnHarvesters[CT <: Harvester, RT <: HarvestedResource: ClassTag, B](cl: PartialFunction[RT, B])(implicit htag: ClassTag[CT]) = {
+  def collectResourcesOnHarvesters[CT <: Harvester, RT <: HarvestedResource : ClassTag, B](cl: PartialFunction[RT, B])(implicit htag: ClassTag[CT]) = {
 
     var r = collectOnHarvesters[CT, List[B]] {
       case h =>
@@ -217,13 +219,13 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
         r
 
     }
-    r.flatten.toList
+    r.toIterable.flatten
   }
 
   // Delivering
   //------------------
 
-  def deliverToHarvesters[HT <: Harvester: ClassTag](v: HarvestedResource) = {
+  def deliverToHarvesters[HT <: Harvester : ClassTag](v: HarvestedResource) = {
 
     this.getHarvesters[HT] match {
       case Some(harvesters) =>
@@ -252,12 +254,12 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
           h.harvest
         }
     }
-    
-     //-- Done
+
+    //-- Done
     //this.@->("done")
 
     //println(s"********** harvest Done, doing process **************");
-    
+
     //-- Process
     //-------------------
     this.onAllHarvesters {
@@ -265,7 +267,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
         keepErrorsOn(h) {
           h.resetErrors
           //println(s"********** harvest on ${h.getClass.getCanonicalName} **************");
-           h.processResources
+          h.processResources
         }
     }
 
@@ -309,13 +311,14 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
   def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](t: Tuple2[Class[_ <: Harvester], Class[_ <: Harvester]]): Unit = {
     registerAutoHarvesterClass(t._2, t._1)
   }
+
   def registerAutoHarvesterClass[IT <: HarvestedResource, OT <: HarvestedResource](parentClass: Class[_ <: Harvester], harvesterClass: Class[_ <: Harvester]): Unit = {
 
     autoHarvesterClasses.get(parentClass) match {
       case Some(list) =>
-        autoHarvesterClasses = autoHarvesterClasses.updated(parentClass, list :+ harvesterClass.asInstanceOf[Class[Harvester]])
+        autoHarvesterClasses = autoHarvesterClasses.updated(parentClass, harvesterClass.asInstanceOf[Class[Harvester]] :: list)
       case None =>
-        autoHarvesterClasses = autoHarvesterClasses + (parentClass -> List(harvesterClass.asInstanceOf[Class[Harvester]]))
+        autoHarvesterClasses = autoHarvesterClasses.updated(parentClass, List(harvesterClass.asInstanceOf[Class[Harvester]]))
     }
 
     updateAutoHarvester
@@ -325,7 +328,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
     autoHarvesterObjects.get(parentClass) match {
       case Some(list) =>
-        autoHarvesterObjects = autoHarvesterObjects.updated(parentClass, list :+ harvester)
+        autoHarvesterObjects = autoHarvesterObjects.updated(parentClass, harvester :: list)
       case None =>
         autoHarvesterObjects = autoHarvesterObjects.updated(parentClass, List(harvester))
     }
@@ -340,8 +343,9 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
       // Clean Source map if source is tainted
       case (source, required) if (source.getClass.getClassLoader.isInstanceOf[ClassDomain] && source.getClass.getClassLoader.asInstanceOf[ClassDomain].tainted) =>
-        this.autoHarvesterClasses = this.autoHarvesterClasses.filterKeys { k => k != source }
 
+        //this.autoHarvesterClasses.filterKeys { k => k != source }.toMap
+        this.autoHarvesterClasses = this.autoHarvesterClasses.view.filterKeys { k => k != source }.toMap
       case (source, required) =>
         var filtered = required.filter {
           case req if (req.getClassLoader.isInstanceOf[ClassDomain]) =>
@@ -370,13 +374,13 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
         // REmove from parent or top 
         harvester.clean
-        /*harvester.parentHarvester match {
-          case Some(parent) =>
-            parent.removeChildHarvester(harvester)
-          case None =>
-            Harvest.removeHarvester(harvester)
+      /*harvester.parentHarvester match {
+        case Some(parent) =>
+          parent.removeChildHarvester(harvester)
+        case None =>
+          Harvest.removeHarvester(harvester)
 
-        }*/
+      }*/
 
       // Keep
       case _ =>
@@ -412,7 +416,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
     // Make sure the harvester has at least one type of auto classes
     //----------------
     //var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
-    var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass == harvester.getClass }.values.flatten.toList.distinct
+    var requiredClasses = autoHarvesterClasses.filterKeys { case matchClass => matchClass == harvester.getClass }.values.flatten.toList.distinct
     logFine[Harvester]("Required Classes : " + requiredClasses)
 
     requiredClasses.foreach {
@@ -432,7 +436,9 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
     // MAke sure the harvester has all the required objects
     //---------------
-    var requiredObjects = autoHarvesterObjects.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
+    var requiredObjects = autoHarvesterObjects.toIterable.collect {
+      case (matchClass, objects) if (matchClass.isAssignableFrom(harvester.getClass)) => objects.toSeq
+    }.flatten
     requiredObjects.foreach {
       case requiredHarvester if (!children.contains(requiredHarvester)) =>
         h.addChildHarvesterForce(requiredHarvester)
@@ -472,7 +478,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
                   var cl = getClass.getClassLoader.loadClass(className)
 
                   //-- Instantiate and add
-                  var h = cl.newInstance().asInstanceOf[Harvester]
+                  var h = cl.getDeclaredConstructor().newInstance().asInstanceOf[Harvester]
                   addHarvester(h)
                 }
 

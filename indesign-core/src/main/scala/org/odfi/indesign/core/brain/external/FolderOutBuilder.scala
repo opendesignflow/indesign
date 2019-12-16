@@ -9,14 +9,14 @@ import org.odfi.indesign.core.brain.BrainRegion
 import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.brain.ExternalBrainRegionBuilder
 
-import com.idyria.osi.tea.compile.ClassDomain
-import com.idyria.osi.tea.compile.ClassDomainSupport
+import org.odfi.tea.compile.ClassDomain
+import org.odfi.tea.compile.ClassDomainSupport
 import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.indesign.core.harvest.fs.FSGlobalWatch
 import org.odfi.indesign.core.harvest.Harvest
 import scala.reflect.ClassTag
-import scala.collection.convert.DecorateAsScala
+
 
 class FolderOutBuilder extends ExternalBrainRegionBuilder {
 
@@ -47,7 +47,7 @@ class FolderOutBuilder extends ExternalBrainRegionBuilder {
 
 }
 
-class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends ExternalBrainRegion with ClassDomainSupport with DecorateAsScala {
+class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends ExternalBrainRegion with ClassDomainSupport {
   // this.addPath(basePath.toPath())
 
   //tlogEnableFull[LFCDefinition]
@@ -177,7 +177,7 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
                 classOf[IndesignModule].isInstance(obj) match {
                   case true =>
                     //println("Found object")
-                    regions = regions :+ obj.getClass.getCanonicalName
+                    regions = obj.getClass.getCanonicalName :: regions
                     Some(obj.getClass.getCanonicalName)
                   case false => None
                 }
@@ -218,7 +218,7 @@ class FolderOutputBrainRegion(val basePath: File, val outputPath: File) extends 
                var cl = cd.loadClass(className)
                tag.runtimeClass.isAssignableFrom(cl) match {
                  case true => 
-                   foundTypes = foundTypes :+ cl.asInstanceOf[Class[CT]]
+                   foundTypes = cl.asInstanceOf[Class[CT]] :: foundTypes
                  case false => 
                }
              } catch {

@@ -6,9 +6,9 @@ import edu.kit.ipe.adl.indesign.core.harvest.fs.FileSystemHarvester
 import java.io.File
 import edu.kit.ipe.adl.indesign.core.harvest.Harvest
 import edu.kit.ipe.adl.indesign.core.module.ui.www.IndesignWWWUIModule
-import com.idyria.osi.tea.logging.TeaLogging
-import com.idyria.osi.tea.logging.TLog
-import com.idyria.osi.tea.files.FileWatcherAdvanced
+import org.odfi.tea.logging.TeaLogging
+import org.odfi.tea.logging.TLog
+import org.odfi.tea.files.FileWatcherAdvanced
 
 object FastBuildTest extends App {
  

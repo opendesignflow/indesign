@@ -3,7 +3,7 @@ package org.odfi.indesign.core.module.process
 import java.io.File
 
 import org.odfi.indesign.core.harvest.HarvestedResource
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 class IDCommand (val startPath: File) extends HarvestedResource {
 
@@ -15,8 +15,8 @@ class IDCommand (val startPath: File) extends HarvestedResource {
   //------------
 
   def createToolProcess(args: Array[String],runFolder : File = new File("")) : IDProcess= {
-    var cmd = List(startPath.getAbsolutePath) ++ args
-    var pb = new ProcessBuilder(cmd)
+    var cmd = List(startPath.getAbsolutePath) ++(args.toIterable)
+    var pb = new ProcessBuilder(cmd.asJava)
     pb.directory(runFolder.getCanonicalFile)
     var tp = new IDProcess(pb)
     
@@ -25,8 +25,8 @@ class IDCommand (val startPath: File) extends HarvestedResource {
   
   def createToolProcess(args: String*): IDProcess = {
     
-    var cmd = List(startPath.getCanonicalPath) ++ args
-    var pb = new ProcessBuilder(cmd)
+    var cmd = List(startPath.getCanonicalPath) ++ args.toIterable
+    var pb = new ProcessBuilder(cmd.asJava)
     var tp = new IDProcess(pb)
     
     tp

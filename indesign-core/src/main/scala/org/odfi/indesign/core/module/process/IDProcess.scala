@@ -3,7 +3,7 @@ package org.odfi.indesign.core.module.process
 import java.io.ByteArrayOutputStream
 import java.io.BufferedInputStream
 import org.odfi.indesign.core.harvest.HarvestedResource
-import com.idyria.osi.tea.thread.ThreadLanguage
+import org.odfi.tea.thread.ThreadLanguage
 
 class IDProcess(val processBuilder: ProcessBuilder) extends HarvestedResource with ThreadLanguage {
 

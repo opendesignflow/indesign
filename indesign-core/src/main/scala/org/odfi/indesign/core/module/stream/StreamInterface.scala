@@ -1,6 +1,6 @@
 package org.odfi.indesign.core.module.stream
 
-import com.idyria.osi.tea.listeners.ListeningSupport
+import org.odfi.tea.listeners.ListeningSupport
 
 trait StreamInterface extends ListeningSupport {
   

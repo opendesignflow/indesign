@@ -1,6 +1,6 @@
 package org.odfi.indesign.core.heart
 
-import com.idyria.osi.tea.timing.TimingSupport
+import org.odfi.tea.timing.TimingSupport
 
 trait HeartTimingSupport  {
   

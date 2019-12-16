@@ -2,12 +2,12 @@ package edu.kit.ipe.adl.indesign.core.harvest.fs
 
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfterEach
-import com.idyria.osi.tea.file.DirectoryUtilities
+import org.odfi.tea.file.DirectoryUtilities
 import java.io.File
 import java.util.concurrent.{Semaphore, TimeUnit}
 
-import com.idyria.osi.tea.io.TeaIOUtils
-import com.idyria.osi.tea.logging.{TLog, TeaLogging}
+import org.odfi.tea.io.TeaIOUtils
+import org.odfi.tea.logging.{TLog, TeaLogging}
 import org.odfi.indesign.core.harvest.fs.{IDAdded, IDDeleted, IDFileWatcher, IDModified}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.Suite

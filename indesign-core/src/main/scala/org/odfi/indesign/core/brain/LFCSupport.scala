@@ -1,10 +1,10 @@
 package org.odfi.indesign.core.brain
 
-import com.idyria.osi.tea.listeners.ListeningSupport
+import org.odfi.tea.listeners.ListeningSupport
 import java.util.concurrent.Phaser
 import java.util.concurrent.Semaphore
-import com.idyria.osi.tea.compile.ClassDomainSupport
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.compile.ClassDomainSupport
+import org.odfi.tea.logging.TLogSource
 
 /**
  * @author zm4632
@@ -90,7 +90,7 @@ trait LFCSupport extends ListeningSupport with TLogSource {
     this.statesHandlers.get(state) match {
       case Some(handlers) =>
         
-        this.statesHandlers = this.statesHandlers.updated(state, handlers :+ cl)
+        this.statesHandlers = this.statesHandlers.updated(state, cl :: handlers )
         
       case None => 
         this.statesHandlers = this.statesHandlers.updated(state, List(cl))
@@ -163,7 +163,7 @@ trait LFCDefinition extends ClassDomainSupport with TLogSource {
   }
   
   def defineState(name: String) = {
-    states = states :+ name
+    states = name :: states
   }
 
   def moveToState(lifecyclable: LFCSupport, targetState: String): Unit = {

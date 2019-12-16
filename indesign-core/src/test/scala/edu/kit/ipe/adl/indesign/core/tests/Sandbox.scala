@@ -1,7 +1,7 @@
 package org.odfi.indesign.core.tests
 
 import scala.sys.process._
-import com.idyria.osi.tea.logging.TLog
+import org.odfi.tea.logging.TLog
 
 import java.io.File
 

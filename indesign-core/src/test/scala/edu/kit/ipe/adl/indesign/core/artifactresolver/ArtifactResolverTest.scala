@@ -5,7 +5,7 @@ import org.scalatest.BeforeAndAfterAll
 import java.io.File
 import org.scalatest.BeforeAndAfterAllConfigMap
 import org.scalatest.ConfigMap
-import com.idyria.osi.tea.file.DirectoryUtilities
+import org.odfi.tea.file.DirectoryUtilities
 import java.net.URL
 
 class ArtifactResolverTest extends FunSuite with BeforeAndAfterAllConfigMap {

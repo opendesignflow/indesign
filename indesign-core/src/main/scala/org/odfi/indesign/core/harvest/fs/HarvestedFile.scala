@@ -3,11 +3,10 @@ package org.odfi.indesign.core.harvest.fs
 import org.odfi.indesign.core.harvest.HarvestedResource
 import java.nio.file.Path
 import java.nio.file.Files
-import scala.collection.JavaConversions._
+
 import scala.language.implicitConversions
 import java.io.File
 import java.io.FileFilter
-import scala.collection.convert.DecorateAsScala
 import java.sql.Timestamp
 import java.util.Formatter.DateTime
 import java.util.Date
@@ -17,7 +16,9 @@ import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 
-class HarvestedFile(val path: Path) extends HarvestedResource with DecorateAsScala {
+import scala.jdk.CollectionConverters._
+
+class HarvestedFile(val path: Path) extends HarvestedResource  {
 
   def getId = getClass.getCanonicalName + ":" + path.toAbsolutePath().toString()
   def getName = path.getFileName.toString()
@@ -151,7 +152,7 @@ class HarvestedFile(val path: Path) extends HarvestedResource with DecorateAsSca
           case lc if (lc != null && lc.get != null) =>
             linesCache.get
           case lc =>
-            linesCache = new java.lang.ref.WeakReference[List[String]](Files.readAllLines(path).toList)
+            linesCache = new java.lang.ref.WeakReference[List[String]](Files.readAllLines(path).asScala.toList)
             linesCache.get
         }
     }

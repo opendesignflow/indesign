@@ -2,7 +2,7 @@ package org.odfi.indesign.core.config
 
 import org.odfi.indesign.core.config.model.CommonConfigTrait
 import org.odfi.indesign.core.config.model.CommonConfig
-import com.idyria.osi.tea.listeners.ListeningSupport
+import org.odfi.tea.listeners.ListeningSupport
 import org.odfi.indesign.core.harvest.HarvestedResource
 
 trait ConfigSupport extends ConfigHolder with HarvestedResource {

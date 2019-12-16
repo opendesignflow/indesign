@@ -1,6 +1,6 @@
 package org.odfi.indesign.core.config
 
-import com.idyria.osi.tea.listeners.ListeningSupport
+import org.odfi.tea.listeners.ListeningSupport
 import org.odfi.indesign.core.config.model.CommonConfig
 
 /**

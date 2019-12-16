@@ -1,10 +1,10 @@
 package org.odfi.indesign.core.brain.artifact
 
-import com.idyria.osi.tea.compile.ClassDomainContainer
+import org.odfi.tea.compile.ClassDomainContainer
 import org.eclipse.aether.artifact.Artifact
 import org.odfi.indesign.core.brain.Brain
 import org.odfi.indesign.core.harvest.Harvest
-import com.idyria.osi.tea.logging.TLogSource
+import org.odfi.tea.logging.TLogSource
 import org.odfi.indesign.core.brain.BrainRegion
 import org.eclipse.aether.graph.Dependency
 
