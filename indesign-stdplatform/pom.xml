@@ -4,10 +4,11 @@
     <artifactId>indesign-stdplatform</artifactId>
     <name>InDesign Std Platform</name>
 
+
     <parent>
         <groupId>org.odfi.indesign</groupId>
         <artifactId>indesign-parent</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>1.3.0</version>
         <relativePath>../</relativePath>
     </parent>
 
