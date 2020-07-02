@@ -2,12 +2,10 @@ package org.odfi.indesign.core.brain
 
 import org.odfi.indesign.core.config.ConfigSupport
 import java.io.File
+
 import org.odfi.tea.logging.TLogSource
 import org.odfi.indesign.core.harvest.Harvester
 import org.odfi.indesign.core.heart.Heart
-import org.eclipse.aether.impl.ArtifactResolver
-import org.odfi.indesign.core.artifactresolver.AetherResolver
-import org.odfi.indesign.core.brain.artifact.ArtifactExternalRegion
 import org.odfi.indesign.core.harvest.Harvest
 import org.odfi.tea.compile.ClassDomainSupport
 
@@ -137,9 +135,9 @@ object Brain extends Brain with ClassDomainSupport {
                         try {
                             keepErrorsOn(this) {
 
-                                var external = new ArtifactExternalRegion(gid, aid, v)
+                               /* var external = new ArtifactExternalRegion(gid, aid, v)
                                 external.configKey = Some(key)
-                                gather(external)
+                                gather(external)*/
                             }
 
                         } catch {

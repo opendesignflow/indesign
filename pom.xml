@@ -9,13 +9,13 @@
 	<parent>
 		<groupId>org.odfi</groupId>
 		<artifactId>superpom-scala</artifactId>
-		<version>2.13.1.r1</version>
+		<version>2.13.3.r2</version>
 	</parent>
 
 
 	
 	<properties>
-		<ooxoo.version>3.4.0-SNAPSHOT</ooxoo.version>
+		<ooxoo.version>3.4.0</ooxoo.version>
 	</properties>
 
 	<!-- Repositories to find ODFI packages -->
@@ -93,8 +93,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	
-
 
 	<build>
 		<plugins>
@@ -119,6 +117,7 @@
 
 	<modules>
 		<module>indesign-core</module>
+		<module>indesign-stdplatform</module>
 <!--		<module>indesign-git</module>-->
 <!-- 		<module>indesign-native</module> -->
 <!-- 		<module>indesign-webdraw</module> -->

@@ -4,12 +4,12 @@ import com.idyria.osi.ooxoo.db.store.DocumentContainer
 
 trait ConfigImplementation {
 
-  def addRealm(name: String)
+  def addRealm(name: String) : Unit
   def listAllRealms: List[String]
   def detectLatestRealm: Option[String]
 
   def cleanRealm : Unit
-  def openConfigRealm(str: String)
+  def openConfigRealm(str: String) : Unit
   
   def swithToCleanRealm(name: String) = {
     openConfigRealm(name)

@@ -65,7 +65,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
   }
 
   def supportConfigClean = {
-    this.supportedConfig.configValues.clear
+    this.supportedConfig.configValues.clear()
   }
 
   /**

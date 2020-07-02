@@ -3,10 +3,7 @@ package org.odfi.indesign.core.config
 import com.idyria.osi.ooxoo.core.buffers.datatypes.ClassBuffer
 import com.idyria.osi.ooxoo.core.buffers.structural.xattribute
 import org.odfi.indesign.core.config.model.CommonConfig
-import javafx.scene.Node
-import java.awt.Window
-import org.odfi.indesign.core.module.jfx.JFXRun
-import javafx.stage.Stage
+
 
 trait ConfigModelWithImpl[IT <: ConfigInModel[_ <: CommonConfig]] extends CommonConfig {
 
@@ -24,12 +21,13 @@ trait ConfigModelWithImpl[IT <: ConfigInModel[_ <: CommonConfig]] extends Common
       sys.error("Cannot ensure instance creation, no @implementationType value present")
     case None =>
 
-      val implresult = (classOf[Node].isAssignableFrom(implementationType.data) || classOf[Stage].isAssignableFrom(implementationType.data)) match {
+      /*val implresult = (classOf[Node].isAssignableFrom(implementationType.data) || classOf[Stage].isAssignableFrom(implementationType.data)) match {
         case true =>
           JFXRun.onJavaFXBlock(implementationType.data.newInstance()).get
         case false =>
           implementationType.data.newInstance()
-      }
+      }*/
+      val implresult = implementationType.data.getDeclaredConstructor().newInstance()
       implementationInstance = Some(implresult)
       implementationInstance.get.asInstanceOf[ConfigInModel[CommonConfig]].setConfigModel(this)
       implementationInstance.get

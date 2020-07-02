@@ -443,8 +443,9 @@ class IDFileWatcher extends ThreadLanguage with TLogSource {
               val polledEvents = key.pollEvents().asScala
               polledEvents.filter { ev => ev.kind() != StandardWatchEventKinds.OVERFLOW }.foreach {
 
-                case be: WatchEvent[Path] if (be.count() <= 1) =>
+                case ben: WatchEvent[_] if (ben.count() <= 1) =>
 
+                  val be = ben.asInstanceOf[WatchEvent[Path]]
                   logFine[IDFileWatcher](s"Change detected on key ${idKey}: " + be.kind() + " -> " + be.context() + " -> " + be.count())
 
 
