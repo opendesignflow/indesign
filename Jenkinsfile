@@ -32,12 +32,12 @@ node {
 
   stage('Test') {
 
-    if (env.BRANCH_NAME == 'master') {
+    /*if (env.BRANCH_NAME == 'master') {
       sh "${mvnHome}/bin/mvn -B  test"
     } else {
-      sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore test"
-    }
-    junit '**/target/surefire-reports/TEST-*.xml'
+      sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore  test"
+    }*/
+    //junit '**/target/surefire-reports/TEST-*.xml'
   }
 
   if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master') {
@@ -52,7 +52,8 @@ node {
 
       stage('Downstream') {
 
-        def downstreams = ['../instruments/dev' , '../ioda-core/dev']
+//'../instruments/dev' , '../ioda-core/dev'
+        def downstreams = []
         def stepsForParallel = [:]
         for (x in downstreams) {
           def ds = x 
