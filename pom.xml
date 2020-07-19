@@ -1,127 +1,127 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.odfi.indesign</groupId>
-	<artifactId>indesign-parent</artifactId>
-	<version>1.3.1-SNAPSHOT</version>
-	<name>InDesign Parent</name>
-	<packaging>pom</packaging>
-	<parent>
-		<groupId>org.odfi</groupId>
-		<artifactId>superpom-scala</artifactId>
-		<version>2.13.3.r2</version>
-	</parent>
-
-
-	
-	<properties>
-		<ooxoo.version>3.4.0</ooxoo.version>
-	</properties>
-
-	<!-- Repositories to find ODFI packages -->
-	<!-- ############################################## -->
-	<pluginRepositories>
-		<pluginRepository>
-			<id>sonatype</id>
-			<name>Sonatype OSS Snapshots Repository</name>
-			<url>http://oss.sonatype.org/content/groups/public</url>
-		</pluginRepository>
-		<pluginRepository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>odfi.central</id>
-			<name>plugins-release</name>
-			<url>http://www.opendesignflow.org/maven/repository/internal/</url>
-		</pluginRepository>
-		<pluginRepository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>odfi.snapshots</id>
-			<name>plugins-snapshot</name>
-			<url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<repositories>
-		<repository>
-			<id>sonatype</id>
-			<name>Sonatype OSS Snapshots Repository</name>
-			<url>http://oss.sonatype.org/content/groups/public</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>odfi.central</id>
-			<name>odfi-release</name>
-			<url>http://www.opendesignflow.org/maven/repository/internal/</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>odfi.snapshots</id>
-			<name>odfi-snapshot</name>
-			<url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
-		</repository>
-	</repositories>
-
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.odfi.ooxoo</groupId>
-				<artifactId>ooxoo-core</artifactId>
-				<version>${ooxoo.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.odfi.ooxoo</groupId>
-				<artifactId>ooxoo-db</artifactId>
-				<version>${ooxoo.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>${ooxoo.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.odfi.wsb</groupId>
-				<artifactId>wsb-webapp</artifactId>
-				<version>2.2.0-SNAPSHOT</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>${ooxoo.version}</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.odfi.indesign</groupId>
+    <artifactId>indesign-parent</artifactId>
+    <version>1.3.1-SNAPSHOT</version>
+    <name>InDesign Parent</name>
+    <packaging>pom</packaging>
+    <parent>
+        <groupId>org.odfi</groupId>
+        <artifactId>superpom-scala</artifactId>
+        <version>2.13.3.r2</version>
+    </parent>
 
 
 
+    <properties>
+        <ooxoo.version>3.4.1</ooxoo.version>
+    </properties>
 
-	<modules>
-		<module>indesign-core</module>
-		<module>indesign-stdplatform</module>
-<!--		<module>indesign-git</module>-->
-<!-- 		<module>indesign-native</module> -->
-<!-- 		<module>indesign-webdraw</module> -->
-<!-- 		<module>indesign-wwwui</module> -->
-	</modules>
+    <!-- Repositories to find ODFI packages -->
+    <!-- ############################################## -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>sonatype</id>
+            <name>Sonatype OSS Snapshots Repository</name>
+            <url>http://oss.sonatype.org/content/groups/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>odfi.central</id>
+            <name>plugins-release</name>
+            <url>http://www.opendesignflow.org/maven/repository/internal/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>odfi.snapshots</id>
+            <name>plugins-snapshot</name>
+            <url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <id>sonatype</id>
+            <name>Sonatype OSS Snapshots Repository</name>
+            <url>http://oss.sonatype.org/content/groups/public</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>odfi.central</id>
+            <name>odfi-release</name>
+            <url>http://www.opendesignflow.org/maven/repository/internal/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>odfi.snapshots</id>
+            <name>odfi-snapshot</name>
+            <url>http://www.opendesignflow.org/maven/repository/snapshots/</url>
+        </repository>
+    </repositories>
+
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.odfi.ooxoo</groupId>
+                <artifactId>ooxoo-core</artifactId>
+                <version>${ooxoo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.odfi.ooxoo</groupId>
+                <artifactId>ooxoo-db</artifactId>
+                <version>${ooxoo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ooxoo-plugin</artifactId>
+                <version>${ooxoo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.odfi.wsb</groupId>
+                <artifactId>wsb-webapp</artifactId>
+                <version>2.2.0-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ooxoo-plugin</artifactId>
+                <version>${ooxoo.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+
+    <modules>
+        <module>indesign-core</module>
+        <module>indesign-stdplatform</module>
+        <!--		<module>indesign-git</module>-->
+        <!-- 		<module>indesign-native</module> -->
+        <!-- 		<module>indesign-webdraw</module> -->
+        <!-- 		<module>indesign-wwwui</module> -->
+    </modules>
 
 </project>
