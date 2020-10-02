@@ -19,10 +19,10 @@ object Brain extends Brain with ClassDomainSupport {
     //------------
 
     // Graceful Shutdown
-    sys.addShutdownHook {
+    /*sys.addShutdownHook {
 
         Brain.moveToShutdown
-    }
+    }*/
 
     // Heart is always a region
     Brain.gatherPermanent(Heart)
