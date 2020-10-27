@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.odfi.indesign</groupId>
         <artifactId>indesign-parent</artifactId>
-        <version>1.3.2-SNAPSHOT</version>
+        <version>1.3.2</version>
         <relativePath>../</relativePath>
     </parent>
 
