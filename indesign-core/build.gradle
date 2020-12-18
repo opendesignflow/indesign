@@ -133,7 +133,7 @@ publishing {
             // change URLs to point to your repos, e.g. http://my.org/repo
             def releasesRepoUrl = "https://www.opendesignflow.org/maven/repository/internal/"
             def snapshotsRepoUrl = "https://www.opendesignflow.org/maven/repository/snapshots"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = gradle.ext.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
             // Credentials
             def mavenOdfiPropertiesFile = new File(System.getProperty("user.home") + File.separator + ".gradle/odfi-maven.properties").getCanonicalFile()
