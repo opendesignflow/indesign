@@ -32,7 +32,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   /**
    * Background Executor
    */
-  val timedExecutor = Executors.newScheduledThreadPool(8, this)
+  var timedExecutor = Executors.newScheduledThreadPool(Runtime.getRuntime.availableProcessors(), this)
 
   // Task Management
   //------------------------
@@ -117,6 +117,16 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
     killTask(t)
     // t.waitForDone
     pump(t)
+  }
+
+  def pumpDefaultTask(id:String,cl: => Any) : HeartTask[Any] = {
+    this.pump(new HeartTask[Any] {
+      override def doTask: Unit = {
+        cl
+      }
+
+      override def getId: String = id
+    })
   }
 
   def getTaskById(id: String) = {

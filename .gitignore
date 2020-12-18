@@ -5,3 +5,5 @@ target/*
 *.iml
 indesign-boot/libs/
 indesign-boot/indesign-config/
+**/build/*
+**/out/*

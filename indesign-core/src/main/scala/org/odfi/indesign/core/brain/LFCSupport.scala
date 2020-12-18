@@ -127,9 +127,9 @@ trait LFCSupport extends ListeningSupport with TLogSource {
     var stateVal = this.synchronized {
       currentState
     }
+    //println(s"Waiting for $expectedState , current = $stateVal")
 
     stateVal match {
-      case None =>
       case Some(st) if (st == expectedState) =>
       case _ =>
         var wait = true
@@ -144,6 +144,7 @@ trait LFCSupport extends ListeningSupport with TLogSource {
               wait = false
             case _ =>
               lfcSemaphore.acquire()
+
           }
 
           //phase = lfcPhaser.awaitAdvance(phase+1)

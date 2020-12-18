@@ -1,14 +1,13 @@
 // Take the string and echo it.
 def transformIntoStep(jobFullName) {
     return {
-       build job: jobFullName , wait: false, propagate: false
+        build job: jobFullName , wait: false, propagate: false
     }
 }
 
 // Indesign
 node {
- 
-   //-- Github trigger
+    //-- Github trigger
     properties([pipelineTriggers([[$class: 'GitHubPushTrigger']])])
 
     //-- JDK
@@ -17,64 +16,49 @@ node {
 
     //-- Maven
     def mvnHome = tool 'maven3'
-    mavenOptions="-B -U"
+    mavenOptions = '-B -U'
 
-
-  stage('Clean') {
-    checkout scm
-    sh "${mvnHome}/bin/mvn ${mavenOptions} clean"
-  }
-
-  stage('Build') {
-    sh "${mvnHome}/bin/mvn ${mavenOptions}  -DskipTests=true install"
-    //junit '**/target/surefire-reports/TEST-*.xml'
-  }
-
-  stage('Test') {
-
-    /*if (env.BRANCH_NAME == 'master') {
-      sh "${mvnHome}/bin/mvn -B  test"
-    } else {
-      sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore  test"
-    }*/
-    //junit '**/target/surefire-reports/TEST-*.xml'
-  }
-
-  if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master') {
-
-    stage('Deploy') {
-        sh "${mvnHome}/bin/mvn ${mavenOptions} -DskipTests=true deploy"
-        step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
+    stage('Clean') {
+        checkout scm
+        sh 'chmod +x gradlew'
+        sh './gradlew clean'
+    //sh "${mvnHome}/bin/mvn ${mavenOptions} clean"
     }
 
-    // Trigger sub builds on dev
-    if (env.BRANCH_NAME == 'dev') {
+    stage('Build') {
+        sh './gradlew build'
+    //sh "${mvnHome}/bin/mvn ${mavenOptions}  -DskipTests=true install"
+    //junit '**/target/surefire-reports/TEST-*.xml'
+    }
 
-      stage('Downstream') {
+    stage('Test') {
+    }
 
-//'../instruments/dev' , '../ioda-core/dev'
-        def downstreams = []
-        def stepsForParallel = [:]
-        for (x in downstreams) {
-          def ds = x 
-          stepsForParallel[ds] = transformIntoStep(ds) 
+    if (env.BRANCH_NAME == 'dev' || env.BRANCH_NAME == 'master') {
+        stage('Deploy') {
+            //sh "${mvnHome}/bin/mvn ${mavenOptions} -DskipTests=true deploy"
+            // step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
+            sh './gradlew publish'
         }
 
-        parallel stepsForParallel
+        // Trigger sub builds on dev
+        if (env.BRANCH_NAME == 'dev') {
+            stage('Downstream') {
+                //'../instruments/dev' , '../ioda-core/dev'
+                def downstreams = []
+                def stepsForParallel = [:]
+                for (x in downstreams) {
+                    def ds = x
+                    stepsForParallel[ds] = transformIntoStep(ds)
+                }
 
-      }
-      
-    }
-
-
+                parallel stepsForParallel
+            }
+        }
   } else {
-    stage('Package') {
-        sh "${mvnHome}/bin/mvn -B -DskipTests=true -Dmaven.test.failure.ignore package"
-        step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
+        stage('Package') {
+            sh "${mvnHome}/bin/mvn -B -DskipTests=true -Dmaven.test.failure.ignore package"
+            step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
+        }
     }
-  }
-
- 
-
-
 }

@@ -1,16 +1,17 @@
-package edu.kit.ipe.adl.indesign.core.harvest.fs
+package org.odfi.indesign.core.harvest.fs
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, GivenWhenThen, Suite}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen, Suite}
 import org.odfi.tea.file.DirectoryUtilities
+
 import java.io.File
 import java.util.concurrent.{Semaphore, TimeUnit}
-
 import org.odfi.tea.io.TeaIOUtils
 import org.odfi.tea.logging.{TLog, TeaLogging}
 import org.odfi.indesign.core.harvest.fs.{IDAdded, IDDeleted, IDFileWatcher, IDModified}
+import org.scalatest.funsuite.AnyFunSuite
 
 
-class IDFileWatcherTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll with GivenWhenThen {
+class IDFileWatcherTest extends AnyFunSuite with BeforeAndAfterEach with BeforeAndAfterAll with GivenWhenThen {
 
   val baseFolder = new File("target/test-data/idfilewatcher")
   baseFolder.mkdirs

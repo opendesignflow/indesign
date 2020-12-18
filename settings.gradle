@@ -1,0 +1,21 @@
+
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        maven {
+            name = 'ODFI Releases'
+            url = 'https://www.opendesignflow.org/maven/repository/internal/'
+        }
+        maven {
+            name = 'ODFI Snapshots'
+            url = 'https://www.opendesignflow.org/maven/repository/snapshots/'
+        }
+    }
+}
+
+gradle.ext.version = "1.3.3-SNAAPSHOT"
+
+rootProject.name = "indesign"
+include(":core")
+project(":core").projectDir = new java.io.File("indesign-core")

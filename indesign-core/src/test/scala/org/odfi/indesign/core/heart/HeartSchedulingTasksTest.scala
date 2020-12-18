@@ -1,12 +1,11 @@
 package org.odfi.indesign.core.heart
 
-import org.scalatest.FunSuite
 import java.util.concurrent.Semaphore
-
 import org.odfi.indesign.core.brain.LFCDefinition
 import org.odfi.tea.logging.TLog
+import org.scalatest.funsuite.AnyFunSuite
 
-class HeartSchedulingTasksTest extends FunSuite {
+class HeartSchedulingTasksTest extends AnyFunSuite {
   
   
   test("Start Simple task and check cleanning") {
