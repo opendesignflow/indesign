@@ -1,5 +1,3 @@
-
-
 /*buildscript {
     dependencies {
 
@@ -28,7 +26,7 @@ sourceSets {
     main {
         scala {
             // Generated from ooxoo
-            srcDir  new java.io.File(getBuildDir(), "generated-sources/scala")
+            srcDir new java.io.File(getBuildDir(), "generated-sources/scala")
         }
     }
 
@@ -47,8 +45,6 @@ dependencies {
     api "org.odfi.ooxoo:ooxoo-db:${ooxoo_version}"
     api "org.odfi.ooxoo:ooxoo-core:${ooxoo_version}"
     api "org.odfi.ubroker:ubroker-core:$ubroker_version"
-
-
 
 
     api("org.scala-lang:scala-library:$scala_version")
@@ -89,9 +85,9 @@ publishing {
         }*/
         publishToMavenLocal(MavenPublication) {
 
-             groupId    "org.odfi.indesign"
+            groupId "org.odfi.indesign"
             artifactId "indesign-core"
-            //version    version
+            version gradle.ext.version
 
             from components.java
             /*versionMapping {
