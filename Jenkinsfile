@@ -26,8 +26,8 @@ node {
     }
 
     stage('Build') {
-        sh './gradlew generateOOXOO'
-        sh './gradlew build'
+        sh './gradlew generateOOXOO --no-daemon'
+        sh './gradlew build --no-daemon'
     //sh "${mvnHome}/bin/mvn ${mavenOptions}  -DskipTests=true install"
     //junit '**/target/surefire-reports/TEST-*.xml'
     }
