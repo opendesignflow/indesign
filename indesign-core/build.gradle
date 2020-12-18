@@ -34,6 +34,12 @@ sourceSets {
 
 // Dependencies
 //-------------------
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
 def ooxoo_version = "3.4.2-SNAPSHOT"
 def ubroker_version = "1.0.0"
 def scala_major = "2.13"
