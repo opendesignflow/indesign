@@ -17,8 +17,10 @@ plugins {
 
 }
 
-//def version = "1.1.0-SNAPSHOT"
-gradle.ext.version
+
+group = 'org.odfi.indesign'
+version = gradle.ext.hasProperty("version") ?  gradle.ext.version :  "dev"
+//gradle.ext.version
 
 // Sources
 //-------------------
@@ -60,50 +62,15 @@ dependencies {
 }
 
 
-repositories {
-
-    mavenLocal()
-    mavenCentral()
-    maven {
-        name = 'Sonatype Nexus Snapshots'
-        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
-    maven {
-        name = 'ODFI Releases'
-        url = 'https://www.opendesignflow.org/maven/repository/internal/'
-    }
-    maven {
-        name = 'ODFI Snapshots'
-        url = 'https://www.opendesignflow.org/maven/repository/snapshots/'
-    }
-    maven {
-        url "https://repo.triplequote.com/libs-release/"
-    }
-    google()
-    jcenter()
-}
-
 publishing {
+
     publications {
 
-        /*publishToMavenLocal(MavenPublication) {
-
-        }*/
         publishToMavenLocal(MavenPublication) {
 
-            groupId "org.odfi.indesign"
             artifactId "indesign-core"
-            version gradle.ext.version
-
             from components.java
-            /*versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }*/
+
             pom {
                 name = 'Indesign Core'
                 description = 'Indesign Core module'
@@ -133,7 +100,7 @@ publishing {
             // change URLs to point to your repos, e.g. http://my.org/repo
             def releasesRepoUrl = "https://www.opendesignflow.org/maven/repository/internal/"
             def snapshotsRepoUrl = "https://www.opendesignflow.org/maven/repository/snapshots"
-            url = gradle.ext.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
             // Credentials
             def mavenOdfiPropertiesFile = new File(System.getProperty("user.home") + File.separator + ".gradle/odfi-maven.properties").getCanonicalFile()
@@ -150,3 +117,29 @@ publishing {
         }
     }
 }
+
+repositories {
+
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name = 'Sonatype Nexus Snapshots'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'ODFI Releases'
+        url = 'https://www.opendesignflow.org/maven/repository/internal/'
+    }
+    maven {
+        name = 'ODFI Snapshots'
+        url = 'https://www.opendesignflow.org/maven/repository/snapshots/'
+    }
+    maven {
+        url "https://repo.triplequote.com/libs-release/"
+    }
+    google()
+    jcenter()
+}
+
+
+
