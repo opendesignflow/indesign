@@ -19,7 +19,8 @@ plugins {
 
 
 group = 'org.odfi.indesign'
-version = gradle.ext.hasProperty("version") ?  gradle.ext.version :  "dev"
+version = gradle.ext.has("version") ?  gradle.ext.version :  "dev"
+
 //gradle.ext.version
 
 // Sources
