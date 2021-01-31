@@ -88,6 +88,10 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
   def kill = {
     Heart.killTask(this)
   }
+  def killWait = {
+    this.kill
+    this.waitForDone
+  }
 
   def reschedule = {
 

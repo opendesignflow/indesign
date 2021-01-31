@@ -167,7 +167,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
               logFine[HeartTask[_]]("Task is periodic, Relasing stop signal")
               t.stopSignal.release
               try {
-                taskFuture.get(scheduleRate, TimeUnit.MILLISECONDS)
+                taskFuture.get(scheduleRate, t.timeUnit)
               } catch {
 
                 // Periodic task cancelled
@@ -196,7 +196,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
               logFine[HeartTask[_]]("Task not periodic, releasing stop signal")
               t.stopSignal.release
               try {
-                taskFuture.get(100, TimeUnit.MILLISECONDS)
+                taskFuture.get(100, t.timeUnit)
               } catch {
                 case e: TimeoutException =>
                   try {
@@ -219,7 +219,7 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
         // t.scheduleFuture.get.
         case false =>
 
-          t.scheduleEvery = None
+          //t.scheduleEvery = None
           t.scheduleFuture match {
             case Some(future) =>
               future.cancel(true)
