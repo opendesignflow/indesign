@@ -43,11 +43,10 @@ java {
     }
 }
 
-def ooxoo_version = "3.4.2-SNAPSHOT"
+def ooxoo_version = "3.4.2"
 def ubroker_version = "1.0.0"
 def scala_major = "2.13"
-def scala_version = "$scala_major.4"
-
+def scala_version = gradle.ext.has("scala_version") ?gradle.ext.scala_version :  "$scala_major.5"
 dependencies {
 
 
