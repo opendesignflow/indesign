@@ -1,9 +1,9 @@
-package org.odfi.indesign.core.module.artifactresolver.artifactresolver
+package org.odfi.indesign.core.module.artifactresolver
 
 import org.odfi.indesign.core.module.artifactresolver.ArtifactExternalRegion
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ExternalArtifactTest extends FunSuite {
+class ExternalArtifactTest extends AnyFunSuite {
   
   
   test("Discover Test") {

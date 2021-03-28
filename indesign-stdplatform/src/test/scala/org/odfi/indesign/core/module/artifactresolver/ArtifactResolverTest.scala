@@ -1,17 +1,18 @@
-package org.odfi.indesign.core.module.artifactresolver.artifactresolver
+package org.odfi.indesign.core.module.artifactresolver
 
-import org.scalatest.FunSuite
+
 import org.scalatest.BeforeAndAfterAll
-import java.io.File
 
+import java.io.File
 import org.scalatest.BeforeAndAfterAllConfigMap
 import org.scalatest.ConfigMap
 import org.odfi.tea.file.DirectoryUtilities
+
 import java.net.URL
-
 import org.odfi.indesign.core.module.artifactresolver.AetherResolver
+import org.scalatest.funsuite.AnyFunSuite
 
-class ArtifactResolverTest extends FunSuite with BeforeAndAfterAllConfigMap {
+class ArtifactResolverTest extends AnyFunSuite with BeforeAndAfterAllConfigMap {
   
   val testRepositoryFolder = new File("target/test-repository")
 

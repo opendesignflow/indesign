@@ -4,6 +4,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'scala'
     id "org.odfi.ooxoo" version "3.4.3-SNAPSHOT"
+    id 'org.openjfx.javafxplugin' version '0.0.9'
 
     // Publish
     id 'maven-publish'
@@ -15,7 +16,7 @@ plugins {
 group = 'org.odfi.indesign'
 version = gradle.ext.has("version") ?  gradle.ext.version :  "dev"
 
-//gradle.ext.version
+
 
 // Sources
 //-------------------
@@ -36,21 +37,36 @@ java {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
+javafx {
+    version = "17-ea+3"
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics' , 'javafx.media','javafx.web']
+}
 
 def ooxoo_version = gradle.ext.ooxoo_version
-def ubroker_version = "1.0.1-SNAPSHOT"
 def scala_major = "2.13"
 def scala_version = gradle.ext.has("scala_version") ? gradle.ext.scala_version :  "$scala_major.5"
 dependencies {
 
 
+    // Core Project
+    //-----------
+    api project(":core")
+    
+    // Dependencies
+    //------------
+    ["aether-transport-file","aether-util","aether-transport-http","aether-connector-basic"].each {
+        api "org.eclipse.aether:$it:1.1.0"
+    }
+    ["lucene-suggest","lucene-queries","lucene-queryparser"].each {
+        api "org.apache.lucene:$it:6.0.0"
+    }
 
-   // api "org.odfi.ooxoo:ooxoo-core:${ooxoo_version}"
-    api "org.odfi.ooxoo:ooxoo-db:${ooxoo_version}"
-    api "org.odfi.ubroker:ubroker-core:$ubroker_version"
+    api "org.apache.maven:maven-embedder:3.3.9"
+    api "javax.mail:mail:1.4.7"
 
+    // Test
+    //----------------
 
-    api("org.scala-lang:scala-library:$scala_version")
     testImplementation "org.scala-lang.modules:scala-xml_$scala_major:2.0.0-M3"
     testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.6"
     testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.6"
@@ -63,11 +79,11 @@ publishing {
 
         publishToMavenLocal(MavenPublication) {
 
-            artifactId "indesign-core"
+            artifactId "indesign-stdplatform"
             from components.java
 
             pom {
-                name = 'Indesign Core'
+                name = 'Indesign Standard Utilities'
                 description = 'Indesign Core module'
 
                 //properties = [ ]
