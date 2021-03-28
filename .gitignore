@@ -1,5 +1,6 @@
 target/*
-.*
+.gradle/*
+.idea/*
 **/target/*
 **/workspace-*/
 *.iml
