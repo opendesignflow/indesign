@@ -5,11 +5,13 @@
     }
 }*/
 
+
+
 plugins {
     // Scala
     // Apply the java plugin to add support for Java
     id 'scala'
-    id "org.odfi.ooxoo" version "3.4.2-SNAPSHOT"
+    id "org.odfi.ooxoo" version "3.4.3-SNAPSHOT"
 
     // Publish
     id 'maven-publish'
@@ -43,10 +45,10 @@ java {
     }
 }
 
-def ooxoo_version = "3.4.2"
+def ooxoo_version = "3.4.3-SNAPSHOT"
 def ubroker_version = "1.0.0"
 def scala_major = "2.13"
-def scala_version = gradle.ext.has("scala_version") ?gradle.ext.scala_version :  "$scala_major.5"
+def scala_version = gradle.ext.has("scala_version") ? gradle.ext.scala_version :  "$scala_major.5"
 dependencies {
 
 
@@ -57,8 +59,8 @@ dependencies {
 
     api("org.scala-lang:scala-library:$scala_version")
     testImplementation "org.scala-lang.modules:scala-xml_$scala_major:2.0.0-M3"
-    testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.3"
-    testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.3"
+    testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.6"
+    testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.6"
 }
 
 
@@ -103,6 +105,7 @@ publishing {
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
             // Credentials
+            //-------------
             def mavenOdfiPropertiesFile = new File(System.getProperty("user.home") + File.separator + ".gradle/odfi-maven.properties").getCanonicalFile()
 
             if (mavenOdfiPropertiesFile.exists()) {
@@ -112,6 +115,11 @@ publishing {
                 credentials {
                     username keystoreProperties["user"]
                     password keystoreProperties["password"]
+                }
+            } else {
+                credentials {
+                    username System.getenv("PUBLISH_USERNAME")
+                    password System.getenv("PUBLISH_PASSWORD")
                 }
             }
         }

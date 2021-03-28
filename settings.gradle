@@ -14,12 +14,20 @@ pluginManagement {
     }
 }
 
+// Version
+//--------------
 gradle.ext.version = "1.3.3-SNAPSHOT"
 gradle.ext.branch = System.getenv("BRANCH_NAME")
-if (gradle.ext.branch!=null && gradle.ext.branch=="release") {
+if (gradle.ext.branch!=null && gradle.ext.branch.matches(".*\\/release.*")) {
     gradle.ext.version = gradle.ext.version.replace("-SNAPSHOT","")
 }
 
+// Scala
+//-------------
+gradle.ext.scala_version = "2.13.5"
+
+// Projects
+//-------------
 rootProject.name = "indesign"
 include(":core")
 project(":core").projectDir = new java.io.File("indesign-core")
