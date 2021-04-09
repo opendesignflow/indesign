@@ -3,7 +3,7 @@ plugins {
     // Scala
     // Apply the java plugin to add support for Java
     id 'scala'
-    id "org.odfi.ooxoo" version "3.4.3-SNAPSHOT"
+    id "org.odfi.ooxoo" version "3.4.3"
     id 'org.openjfx.javafxplugin' version '0.0.9'
 
     // Publish

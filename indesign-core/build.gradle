@@ -1,13 +1,15 @@
 
 plugins {
-    // Scala
+
     // Apply the java plugin to add support for Java
-    id 'scala'
-    id "org.odfi.ooxoo" version "3.4.3-SNAPSHOT"
+    id "org.odfi.ooxoo" version "3.4.3"
 
     // Publish
     id 'maven-publish'
     id "java-library"
+
+    // Scala
+    id 'scala'
 
 }
 
@@ -47,7 +49,7 @@ dependencies {
 
    // api "org.odfi.ooxoo:ooxoo-core:${ooxoo_version}"
     api "org.odfi.ooxoo:ooxoo-db:${ooxoo_version}"
-    api "org.odfi.ubroker:ubroker-core:$ubroker_version"
+    //api "org.odfi.ubroker:ubroker-core:$ubroker_version"
 
 
     api("org.scala-lang:scala-library:$scala_version")
