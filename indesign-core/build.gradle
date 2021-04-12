@@ -2,7 +2,7 @@
 plugins {
 
     // Apply the java plugin to add support for Java
-    id "org.odfi.ooxoo" version "3.4.3"
+    id "org.odfi.ooxoo" version "3.4.4"
 
     // Publish
     id 'maven-publish'
@@ -40,7 +40,6 @@ java {
 }
 
 def ooxoo_version = gradle.ext.ooxoo_version
-def ubroker_version = "1.0.1-SNAPSHOT"
 def scala_major = "2.13"
 def scala_version = gradle.ext.has("scala_version") ? gradle.ext.scala_version :  "$scala_major.5"
 dependencies {
@@ -48,14 +47,14 @@ dependencies {
 
 
    // api "org.odfi.ooxoo:ooxoo-core:${ooxoo_version}"
-    api "org.odfi.ooxoo:ooxoo-db:${ooxoo_version}"
+    api "org.odfi.ooxoo:ooxoo-db:${ooxoo_version}".toString()
     //api "org.odfi.ubroker:ubroker-core:$ubroker_version"
 
 
-    api("org.scala-lang:scala-library:$scala_version")
-    testImplementation "org.scala-lang.modules:scala-xml_$scala_major:2.0.0-M3"
-    testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.6"
-    testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.6"
+    api("org.scala-lang:scala-library:$scala_version").toString()
+    testImplementation "org.scala-lang.modules:scala-xml_$scala_major:2.0.0-M3".toString()
+    testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.6".toString()
+    testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.6".toString()
 }
 
 
@@ -141,7 +140,6 @@ repositories {
         url "https://repo.triplequote.com/libs-release/"
     }
     google()
-    jcenter()
 }
 
 

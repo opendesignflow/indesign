@@ -20,10 +20,10 @@ class RegionClassName(val className: String, val region: ExternalBrainRegion) ex
     load[T] match {
       //case ESome(cl) if (tag.runtimeClass.isAssignableFrom(cl)) => true 
       case ESome(r) if (tag.runtimeClass.isInstance(r)) => true
-      case ENone => false
       case EError(err) =>
         addError(err)
         false
+      case other => false
     }
   }
 

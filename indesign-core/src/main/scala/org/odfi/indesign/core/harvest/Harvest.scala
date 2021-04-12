@@ -133,25 +133,6 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
   }
 
-  /*def onAllHarvestersDepthFirst(cl: Harvester => Boolean): Unit = {
-
-    var processList = new scala.collection.mutable.Stack[Harvester]()
-    processList ++= this.harvesters
-
-    while (processList.nonEmpty) {
-
-      var h = processList.pop()
-
-      keepErrorsOn(h) {
-        cl(h) match {
-          case true => 
-          case false => 
-        }
-        processList.pushAll(h.childHarvesters)
-      }
-    }
-
-  }*/
 
   def onHarvesters[CT <: Harvester](cl: PartialFunction[CT, Unit])(implicit tag: ClassTag[CT]): Unit = {
 
@@ -416,14 +397,14 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
     // Make sure the harvester has at least one type of auto classes
     //----------------
     //var requiredClasses = autoHarvesterClasses.filter { case (matchClass, objects) => matchClass.isAssignableFrom(harvester.getClass) }.values.flatten.toList.distinct
-    var requiredClasses = autoHarvesterClasses.filterKeys { case matchClass => matchClass == harvester.getClass }.values.flatten.toList.distinct
+    var requiredClasses = autoHarvesterClasses.view.filterKeys { case matchClass => matchClass == harvester.getClass }.values.flatten.toList.distinct
     logFine[Harvester]("Required Classes : " + requiredClasses)
 
     requiredClasses.foreach {
 
       // Can't find required class in children harvesters, and required is not same as harvester, add
       //case requiredClass if (requiredClass != harvester.getClass && ((harvester.parentHarvester.isDefined && harvester.parentHarvester.get.getClass!=requiredClass) || harvester.parentHarvester.isEmpty) && children.find { ch => requiredClass.isAssignableFrom(ch.getClass) }.isEmpty) =>
-      case requiredClass if (requiredClass != harvester.getClass && children.find { ch => requiredClass.isAssignableFrom(ch.getClass) }.isEmpty) =>
+      case requiredClass if (requiredClass != harvester.getClass && !children.exists { ch => requiredClass.isAssignableFrom(ch.getClass) }) =>
 
         try {
           harvester.addChildHarvester(requiredClass)

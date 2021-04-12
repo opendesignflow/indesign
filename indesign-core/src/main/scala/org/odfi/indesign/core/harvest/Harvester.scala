@@ -72,7 +72,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
   }
 
   def addChildHarvester(h: Class[Harvester]): Harvester = {
-    this.addChildHarvester(h.newInstance().asInstanceOf[Harvester])
+    this.addChildHarvester(h.getDeclaredConstructor().newInstance().asInstanceOf[Harvester])
 
   }
   def addChildHarvesterForce(h: Harvester): Harvester = {
@@ -233,7 +233,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   def getResourceExact[CT <: HarvestedResource](implicit cl: ClassTag[CT]): Option[CT] = {
 
-    this.getResources.find { r => cl.runtimeClass.isInstance(r) && cl.runtimeClass == r } match {
+    this.getResources.find { r => cl.runtimeClass.isInstance(r)  } match {
       case Some(r) => Some(r.asInstanceOf[CT])
       case None => None
     }

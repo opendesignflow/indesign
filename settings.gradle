@@ -25,14 +25,11 @@ if (gradle.ext.branch!=null && gradle.ext.branch.matches(".*\\/release.*")) {
 
 // Scala
 //-------------
-gradle.ext.ooxoo_version = "3.4.3"
+gradle.ext.ooxoo_version = "3.4.4"
 gradle.ext.scala_version = "2.13.5"
 
 // Projects
 //-------------
 rootProject.name = "indesign"
-include(":core")
-project(":core").projectDir = new java.io.File("indesign-core")
-
-include(":stdplatform")
-project(":stdplatform").projectDir = new java.io.File("indesign-stdplatform")
+include(":indesign-core")
+include(":indesign-stdplatform")

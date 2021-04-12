@@ -3,7 +3,7 @@ plugins {
     // Scala
     // Apply the java plugin to add support for Java
     id 'scala'
-    id "org.odfi.ooxoo" version "3.4.3"
+    id "org.odfi.ooxoo" version "3.4.4"
     id 'org.openjfx.javafxplugin' version '0.0.9'
 
     // Publish
@@ -38,7 +38,7 @@ java {
     }
 }
 javafx {
-    version = "17-ea+3"
+    version = "17-ea+6"
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics' , 'javafx.media','javafx.web']
 }
 
@@ -50,26 +50,26 @@ dependencies {
 
     // Core Project
     //-----------
-    api project(":core")
+    api project(":indesign-core")
     
     // Dependencies
     //------------
     ["aether-transport-file","aether-util","aether-transport-http","aether-connector-basic"].each {
-        api "org.eclipse.aether:$it:1.1.0"
+        api "org.eclipse.aether:$it:1.1.0".toString()
     }
     ["lucene-suggest","lucene-queries","lucene-queryparser"].each {
-        api "org.apache.lucene:$it:6.0.0"
+        api "org.apache.lucene:$it:6.0.0".toString()
     }
 
-    api "org.apache.maven:maven-embedder:3.3.9"
-    api "javax.mail:mail:1.4.7"
+    api "org.apache.maven:maven-embedder:3.3.9".toString()
+    api "javax.mail:mail:1.4.7".toString()
 
     // Test
     //----------------
 
-    testImplementation "org.scala-lang.modules:scala-xml_$scala_major:2.0.0-M3"
-    testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.6"
-    testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.6"
+    testImplementation "org.scala-lang.modules:scala-xml_$scala_major:2.0.0-M3".toString()
+    testImplementation "org.scalatest:scalatest-funsuite_$scala_major:3.2.6".toString()
+    testImplementation "org.scalatest:scalatest-shouldmatchers_$scala_major:3.2.6".toString()
 }
 
 
@@ -155,7 +155,6 @@ repositories {
         url "https://repo.triplequote.com/libs-release/"
     }
     google()
-    jcenter()
 }
 
 

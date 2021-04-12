@@ -274,7 +274,7 @@ object Brain extends Brain with ClassDomainSupport {
 
                 // Class
                 case name =>
-                    regionClass.newInstance().asInstanceOf[BrainRegion]
+                    regionClass.getDeclaredConstructor().newInstance().asInstanceOf[BrainRegion]
             }
 
         }

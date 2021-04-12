@@ -260,7 +260,6 @@ object Heart extends ThreadFactory with Harvester with BrainRegion {
   this.onLoad {
     this.threadGroup = new ThreadGroup("heart")
     this.threadGroup.setDaemon(true)
-    this.threadGroup.allowThreadSuspension(true)
   }
   this.onStop {
 
