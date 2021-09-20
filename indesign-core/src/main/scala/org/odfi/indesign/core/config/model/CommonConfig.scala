@@ -217,7 +217,7 @@ trait CommonConfig extends CommonConfigTrait with DBContainerReference {
       case Some(c: T) =>
         c
       case other =>
-        var newBuffer = tag.runtimeClass.newInstance().asInstanceOf[T]
+        var newBuffer = tag.runtimeClass.getDeclaredConstructor().newInstance().asInstanceOf[T]
         this.valuesBufferCache = this.valuesBufferCache + (str -> newBuffer)
         newBuffer
     }

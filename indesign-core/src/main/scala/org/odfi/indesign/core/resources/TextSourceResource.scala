@@ -16,7 +16,7 @@ trait TextSourceResource extends HarvestedResource {
   /**
    * Set the Text Content
    */
-  def setTextContent(input: String)
+  def setTextContent(input: String) : Unit
 
   /**
    *

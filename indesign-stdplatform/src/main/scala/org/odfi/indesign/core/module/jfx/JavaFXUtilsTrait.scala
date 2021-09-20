@@ -42,7 +42,7 @@ trait JavaFXUtilsTrait {
                 cl
             case false =>
                 Platform.runLater(new Runnable() {
-                    def run = {
+                    def run : Unit = {
                         cl
 
                     }
@@ -55,7 +55,7 @@ trait JavaFXUtilsTrait {
         //JavaFXRun.onJavaFX({ cl })
 
         Platform.runLater(new Runnable() {
-            def run = {
+            def run : Unit  = {
                 cl
 
             }
@@ -281,7 +281,7 @@ trait JavaFXUtilsTrait {
 
     }
 
-    implicit def convertClosureToEventHandler[ET <: Event](cl: ET => Unit) = {
+    implicit def convertClosureToEventHandler[ET <: Event](cl: ET => Unit) : EventHandler[ET] = {
         var eh = new EventHandler[ET] {
 
             def handle(event: ET) = {

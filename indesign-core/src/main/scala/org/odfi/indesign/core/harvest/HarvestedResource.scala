@@ -107,7 +107,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     // Add to local list, but not if already there
     derivedResources.get(r.getId) match {
       case Some(res) =>
-        logWarn("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
+        logWarn[HarvestedResource]("Readding derived resource of ID: " + r.getId + s", actual resource is ${res.getClass}, trying to add ${r.getClass}")
         res.asInstanceOf[RT]
       case None =>
         derivedResources = derivedResources.updated(r.getId, r)
@@ -405,7 +405,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
   //-------------------
   def onAdded(cl: PartialFunction[Harvester, Unit]) = {
     this.onWith("added") {
-      h: Harvester =>
+      (h: Harvester) =>
         cl.isDefinedAt(h) match {
           case true => keepErrorsOn(this) {
             cl(h)
@@ -417,7 +417,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   def onGathered(cl: PartialFunction[Harvester, Unit]) = {
     this.onWith[Harvester]("gathered") {
-      h: Harvester =>
+      (h: Harvester) =>
         //println("Running a gathered even on "+this)
         cl.isDefinedAt(h) match {
           case true =>
@@ -448,7 +448,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
     this.originalHarvester match {
       case Some(h) =>
         h.availableResources.clear()
-        h.availableResources.addAll(this.originalHarvester.get.availableResources - this)
+        h.availableResources.addAll(this.originalHarvester.get.availableResources.filterNot(_==this))
         this.originalHarvester = None
       //  println(s"Removing " + this + " from original harvester: " + h)
       case None =>
@@ -468,7 +468,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   def onCleaned(cl: PartialFunction[Harvester, Unit]): Unit = {
     this.onWith("clean") {
-      h: Harvester =>
+      (h: Harvester) =>
         cl.isDefinedAt(h) match {
           case true => keepErrorsOn(this) {
             cl(h)
@@ -480,7 +480,7 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
 
   def onKept(cl: PartialFunction[Harvester, Unit]) = {
     this.onWith("kept") {
-      h: Harvester =>
+      (h: Harvester) =>
         cl.isDefinedAt(h) match {
           case true => keepErrorsOn(this) {
             cl(h)

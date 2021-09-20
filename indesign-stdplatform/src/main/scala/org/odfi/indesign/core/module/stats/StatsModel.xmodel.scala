@@ -11,7 +11,7 @@ import com.idyria.osi.ooxoo.core.buffers.id.IdAndRefIdModelBuilder
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),
   new producer(value = classOf[MDProducer])))
-object StatsModel extends ModelBuilder with IdAndRefIdModelBuilder {
+class StatsModel extends ModelBuilder with IdAndRefIdModelBuilder {
 
     /**
      * Add standard elements for statistics gathering

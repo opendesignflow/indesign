@@ -105,7 +105,7 @@ trait HeartTask[PT] extends Callable[PT] with Runnable with HarvestedResource wi
 
   // Run
   //--------------
-  def run = call
+  def run() : Unit = call
   def call = {
     catchErrorsOn(this) {
 

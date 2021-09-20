@@ -253,5 +253,5 @@ trait FileSystemHarvester extends Harvester  {
 
 object FileSystemHarvester extends FileSystemHarvester {
 
-  implicit def pathToResource(p: Path) = new HarvestedFile(p)
+  implicit def pathToResource(p: Path) : HarvestedFile = new HarvestedFile(p)
 }

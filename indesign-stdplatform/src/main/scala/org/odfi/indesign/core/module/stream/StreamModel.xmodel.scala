@@ -9,7 +9,7 @@ import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),
   new producer(value = classOf[MDProducer])))
-object StreamModel extends ModelBuilder {
+class StreamModel extends ModelBuilder {
   
   "StreamUpdate" is {
      attribute("streamID")

@@ -244,7 +244,7 @@ class IDFileWatcher extends ThreadLanguage with TLogSource {
     var targetFile = directory.exists() match {
       case true if (directory.isDirectory) => directory.getCanonicalFile
       case true if (!directory.isDirectory) => directory.getParentFile.getCanonicalFile
-      case false =>
+      case other =>
         sys.error("Cannot Watch non existing file/directory..." + directory.getCanonicalPath)
     }
 

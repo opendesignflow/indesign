@@ -8,7 +8,7 @@ import com.idyria.osi.ooxoo.model.out.scala.ScalaProducer
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),
   new producer(value = classOf[MDProducer])))
-object HeartModel extends ModelBuilder {
+class HeartModel extends ModelBuilder {
   
   
   "HeartTaskStatus" is {

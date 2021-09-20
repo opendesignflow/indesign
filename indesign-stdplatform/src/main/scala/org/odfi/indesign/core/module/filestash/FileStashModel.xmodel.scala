@@ -11,7 +11,7 @@ import com.idyria.osi.ooxoo.core.buffers.id.IdAndRefIdModelBuilder
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),
   new producer(value = classOf[MDProducer])))
-object FileStashModel extends ModelBuilder with IdAndRefIdModelBuilder {
+class FileStashModel extends ModelBuilder with IdAndRefIdModelBuilder {
 
   "FileStash" is {
     makeTraitAndUseCustomImplementation

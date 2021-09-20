@@ -60,7 +60,7 @@ object Config extends IndesignModule {
   
   def onImplementationSet(cl: ConfigImplementation => Any) = {
     this.onWith("implementation.set") {
-      c : ConfigImplementation => cl(c)
+      (c : ConfigImplementation) => cl(c)
     }
   }
 

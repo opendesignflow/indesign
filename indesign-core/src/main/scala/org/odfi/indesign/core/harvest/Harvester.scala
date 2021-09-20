@@ -783,13 +783,13 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
 
   def onRemovedResources(cl: List[HarvestedResource] => Unit) = {
     this.onWith("removedResources") {
-      rl: List[HarvestedResource] => cl(rl)
+      (rl: List[HarvestedResource]) => cl(rl)
     }
   }
 
   def onGatheredResources(cl: List[HarvestedResource] => Unit) = {
     this.onWith("gathered.resources") {
-      rl: List[HarvestedResource] => cl(rl)
+      (rl: List[HarvestedResource]) => cl(rl)
     }
   }
 
@@ -798,7 +798,7 @@ trait Harvester extends LFCSupport with ErrorSupport with TLogSource with Config
    */
   def onGathered[T <: HarvestedResource](cl: T => Unit)(implicit tag: ClassTag[T]) = {
     this.onWith[HarvestedResource]("gathered.resource") {
-      rl: HarvestedResource => 
+      (rl: HarvestedResource) => 
         if (tag.runtimeClass.isInstance(rl))
           cl(rl.asInstanceOf[T])
     }
