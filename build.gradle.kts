@@ -16,8 +16,7 @@ if (System.getenv().getOrDefault("BRANCH_NAME", "dev").contains("release")) {
 }
 
 
-group = "org.odfi.indesign"
-version = lib_version
+
 
 allprojects {
 
@@ -25,7 +24,7 @@ allprojects {
 
 
     // Name + version
-    group = "org.odfi.ooxoo"
+    group = "org.odfi.indesign"
     version = lib_version
 
     var scalaMajorVersion by extra("3")
