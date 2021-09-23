@@ -4,7 +4,7 @@ plugins {
     // Scala
     // Apply the java plugin to add support for Java
     id("scala")
-    id("org.odfi.ooxoo") version ("4.0.1")
+    id("org.odfi.ooxoo") version ("4.0.2")
 
     // Publish
     id("maven-publish")
@@ -45,7 +45,7 @@ tasks.javadoc {
 
 // Scala compilation options
 tasks.withType<ScalaCompile>().configureEach {
-    scalaCompileOptions.additionalParameters = listOf("-rewrite", "-source", "3.0-migration")
+    //scalaCompileOptions.additionalParameters = listOf("-rewrite", "-source", "3.0-migration")
 }
 
 // Dependencies
