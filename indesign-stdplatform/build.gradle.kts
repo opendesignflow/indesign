@@ -4,7 +4,7 @@ plugins {
     // Scala
     // Apply the java plugin to add support for Java
     id("scala")
-    id("org.odfi.ooxoo") version ("4.0.2")
+    id("org.odfi.ooxoo") version ("4.0.5-SNAPSHOT")
     id("org.openjfx.javafxplugin") version "0.0.10"
 
     // Publish
