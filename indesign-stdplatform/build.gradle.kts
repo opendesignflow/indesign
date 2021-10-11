@@ -4,7 +4,7 @@ plugins {
     // Scala
     // Apply the java plugin to add support for Java
     id("scala")
-    id("org.odfi.ooxoo") version ("4.0.5-SNAPSHOT")
+    id("org.odfi.ooxoo") version ("4.0.5")
     id("org.openjfx.javafxplugin") version "0.0.10"
 
     // Publish
@@ -79,7 +79,7 @@ dependencies {
     }
 
     api("org.apache.maven:maven-embedder:3.8.1")
-    api("javax.mail:mail:1.4.7")
+    implementation("javax.mail:mail:1.4.7")
 
     // Test
     //----------------

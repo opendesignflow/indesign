@@ -6,7 +6,7 @@ val scalaVersion by extra {
     "$scalaMajorVersion.$scalaMinorVersion"
 }
 
-var ooxooVersion by extra("4.0.5-SNAPSHOT")
+var ooxooVersion by extra("4.0.5")
 
 // Project version
 var lib_version by extra("2.0.1-SNAPSHOT")
