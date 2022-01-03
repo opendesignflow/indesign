@@ -200,7 +200,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
         r
 
     }
-    r.toIterable.flatten
+    r.flatten
   }
 
   // Delivering
@@ -417,7 +417,7 @@ object Harvest extends BrainRegion with ListeningSupport with ConfigSupport {
 
     // MAke sure the harvester has all the required objects
     //---------------
-    var requiredObjects = autoHarvesterObjects.toIterable.collect {
+    var requiredObjects = autoHarvesterObjects.collect {
       case (matchClass, objects) if (matchClass.isAssignableFrom(harvester.getClass)) => objects.toSeq
     }.flatten
     requiredObjects.foreach {

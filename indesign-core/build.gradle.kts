@@ -1,10 +1,11 @@
 val ooxooVersion : String by rootProject.extra
 
 plugins {
+
     // Scala
     // Apply the java plugin to add support for Java
     id("scala")
-    id("org.odfi.ooxoo") version ("4.0.5")
+    id("org.odfi.ooxoo")
 
     // Publish
     id("maven-publish")

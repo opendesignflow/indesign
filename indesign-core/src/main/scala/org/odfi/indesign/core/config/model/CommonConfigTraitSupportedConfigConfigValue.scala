@@ -1,6 +1,6 @@
 package org.odfi.indesign.core.config.model
 
-import com.idyria.osi.ooxoo.core.buffers.datatypes.DoubleBuffer
+import org.odfi.ooxoo.core.buffers.datatypes.DoubleBuffer
 
 class CommonConfigTraitSupportedConfigConfigValue extends CommonConfigTraitSupportedConfigConfigValueTrait {
 

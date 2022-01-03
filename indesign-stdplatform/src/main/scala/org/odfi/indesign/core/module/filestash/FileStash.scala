@@ -6,8 +6,8 @@ import java.nio.ByteBuffer
 import org.odfi.tea.io.TeaIOUtils
 import java.io.ByteArrayInputStream
 import org.odfi.indesign.core.harvest.fs.HarvestedFile
-import com.idyria.osi.ooxoo.core.buffers.structural.AnyXList
-import com.idyria.osi.ooxoo.core.buffers.structural.xelement
+import org.odfi.ooxoo.core.buffers.structural.AnyXList
+import org.odfi.ooxoo.core.buffers.structural.xelement
 
 object FileStash extends IndesignModule {
   

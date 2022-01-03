@@ -5,6 +5,6 @@
 :artifactId set "simplefb-withdeps"
 :version set "1"
 
-:dependency com.idyria.osi.ooxoo:ooxoo-core:3.1.2-SNAPSHOT
+:dependency org.odfi.ooxoo:ooxoo-core:3.1.2-SNAPSHOT
 
         

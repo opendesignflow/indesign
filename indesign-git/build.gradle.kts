@@ -1,6 +1,5 @@
-val ooxooVersion: String by rootProject.extra
+val ooxooVersion : String by rootProject.extra
 val javafxVersion: String by rootProject.extra
-
 plugins {
     // Scala
     // Apply the java plugin to add support for Java
@@ -69,27 +68,9 @@ dependencies {
     //-----------
     api(project(":indesign-core"))
 
-    // Dependencies
-    //------------
+    // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
+    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
 
-    listOf("aether-transport-file", "aether-util", "aether-transport-http", "aether-connector-basic").forEach {
-        api("org.eclipse.aether:$it:1.1.0")
-    }
-    listOf("lucene-suggest", "lucene-queries", "lucene-queryparser").forEach {
-        api("org.apache.lucene:$it:9.0.0")
-    }
-
-    api("org.apache.maven:maven-embedder:3.8.4")
-
-    // Java Mail API
-    //------------
-
-    // https://mvnrepository.com/artifact/jakarta.mail/jakarta.mail-api
-    //implementation("jakarta.mail:jakarta.mail-api:2.1.0-RC1")
-    // https://mvnrepository.com/artifact/javax.mail/javax.mail-api
-    implementation("javax.mail:javax.mail-api:1.6.2")
-
-    //implementation("jakarta.mail:mail:1.4.7")
 
     // Test
     //----------------
@@ -110,7 +91,7 @@ publishing {
             pom {
 
                 name.set("Indesign Standard Utilities")
-                description.set("Indesign Standard module")
+                description.set("Indesign Core module")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")

@@ -1,12 +1,12 @@
 package org.odfi.indesign.core.module.stats
 
-import com.idyria.osi.ooxoo.model.ModelBuilder
-import com.idyria.osi.ooxoo.model.producer
-import com.idyria.osi.ooxoo.model.producers
-import com.idyria.osi.ooxoo.model.out.markdown.MDProducer
-import com.idyria.osi.ooxoo.model.out.scala.ScalaProducer
-import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
-import com.idyria.osi.ooxoo.core.buffers.id.IdAndRefIdModelBuilder
+import org.odfi.ooxoo.model.ModelBuilder
+import org.odfi.ooxoo.model.producer
+import org.odfi.ooxoo.model.producers
+import org.odfi.ooxoo.model.out.markdown.MDProducer
+import org.odfi.ooxoo.model.out.scala.ScalaProducer
+import org.odfi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
+import org.odfi.ooxoo.core.buffers.id.IdAndRefIdModelBuilder
 
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),

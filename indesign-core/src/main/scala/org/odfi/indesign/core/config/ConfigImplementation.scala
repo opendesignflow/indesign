@@ -1,6 +1,6 @@
 package org.odfi.indesign.core.config
 
-import com.idyria.osi.ooxoo.db.store.DocumentContainer
+import org.odfi.ooxoo.db.store.DocumentContainer
 
 trait ConfigImplementation {
 

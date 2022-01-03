@@ -7,10 +7,10 @@ import org.odfi.indesign.core.config.model.HarvesterConfig
 import org.odfi.indesign.core.config.model.DefaultConfig
 import org.odfi.indesign.core.config.model.RegionConfig
 import org.odfi.indesign.core.config.model.CommonConfig
-import com.idyria.osi.ooxoo.db.store.DocumentContainer
+import org.odfi.ooxoo.db.store.DocumentContainer
 import org.odfi.indesign.core.module.IndesignModule
 import org.odfi.indesign.core.harvest.fs.FSGlobalWatch
-import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
+import org.odfi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
 import org.odfi.indesign.core.harvest.HarvestedResource
 import org.odfi.indesign.core.harvest.Harvest
 

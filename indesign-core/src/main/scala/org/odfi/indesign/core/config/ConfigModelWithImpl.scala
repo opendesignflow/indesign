@@ -1,7 +1,7 @@
 package org.odfi.indesign.core.config
 
-import com.idyria.osi.ooxoo.core.buffers.datatypes.ClassBuffer
-import com.idyria.osi.ooxoo.core.buffers.structural.xattribute
+import org.odfi.ooxoo.core.buffers.datatypes.ClassBuffer
+import org.odfi.ooxoo.core.buffers.structural.xattribute
 import org.odfi.indesign.core.config.model.CommonConfig
 
 

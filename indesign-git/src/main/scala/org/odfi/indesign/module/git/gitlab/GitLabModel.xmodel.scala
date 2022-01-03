@@ -1,16 +1,16 @@
 package org.odfi.indesign.module.git.gitlab
 
-import com.idyria.osi.ooxoo.model.ModelBuilder
-import com.idyria.osi.ooxoo.model.producer
-import com.idyria.osi.ooxoo.model.producers
-import com.idyria.osi.ooxoo.model.out.markdown.MDProducer
-import com.idyria.osi.ooxoo.model.out.scala.ScalaProducer
-import com.idyria.osi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
+import org.odfi.ooxoo.model.ModelBuilder
+import org.odfi.ooxoo.model.producer
+import org.odfi.ooxoo.model.producers
+import org.odfi.ooxoo.model.out.markdown.MDProducer
+import org.odfi.ooxoo.model.out.scala.ScalaProducer
+import org.odfi.ooxoo.core.buffers.structural.io.sax.STAXSyncTrait
 
 @producers(Array(
   new producer(value = classOf[ScalaProducer]),
   new producer(value = classOf[MDProducer])))
-object GitLabModel extends ModelBuilder {
+class GitLabModel extends ModelBuilder {
   
   "Gitlab" is {
     elementsStack.head.makeTraitAndUseCustomImplementation

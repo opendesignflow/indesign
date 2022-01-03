@@ -7,7 +7,7 @@ import org.odfi.indesign.core.brain.ExternalBrainRegion
 import java.io.File
 import org.odfi.indesign.core.brain.BrainRegion
 import org.odfi.indesign.core.module.ui.www.external.DataTableBuilder
-import com.idyria.osi.ooxoo.core.buffers.structural.xelement
+import org.odfi.ooxoo.core.buffers.structural.xelement
 import org.odfi.indesign.core.brain.ExternalBrainRegion
 import org.odfi.indesign.core.module.ui.www.IndesignUIView
 import com.google.inject.spi.ModuleSource

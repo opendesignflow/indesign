@@ -355,24 +355,24 @@ trait HarvestedResource extends ListeningSupport with LFCSupport with ErrorSuppo
    * Get Derived Resources Recursively
    */
   def getSubDerivedResources[CT <: HarvestedResource](implicit tag: ClassTag[CT]) = {
-    this.derivedResources.toIterable.map {
+    this.derivedResources.flatMap {
       case (id, r) if (tag.runtimeClass.isInstance(r)) =>
         List(r.asInstanceOf[CT])
       case (id, r) =>
         r.getDerivedResources[CT]
 
-    }.flatten
+    }
   }
 
   def hasDerivedResourceOfType[CT <: HarvestedResource](implicit tag: ClassTag[CT]): Boolean = {
 
-    this.derivedResources.find {
+    this.derivedResources.exists {
       case (id, r) if (tag.runtimeClass.isInstance(r)) =>
         true
       case (id, r) =>
         // println(s"Recursino on $r which has: ${r.derivedResources.size}")
         r.hasDerivedResourceOfType[CT]
-    }.isDefined
+    }
 
     //this.derivedResources.find{case (id,r) if (tag.runtimeClass.isInstance(r))=>true;case _ => false }.isDefined
   }

@@ -1,12 +1,12 @@
 package org.odfi.indesign.core.config.model
 
-import com.idyria.osi.ooxoo.db.store.DocumentContainer
-import com.idyria.osi.ooxoo.db.traits.DBContainerReference
-import com.idyria.osi.ooxoo.core.buffers.datatypes.DoubleBuffer
-import com.idyria.osi.ooxoo.core.buffers.datatypes.BooleanBuffer
-import com.idyria.osi.ooxoo.core.buffers.datatypes.IntegerBuffer
-import com.idyria.osi.ooxoo.core.buffers.datatypes.XSDStringBuffer
-import com.idyria.osi.ooxoo.core.buffers.structural.AbstractDataBuffer
+import org.odfi.ooxoo.db.store.DocumentContainer
+import org.odfi.ooxoo.db.traits.DBContainerReference
+import org.odfi.ooxoo.core.buffers.datatypes.DoubleBuffer
+import org.odfi.ooxoo.core.buffers.datatypes.BooleanBuffer
+import org.odfi.ooxoo.core.buffers.datatypes.IntegerBuffer
+import org.odfi.ooxoo.core.buffers.datatypes.XSDStringBuffer
+import org.odfi.ooxoo.core.buffers.structural.AbstractDataBuffer
 import scala.reflect.ClassTag
 
 trait CommonConfig extends CommonConfigTrait with DBContainerReference {

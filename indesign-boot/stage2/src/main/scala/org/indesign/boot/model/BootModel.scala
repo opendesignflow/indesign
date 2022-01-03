@@ -1,10 +1,10 @@
 package org.indesign.boot.model
 
-import com.idyria.osi.ooxoo.core.buffers.id.IdAndRefIdModelBuilder
-import com.idyria.osi.ooxoo.model.ModelBuilder
-import com.idyria.osi.ooxoo.model.producers
-import com.idyria.osi.ooxoo.model.producer
-import com.idyria.osi.ooxoo.model.out.scala.ScalaProducer
+import org.odfi.ooxoo.core.buffers.id.IdAndRefIdModelBuilder
+import org.odfi.ooxoo.model.ModelBuilder
+import org.odfi.ooxoo.model.producers
+import org.odfi.ooxoo.model.producer
+import org.odfi.ooxoo.model.out.scala.ScalaProducer
 
 
 @producers(Array(

@@ -1,11 +1,13 @@
 package org.odfi.indesign.module.git
 
 import org.odfi.indesign.core.harvest.fs.HarvestedFile
+
 import java.io.File
 import org.eclipse.jgit.api.Git
-import org.odfi.indesign.module.git.GitRepository;
+import org.odfi.indesign.module.git.GitRepository
 
-import scala.collection.JavaConversions._ 
+import scala.jdk.CollectionConverters.CollectionHasAsScala;
+
 
 object GitTest extends App {
   
@@ -21,7 +23,7 @@ object GitTest extends App {
   var git = new Git(rep);
   var s = git.status().call()
   println(s"CLean: ${s.isClean()}")
-  s.getModified.foreach {
+  s.getModified.asScala.foreach {
     c => 
       println("M: "+c)
   }

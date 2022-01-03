@@ -1,14 +1,16 @@
 package org.odfi.indesign.module.git
 
 import org.odfi.indesign.core.harvest.HarvestedResource
+
 import java.net.URI
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import scala.collection.convert.DecorateAsScala
-import java.io.File
 
-class GitRemoteRepository(val uri:URI) extends HarvestedResource with DecorateAsScala {
+import java.io.File
+import scala.jdk.CollectionConverters.CollectionHasAsScala
+
+class GitRemoteRepository(val uri:URI) extends HarvestedResource {
   
   def getId = "GIT:"+uri.toString()
   

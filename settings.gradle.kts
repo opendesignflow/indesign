@@ -1,4 +1,12 @@
 pluginManagement {
+
+    pluginManagement {
+        plugins {
+            id("org.odfi.ooxoo") version "4.9.0-SNAPSHOT"
+            id("org.openjfx.javafxplugin") version "0.0.10"
+        }
+    }
+
     repositories {
         mavenLocal()
         gradlePluginPortal()
@@ -22,3 +30,4 @@ pluginManagement {
 rootProject.name = "indesign"
 include(":indesign-core")
 include(":indesign-stdplatform")
+include(":indesign-git")

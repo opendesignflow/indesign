@@ -2,7 +2,7 @@ package org.odfi.indesign.core.config.ooxoo
 
 import org.odfi.indesign.core.config.ConfigImplementation
 import java.io.File
-import com.idyria.osi.ooxoo.db.store.fs.FSStore
+import org.odfi.ooxoo.db.store.fs.FSStore
 import java.util.Properties
 import java.util.PropertyResourceBundle
 import java.io.FileReader
