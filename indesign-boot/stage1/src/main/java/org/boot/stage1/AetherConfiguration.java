@@ -60,9 +60,9 @@ public class AetherConfiguration {
 		try {
 			this.addDefaultRemoteRepository("central", new URL("http://central.maven.org/maven2/"));
 			this.addDefaultRemoteRepository("odfi.releases",
-					new URL("http://www.opendesignflow.org/maven/repository/internal/"));
+					new URL("http://repo.opendesignflow.org/maven/repository/internal/"));
 			this.addDefaultRemoteRepository("odfi.snapshots",
-					new URL("http://www.opendesignflow.org/maven/repository/snapshots/"));
+					new URL("http://repo.opendesignflow.org/maven/repository/snapshots/"));
 
 			this.addDefaultRemoteRepository("sonatype", new URL("http://oss.sonatype.org/content/groups/public"));
 

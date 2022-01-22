@@ -45,7 +45,7 @@ class ArtifactResolverTest extends AnyFunSuite with BeforeAndAfterAllConfigMap {
   
   test("Get Artifact with repository set") {
     
-    AetherResolver.config.addDefaultRemoteRepository("idyria.central", new URL("http://www.opendesignflow.org/maven/repository/internal/"))
+    AetherResolver.config.addDefaultRemoteRepository("idyria.central", new URL("http://repo.opendesignflow.org/maven/repository/internal/"))
     
     var file = AetherResolver.getArtifactPath(resolveGroupId, resolveArtifactId, resolveVersion,"pom")
     assertResult(true)(file.isDefined)

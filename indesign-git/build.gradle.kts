@@ -113,8 +113,8 @@ publishing {
         maven {
 
             // change URLs to point to your repos, e.g. http://my.org/repo
-            var releasesRepoUrl = uri("https://www.opendesignflow.org/maven/repository/internal/")
-            var snapshotsRepoUrl = uri("https://www.opendesignflow.org/maven/repository/snapshots")
+            var releasesRepoUrl = uri("https://repo.opendesignflow.org/maven/repository/internal/")
+            var snapshotsRepoUrl = uri("https://repo.opendesignflow.org/maven/repository/snapshots")
 
             url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
 

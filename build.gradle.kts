@@ -1,6 +1,6 @@
 // Versions
 //-----------------
-var ooxooVersion by extra("4.9.0-SNAPSHOT")
+var ooxooVersion by extra("4.9.0")
 var javafxVersion by extra("18-ea+8")
 
 
@@ -28,6 +28,23 @@ allprojects {
     group = "org.odfi.indesign"
     version = lib_version
 
+    tasks.create("checkForSnapshots") {
+        doFirst {
+            project.configurations.forEach { c ->
+                c.dependencies.forEach { dep ->
+                    val isLocal = dep.name.contains("indesign")
+                    val isSnapshot = dep.version?.endsWith("-SNAPSHOT")   ?: false
+                    if (isSnapshot && !isLocal) {
+
+                        throw kotlin.RuntimeException("Snapshot Dependency detected: $dep")
+                    }
+                }
+            }
+
+
+        }
+    }
+
     repositories {
 
         mavenLocal()
@@ -38,11 +55,11 @@ allprojects {
         }
         maven {
             name = "ODFI Releases"
-            url = uri("https://www.opendesignflow.org/maven/repository/internal/")
+            url = uri("https://repo.opendesignflow.org/maven/repository/internal/")
         }
         maven {
             name = "ODFI Snapshots"
-            url = uri("https://www.opendesignflow.org/maven/repository/snapshots/")
+            url = uri("https://repo.opendesignflow.org/maven/repository/snapshots/")
         }
         maven {
             url = uri("https://repo.triplequote.com/libs-release/")
