@@ -13,7 +13,7 @@ val scalaVersion by extra {
 
 
 // Project version
-var lib_version by extra("2.9.0-SNAPSHOT")
+var lib_version by extra("2.9.1-SNAPSHOT")
 var branch by extra { System.getenv("BRANCH_NAME") }
 if (System.getenv().getOrDefault("BRANCH_NAME", "dev").contains("release")) {
     lib_version = lib_version.replace("-SNAPSHOT", "")
