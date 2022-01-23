@@ -2,7 +2,7 @@ pluginManagement {
 
     pluginManagement {
         plugins {
-            id("org.odfi.ooxoo") version "4.9.0"
+            id("org.odfi.ooxoo") version "5.0.0-SNAPSHOT"
             id("org.openjfx.javafxplugin") version "0.0.10"
         }
     }
