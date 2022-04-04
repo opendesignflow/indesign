@@ -85,9 +85,9 @@ dependencies {
     //------------
 
     // https://mvnrepository.com/artifact/jakarta.mail/jakarta.mail-api
-    //implementation("jakarta.mail:jakarta.mail-api:2.1.0-RC1")
+    implementation("jakarta.mail:jakarta.mail-api:2.1.0")
     // https://mvnrepository.com/artifact/javax.mail/javax.mail-api
-    implementation("javax.mail:javax.mail-api:1.6.2")
+   // implementation("javax.mail:javax.mail-api:1.6.2")
 
     //implementation("jakarta.mail:mail:1.4.7")
 

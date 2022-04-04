@@ -1,6 +1,6 @@
 // Versions
 //-----------------
-var ooxooVersion by extra("5.0.0-SNAPSHOT")
+var ooxooVersion by extra("5.0.0")
 var javafxVersion by extra("18-ea+8")
 
 
