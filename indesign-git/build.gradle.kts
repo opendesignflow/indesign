@@ -13,6 +13,10 @@ plugins {
 
 }
 
+ooxoo {
+    javax.set(true)
+}
+
 // Sources
 //-------------------
 sourceSets {
@@ -31,7 +35,7 @@ sourceSets {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-        vendor.set(JvmVendorSpec.ADOPTOPENJDK)
+        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
     withJavadocJar()
     withSourcesJar()
@@ -69,7 +73,7 @@ dependencies {
     api(project(":indesign-core"))
 
     // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-    implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r")
 
 
     // Test
@@ -85,7 +89,7 @@ publishing {
     publications {
 
         create<MavenPublication>("maven") {
-            artifactId = "indesign-stdplatform"
+            artifactId = "indesign-git"
             from(components["java"])
 
             pom {

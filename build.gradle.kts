@@ -1,11 +1,11 @@
 // Versions
 //-----------------
-var ooxooVersion by extra("5.0.0")
-var javafxVersion by extra("18-ea+8")
+var ooxooVersion by extra("5.0.2-SNAPSHOT")
+var javafxVersion by extra("20-ea+1")
 
 
-var scalaMajorVersion by extra("2.13")
-var scalaMinorVersion by extra("8")
+var scalaMajorVersion by extra("3")
+var scalaMinorVersion by extra("1.3")
 val scalaVersion by extra {
     "$scalaMajorVersion.$scalaMinorVersion"
 }

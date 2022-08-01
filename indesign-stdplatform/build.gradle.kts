@@ -14,6 +14,10 @@ plugins {
 
 }
 
+ooxoo {
+    javax.set(true)
+}
+
 // Sources
 //-------------------
 sourceSets {
@@ -32,7 +36,7 @@ sourceSets {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
-        vendor.set(JvmVendorSpec.ADOPTOPENJDK)
+        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
     withJavadocJar()
     withSourcesJar()
@@ -79,7 +83,7 @@ dependencies {
         api("org.apache.lucene:$it:9.0.0")
     }
 
-    api("org.apache.maven:maven-embedder:3.8.4")
+    api("org.apache.maven:maven-embedder:3.8.5")
 
     // Java Mail API
     //------------
