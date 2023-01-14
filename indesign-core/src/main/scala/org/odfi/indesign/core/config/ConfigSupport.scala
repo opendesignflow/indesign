@@ -7,21 +7,10 @@ import org.odfi.indesign.core.harvest.HarvestedResource
 
 trait ConfigSupport extends ConfigHolder with HarvestedResource {
 
-  // def getId = "default"
-
   /**
    * get Config
    */
   var __config: Option[CommonConfig] = None
-
-  // Clean config on reload
-  Config.onRealmChanged {
-    synchronized {
-      __config = None
-    }
-
-  }
-
   def isConfigLoaded: Boolean = synchronized { __config.isDefined }
 
   def config: Option[CommonConfig] = synchronized {

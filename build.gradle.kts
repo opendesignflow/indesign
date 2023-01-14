@@ -1,11 +1,11 @@
 // Versions
 //-----------------
-var ooxooVersion by extra("5.0.3")
+var ooxooVersion by extra("5.0.4")
 var javafxVersion by extra("20-ea+4")
 
 
 var scalaMajorVersion by extra("3")
-var scalaMinorVersion by extra("2.0")
+var scalaMinorVersion by extra("2.1")
 val scalaVersion by extra {
     "$scalaMajorVersion.$scalaMinorVersion"
 }
@@ -13,7 +13,7 @@ val scalaVersion by extra {
 
 
 // Project version
-var lib_version by extra("3.0.2-SNAPSHOT")
+var lib_version by extra("3.0.3-SNAPSHOT")
 var branch by extra { System.getenv("BRANCH_NAME") }
 if (System.getenv().getOrDefault("BRANCH_NAME", "dev").contains("release")) {
     lib_version = lib_version.replace("-SNAPSHOT", "")
