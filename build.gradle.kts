@@ -1,11 +1,11 @@
 // Versions
 //-----------------
-var ooxooVersion by extra("5.0.4")
+var ooxooVersion by extra("5.0.5")
 var javafxVersion by extra("20-ea+4")
 
 
 var scalaMajorVersion by extra("3")
-var scalaMinorVersion by extra("2.1")
+var scalaMinorVersion by extra("8.2")
 val scalaVersion by extra {
     "$scalaMajorVersion.$scalaMinorVersion"
 }
@@ -13,7 +13,7 @@ val scalaVersion by extra {
 
 
 // Project version
-var lib_version by extra("3.0.3-SNAPSHOT")
+var lib_version by extra("3.0.4-SNAPSHOT")
 var branch by extra { System.getenv("BRANCH_NAME") }
 if (System.getenv().getOrDefault("BRANCH_NAME", "dev").contains("release")) {
     lib_version = lib_version.replace("-SNAPSHOT", "")
@@ -53,7 +53,7 @@ allprojects {
             name = "Sonatype Nexus Snapshots"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
-        maven {
+        /*maven {
             name = "ODFI Releases"
             url = uri("https://repo.opendesignflow.org/maven/repository/internal/")
         }
@@ -63,7 +63,12 @@ allprojects {
         }
         maven {
             url = uri("https://repo.triplequote.com/libs-release/")
-        }
+        }*/
         google()
     }
+
+    /*dependencies {
+        implementation("org.odfi.ooxoo:gradle-ooxoo-plugin:5.0.4")
+
+        }*/
 }

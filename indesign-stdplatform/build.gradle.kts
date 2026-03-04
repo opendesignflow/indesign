@@ -35,7 +35,7 @@ sourceSets {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(21))
         vendor.set(JvmVendorSpec.ADOPTIUM)
     }
     withJavadocJar()
@@ -150,8 +150,3 @@ publishing {
         }
     }
 }
-
-
-
-
-
