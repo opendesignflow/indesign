@@ -14,7 +14,7 @@ plugins {
 }
 
 ooxoo {
-    javax.set(true)
+    javax.set(false)
 }
 
 // Sources

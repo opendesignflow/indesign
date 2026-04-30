@@ -5,7 +5,7 @@ var javafxVersion by extra("20-ea+4")
 
 
 var scalaMajorVersion by extra("3")
-var scalaMinorVersion by extra("8.2")
+var scalaMinorVersion by extra("3.7")
 val scalaVersion by extra {
     "$scalaMajorVersion.$scalaMinorVersion"
 }
